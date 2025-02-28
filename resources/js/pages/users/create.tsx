@@ -75,7 +75,7 @@ export default function CreateUser() {
                   />
                 </div>
               </CardContent>
-              <CardFooter className="flex justify-between">
+              <CardFooter className="flex justify-between pt-4">
                 <Button variant="outline" type="button" asChild>
                   <Link href={route('users.index')}>Cancel</Link>
                 </Button>
