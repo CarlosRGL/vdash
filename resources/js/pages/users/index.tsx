@@ -9,12 +9,12 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type User } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, Pencil, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
   {
     title: 'Users',
-    href: '/usersccc',
+    href: '/users',
   },
 ];
 
@@ -167,6 +167,23 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
         return <div>{date.toLocaleDateString()}</div>;
       },
     },
+    {
+      id: 'actions',
+      header: () => <div className="text-right">Actions</div>,
+      cell: ({ row }) => {
+        const user = row.original;
+        return (
+          <div className="flex justify-end">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href={route('users.edit', { user: user.id })}>
+                <Pencil className="h-4 w-4" />
+                <span className="sr-only">Edit</span>
+              </Link>
+            </Button>
+          </div>
+        );
+      },
+    },
   ];
 
   const handleSort = (field: string) => {
@@ -262,6 +279,16 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="flex justify-end">
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link href={route('users.edit', { user: user.id })}>
+                            <Pencil className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Link>
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))
               ) : (

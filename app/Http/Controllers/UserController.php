@@ -81,4 +81,44 @@ class UserController extends Controller
             'description' => "The user {$request->name} has been added to the system.",
         ]);
     }
+
+    /**
+     * Show the form for editing the specified user.
+     */
+    public function edit(User $user): Response
+    {
+        return Inertia::render('users/edit', [
+            'user' => $user,
+        ]);
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(Request $request, User $user)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => $request->filled('password') ? ['confirmed', Rules\Password::defaults()] : '',
+        ]);
+
+        $userData = [
+            'name' => $request->name,
+            'email' => $request->email,
+        ];
+
+        // Only update password if provided
+        if ($request->filled('password')) {
+            $userData['password'] = Hash::make($request->password);
+        }
+
+        $user->update($userData);
+
+        return to_route('users.index')->with('toast', [
+            'type' => 'success',
+            'message' => 'User updated successfully',
+            'description' => "The user {$request->name} has been updated.",
+        ]);
+    }
 }
