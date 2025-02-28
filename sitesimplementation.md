@@ -1,65 +1,3 @@
-I'll need to examine your codebase first to provide a more tailored explanation for implementing the site management system. Let me explore the structure of your application.
-
-Ran tool
-
-
-Let me check the app directory to understand the current structure of your Laravel application:
-
-Ran tool
-
-
-Let me check the existing models to understand the current data structure:
-
-Ran tool
-
-
-
-
-Let me look at the database migrations to understand the current database schema:
-
-Ran tool
-
-
-
-
-Let me check the routes to understand the current application flow:
-
-Ran tool
-
-
-
-
-Let me check the web routes to understand the current application endpoints:
-
-Read file: routes/web.php
-
-
-
-
-
-
-Let me check the resources directory to understand the frontend structure:
-
-Ran tool
-
-
-
-
-
-
-Let me check the React components:
-
-Ran tool
-
-
-
-
-
-
-
-
-Based on my exploration of your codebase, here's a tailored explanation for implementing a site management system within your existing Laravel and Inertia.js application:
-
 # Site Management System Implementation Plan
 
 ## 1. Database Structure
@@ -79,14 +17,35 @@ The `sites` table would include:
 - Status fields
 
 The `site_credentials` table would store:
-- FTP credentials (encrypted)
-- Database credentials (encrypted)
+- FTP host
+- FTP username
+- FTP password (encrypted)
+- Database host
+- Database name
+- Database username
+- Database password (encrypted)
+- Login URL
+- Login username
+- Login password (encrypted)
 - API keys (encrypted)
+- Contract start date
+- Contract end date
+- Contract capacity
+- Contract storage usage
+- Contract storage limit
 
 The `site_metrics` table would store:
-- Technical information from API calls
+- PHP version
+- Memory limit
+- Max execution time
+- Post max size
+- Upload max filesize
+- Max input vars
+- Server IP
+- Lighthouse score
 - Last update timestamp
-- Performance metrics
+
+
 
 ## 2. Models Implementation
 

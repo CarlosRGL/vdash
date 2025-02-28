@@ -23,5 +23,10 @@ class DatabaseSeeder extends Seeder
             'email' => 'contact@carlosrgl.com',
             'password' => Hash::make('car13'),
         ]);
+
+        // Seed sites with credentials and metrics
+        $this->call([
+            SiteSeeder::class,
+        ]);
     }
 }
