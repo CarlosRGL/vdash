@@ -24,8 +24,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('car13'),
         ]);
 
-        // Seed sites with credentials and metrics
+        // Seed roles and permissions
         $this->call([
+            RolePermissionSeeder::class,
             SiteSeeder::class,
         ]);
     }

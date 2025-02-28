@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -22,7 +23,7 @@ class UserController extends Controller
         $sortField = $request->input('sortField', 'id');
         $sortDirection = $request->input('sortDirection', 'asc');
 
-        $query = User::query();
+        $query = User::with('roles');
 
         // Apply search filter if provided
         if ($search) {
@@ -54,7 +55,11 @@ class UserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('users/create');
+        $roles = Role::all();
+
+        return Inertia::render('users/create', [
+            'roles' => $roles,
+        ]);
     }
 
     /**
@@ -66,14 +71,18 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'roles' => 'nullable|array',
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
+        }
 
         return to_route('users.index')->with('toast', [
             'type' => 'success',
@@ -87,8 +96,12 @@ class UserController extends Controller
      */
     public function edit(User $user): Response
     {
+        $user->load('roles');
+        $roles = Role::all();
+
         return Inertia::render('users/edit', [
             'user' => $user,
+            'roles' => $roles,
         ]);
     }
 
@@ -101,6 +114,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => $request->filled('password') ? ['confirmed', Rules\Password::defaults()] : '',
+            'roles' => 'nullable|array',
         ]);
 
         $userData = [
@@ -114,6 +128,10 @@ class UserController extends Controller
         }
 
         $user->update($userData);
+
+        if ($request->has('roles')) {
+            $user->syncRoles($request->roles);
+        }
 
         return to_route('users.index')->with('toast', [
             'type' => 'success',

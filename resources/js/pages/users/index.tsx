@@ -147,6 +147,36 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
       ),
     },
     {
+      accessorKey: 'roles',
+      header: () => (
+        <Button variant="ghost" className="flex items-center">
+          Role
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const user = row.original;
+        const roles = user.roles || [];
+
+        if (roles.length === 0) {
+          return <div className="text-gray-500">No role</div>;
+        }
+
+        return (
+          <div className="flex flex-wrap gap-1">
+            {roles.map((role) => (
+              <span
+                key={role.id}
+                className="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+              >
+                {role.name}
+              </span>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
       accessorKey: 'created_at',
       header: () => (
         <Button variant="ghost" onClick={() => handleSort('created_at')} className="flex items-center">
@@ -278,6 +308,7 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
                       </div>
                     </TableCell>
                     <TableCell>{user.email}</TableCell>
+                    <TableCell>{user.roles ? user.roles.map((role) => role.name).join(', ') : 'No role'}</TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex justify-end">
