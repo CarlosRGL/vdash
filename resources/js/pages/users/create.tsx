@@ -2,8 +2,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type Role } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -17,12 +18,17 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function CreateUser() {
+interface CreateUserProps {
+  roles: Role[];
+}
+
+export default function CreateUser({ roles }: CreateUserProps) {
   const { data, setData, post, processing, errors, reset } = useForm({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
+    roles: [] as string[],
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -32,6 +38,10 @@ export default function CreateUser() {
         reset();
       },
     });
+  };
+
+  const handleRoleChange = (roleId: string) => {
+    setData('roles', [roleId]);
   };
 
   return (
@@ -73,6 +83,23 @@ export default function CreateUser() {
                     onChange={(e) => setData('password_confirmation', e.target.value)}
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Select onValueChange={handleRoleChange} value={data.roles[0]}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) => (
+                        <SelectItem key={role.id} value={role.id.toString()}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {errors.roles && <p className="text-sm text-red-500">{errors.roles}</p>}
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between pt-4">
