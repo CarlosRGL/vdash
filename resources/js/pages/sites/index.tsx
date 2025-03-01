@@ -131,11 +131,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         const name = row.getValue('name') as string;
         const url = row.original.url as string;
         return (
-          <div className="flex flex-col">
+          <div className="flex w-[280px] flex-col">
             <span className="font-medium">{name}</span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-blue-600 hover:underline">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center truncate text-sm text-blue-600 hover:underline">
               {url}
-              <ExternalLink className="ml-1 h-3 w-3" />
+              <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
             </a>
           </div>
         );
@@ -159,7 +159,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const type = row.getValue('type') as string;
-        return <Badge className={getTypeBadgeColor(type)}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>;
+        return (
+          <div className="w-[100px]">
+            <Badge className={getTypeBadgeColor(type)}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>
+          </div>
+        );
       },
     },
     {
@@ -180,7 +184,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const phpVersion = row.original.php_version as string | null;
-        return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
+        return <div className="w-[100px] font-mono text-sm">{phpVersion || 'N/A'}</div>;
       },
     },
     {
@@ -201,7 +205,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const team = row.getValue('team') as string;
-        return <Badge className={getTeamBadgeColor(team)}>{team.charAt(0).toUpperCase() + team.slice(1)}</Badge>;
+        return (
+          <div className="w-[100px]">
+            <Badge className={getTeamBadgeColor(team)}>{team.charAt(0).toUpperCase() + team.slice(1)}</Badge>
+          </div>
+        );
       },
     },
     {
@@ -222,7 +230,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const lastCheck = row.original.last_check as string | null;
-        return <div className="text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
+        return <div className="w-[160px] text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
       },
     },
     {
@@ -231,7 +239,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       cell: ({ row }) => {
         const site = row.original;
         return (
-          <div className="flex justify-end">
+          <div className="flex w-[80px] justify-end">
             <Button variant="ghost" size="icon" asChild>
               <Link href={route('sites.edit', { site: site.id })}>
                 <Pencil className="h-4 w-4" />
@@ -307,15 +315,26 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         </div>
 
         <div className="rounded-md border">
-          <Table>
+          <Table className="table-fixed">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  ))}
+                  {headerGroup.headers.map((header) => {
+                    // Set specific widths for each column header
+                    let className = 'whitespace-nowrap';
+                    if (header.id === 'name') className += ' w-[280px]';
+                    if (header.id === 'type') className += ' w-[100px]';
+                    if (header.id === 'php_version') className += ' w-[100px]';
+                    if (header.id === 'team') className += ' w-[100px]';
+                    if (header.id === 'last_check') className += ' w-[160px]';
+                    if (header.id === 'actions') className += ' w-[80px]';
+
+                    return (
+                      <TableHead key={header.id} className={className}>
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableHead>
+                    );
+                  })}
                 </TableRow>
               ))}
             </TableHeader>
@@ -323,34 +342,38 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
               {sites.data.length ? (
                 sites.data.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{site.name}</span>
+                    <TableCell className="py-3">
+                      <div className="flex w-[280px] flex-col">
+                        <span className="truncate font-medium">{site.name}</span>
                         <a
                           href={site.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center text-sm text-blue-600 hover:underline"
+                          className="flex items-center truncate text-sm text-blue-600 hover:underline"
                         >
                           {site.url}
-                          <ExternalLink className="ml-1 h-3 w-3" />
+                          <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
                         </a>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
+                    <TableCell className="py-3">
+                      <div className="w-[100px]">
+                        <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
+                      </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="font-mono text-sm">{site.php_version || 'N/A'}</div>
+                    <TableCell className="py-3">
+                      <div className="w-[100px] font-mono text-sm">{site.php_version || 'N/A'}</div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
+                    <TableCell className="py-3">
+                      <div className="w-[100px]">
+                        <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
+                      </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
+                    <TableCell className="py-3">
+                      <div className="w-[160px] text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end">
+                    <TableCell className="py-3">
+                      <div className="flex w-[80px] justify-end">
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={route('sites.edit', { site: site.id })}>
                             <Pencil className="h-4 w-4" />
