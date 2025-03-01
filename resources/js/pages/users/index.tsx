@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useInitials } from '@/hooks/use-initials';
@@ -332,52 +333,18 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
             </TableBody>
           </Table>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-muted-foreground text-sm">
-            Showing {users.from || 0} to {users.to || 0} of {users.total} users
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, users.last_page) }, (_, i) => {
-                const pageIndex = i;
-                const isCurrentPage = pageIndex === pagination.pageIndex;
-                const isWithinRange = Math.abs(pageIndex - pagination.pageIndex) <= 2;
-
-                // Only show pages near the current page
-                if (users.last_page <= 5 || isWithinRange) {
-                  return (
-                    <Button
-                      key={i}
-                      variant={isCurrentPage ? 'default' : 'outline'}
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => setPagination((prev) => ({ ...prev, pageIndex }))}
-                    >
-                      {pageIndex + 1}
-                    </Button>
-                  );
-                }
-                return null;
-              })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          pagination={pagination}
+          setPagination={setPagination}
+          pageCount={table.getPageCount()}
+          canPreviousPage={table.getCanPreviousPage()}
+          canNextPage={table.getCanNextPage()}
+          totalItems={users.total}
+          itemName="users"
+          showTotalItems={true}
+          from={users.from}
+          to={users.to}
+        />
       </div>
     </AppLayout>
   );

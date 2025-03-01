@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
@@ -131,11 +132,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         const name = row.getValue('name') as string;
         const url = row.original.url as string;
         return (
-          <div className="flex w-[280px] flex-col">
+          <div className="flex flex-col">
             <span className="font-medium">{name}</span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center truncate text-sm text-blue-600 hover:underline">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-blue-600 hover:underline">
               {url}
-              <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
+              <ExternalLink className="ml-1 h-3 w-3" />
             </a>
           </div>
         );
@@ -159,11 +160,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const type = row.getValue('type') as string;
-        return (
-          <div className="w-[100px]">
-            <Badge className={getTypeBadgeColor(type)}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>
-          </div>
-        );
+        return <Badge className={getTypeBadgeColor(type)}>{type.charAt(0).toUpperCase() + type.slice(1)}</Badge>;
       },
     },
     {
@@ -184,7 +181,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const phpVersion = row.original.php_version as string | null;
-        return <div className="w-[100px] font-mono text-sm">{phpVersion || 'N/A'}</div>;
+        return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
       },
     },
     {
@@ -205,11 +202,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const team = row.getValue('team') as string;
-        return (
-          <div className="w-[100px]">
-            <Badge className={getTeamBadgeColor(team)}>{team.charAt(0).toUpperCase() + team.slice(1)}</Badge>
-          </div>
-        );
+        return <Badge className={getTeamBadgeColor(team)}>{team.charAt(0).toUpperCase() + team.slice(1)}</Badge>;
       },
     },
     {
@@ -230,7 +223,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const lastCheck = row.original.last_check as string | null;
-        return <div className="w-[160px] text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
+        return <div className="text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
       },
     },
     {
@@ -239,7 +232,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       cell: ({ row }) => {
         const site = row.original;
         return (
-          <div className="flex w-[80px] justify-end">
+          <div className="flex justify-end">
             <Button variant="ghost" size="icon" asChild>
               <Link href={route('sites.edit', { site: site.id })}>
                 <Pencil className="h-4 w-4" />
@@ -315,26 +308,15 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         </div>
 
         <div className="rounded-md border">
-          <Table className="table-fixed">
+          <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    // Set specific widths for each column header
-                    let className = 'whitespace-nowrap';
-                    if (header.id === 'name') className += ' w-[280px]';
-                    if (header.id === 'type') className += ' w-[100px]';
-                    if (header.id === 'php_version') className += ' w-[100px]';
-                    if (header.id === 'team') className += ' w-[100px]';
-                    if (header.id === 'last_check') className += ' w-[160px]';
-                    if (header.id === 'actions') className += ' w-[80px]';
-
-                    return (
-                      <TableHead key={header.id} className={className}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    );
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>
@@ -342,38 +324,34 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
               {sites.data.length ? (
                 sites.data.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell className="py-3">
-                      <div className="flex w-[280px] flex-col">
-                        <span className="truncate font-medium">{site.name}</span>
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{site.name}</span>
                         <a
                           href={site.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center truncate text-sm text-blue-600 hover:underline"
+                          className="flex items-center text-sm text-blue-600 hover:underline"
                         >
                           {site.url}
-                          <ExternalLink className="ml-1 h-3 w-3 flex-shrink-0" />
+                          <ExternalLink className="ml-1 h-3 w-3" />
                         </a>
                       </div>
                     </TableCell>
-                    <TableCell className="py-3">
-                      <div className="w-[100px]">
-                        <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
-                      </div>
+                    <TableCell>
+                      <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
                     </TableCell>
-                    <TableCell className="py-3">
-                      <div className="w-[100px] font-mono text-sm">{site.php_version || 'N/A'}</div>
+                    <TableCell>
+                      <div className="font-mono text-sm">{site.php_version || 'N/A'}</div>
                     </TableCell>
-                    <TableCell className="py-3">
-                      <div className="w-[100px]">
-                        <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
-                      </div>
+                    <TableCell>
+                      <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
                     </TableCell>
-                    <TableCell className="py-3">
-                      <div className="w-[160px] text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
+                    <TableCell>
+                      <div className="text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
                     </TableCell>
-                    <TableCell className="py-3">
-                      <div className="flex w-[80px] justify-end">
+                    <TableCell>
+                      <div className="flex justify-end">
                         <Button variant="ghost" size="icon" asChild>
                           <Link href={route('sites.edit', { site: site.id })}>
                             <Pencil className="h-4 w-4" />
@@ -394,52 +372,18 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
             </TableBody>
           </Table>
         </div>
-        <div className="mt-4 flex items-center justify-between">
-          <div className="text-muted-foreground text-sm">
-            Showing {sites.from || 0} to {sites.to || 0} of {sites.total} sites
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
-              disabled={!table.getCanPreviousPage()}
-            >
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, sites.last_page) }, (_, i) => {
-                const pageIndex = i;
-                const isCurrentPage = pageIndex === pagination.pageIndex;
-                const isWithinRange = Math.abs(pageIndex - pagination.pageIndex) <= 2;
-
-                // Only show pages near the current page
-                if (sites.last_page <= 5 || isWithinRange) {
-                  return (
-                    <Button
-                      key={i}
-                      variant={isCurrentPage ? 'default' : 'outline'}
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={() => setPagination((prev) => ({ ...prev, pageIndex }))}
-                    >
-                      {pageIndex + 1}
-                    </Button>
-                  );
-                }
-                return null;
-              })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
-              disabled={!table.getCanNextPage()}
-            >
-              Next
-            </Button>
-          </div>
-        </div>
+        <Pagination
+          pagination={pagination}
+          setPagination={setPagination}
+          pageCount={table.getPageCount()}
+          canPreviousPage={table.getCanPreviousPage()}
+          canNextPage={table.getCanNextPage()}
+          totalItems={sites.total}
+          itemName="sites"
+          showTotalItems={true}
+          from={sites.from}
+          to={sites.to}
+        />
       </div>
     </AppLayout>
   );
