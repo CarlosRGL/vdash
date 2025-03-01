@@ -115,7 +115,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       accessorKey: 'name',
       header: () => (
         <Button variant="ghost" onClick={() => handleSort('name')} className="flex items-center">
-          Name
+          Site
           {sorting.field === 'name' ? (
             sorting.direction === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
@@ -127,28 +127,13 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           )}
         </Button>
       ),
-    },
-    {
-      accessorKey: 'url',
-      header: () => (
-        <Button variant="ghost" onClick={() => handleSort('url')} className="flex items-center">
-          URL
-          {sorting.field === 'url' ? (
-            sorting.direction === 'asc' ? (
-              <ChevronUp className="ml-2 h-4 w-4" />
-            ) : (
-              <ChevronDown className="ml-2 h-4 w-4" />
-            )
-          ) : (
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          )}
-        </Button>
-      ),
       cell: ({ row }) => {
-        const url = row.getValue('url') as string;
+        const name = row.getValue('name') as string;
+        const url = row.original.url as string;
         return (
-          <div className="flex items-center">
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:underline">
+          <div className="flex flex-col">
+            <span className="font-medium">{name}</span>
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-blue-600 hover:underline">
               {url}
               <ExternalLink className="ml-1 h-3 w-3" />
             </a>
@@ -178,6 +163,27 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       },
     },
     {
+      accessorKey: 'php_version',
+      header: () => (
+        <Button variant="ghost" onClick={() => handleSort('php_version')} className="flex items-center">
+          PHP Version
+          {sorting.field === 'php_version' ? (
+            sorting.direction === 'asc' ? (
+              <ChevronUp className="ml-2 h-4 w-4" />
+            ) : (
+              <ChevronDown className="ml-2 h-4 w-4" />
+            )
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      ),
+      cell: ({ row }) => {
+        const phpVersion = row.original.php_version as string | null;
+        return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
+      },
+    },
+    {
       accessorKey: 'team',
       header: () => (
         <Button variant="ghost" onClick={() => handleSort('team')} className="flex items-center">
@@ -199,11 +205,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       },
     },
     {
-      accessorKey: 'created_at',
+      accessorKey: 'last_check',
       header: () => (
-        <Button variant="ghost" onClick={() => handleSort('created_at')} className="flex items-center">
-          Created At
-          {sorting.field === 'created_at' ? (
+        <Button variant="ghost" onClick={() => handleSort('last_check')} className="flex items-center">
+          Last Check
+          {sorting.field === 'last_check' ? (
             sorting.direction === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
             ) : (
@@ -215,8 +221,8 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         </Button>
       ),
       cell: ({ row }) => {
-        const date = new Date(row.getValue('created_at'));
-        return <div>{date.toLocaleDateString()}</div>;
+        const lastCheck = row.original.last_check as string | null;
+        return <div className="text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
       },
     },
     {
@@ -317,20 +323,32 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
               {sites.data.length ? (
                 sites.data.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell>{site.name}</TableCell>
                     <TableCell>
-                      <a href={site.url} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:underline">
-                        {site.url}
-                        <ExternalLink className="ml-1 h-3 w-3" />
-                      </a>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{site.name}</span>
+                        <a
+                          href={site.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center text-sm text-blue-600 hover:underline"
+                        >
+                          {site.url}
+                          <ExternalLink className="ml-1 h-3 w-3" />
+                        </a>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
                     </TableCell>
                     <TableCell>
+                      <div className="font-mono text-sm">{site.php_version || 'N/A'}</div>
+                    </TableCell>
+                    <TableCell>
                       <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
                     </TableCell>
-                    <TableCell>{new Date(site.created_at).toLocaleDateString()}</TableCell>
+                    <TableCell>
+                      <div className="text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
+                    </TableCell>
                     <TableCell>
                       <div className="flex justify-end">
                         <Button variant="ghost" size="icon" asChild>

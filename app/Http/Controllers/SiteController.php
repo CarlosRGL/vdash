@@ -16,7 +16,9 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Site::with('user')
+        $query = Site::with(['user', 'metrics' => function ($query) {
+            $query->latest('last_check')->limit(1);
+        }])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->where('user_id', Auth::id());
             });
@@ -34,9 +36,17 @@ class SiteController extends Controller
         // Apply sorting
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at'];
+        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at', 'php_version', 'last_check'];
 
-        if (in_array($sortField, $allowedSortFields)) {
+        // Add support for sorting by metrics fields
+        if ($sortField === 'php_version' || $sortField === 'last_check') {
+            // For metrics-based sorting, we need to use a subquery
+            $subQuery = "SELECT {$sortField} FROM site_metrics
+                        WHERE site_metrics.site_id = sites.id
+                        ORDER BY last_check DESC LIMIT 1";
+
+            $query->orderByRaw("({$subQuery}) " . ($sortDirection === 'asc' ? 'asc' : 'desc'));
+        } elseif (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
         } else {
             $query->orderBy('name', 'asc');
@@ -45,6 +55,20 @@ class SiteController extends Controller
         // Apply pagination
         $perPage = $request->input('perPage', 10);
         $sites = $query->paginate($perPage)->withQueryString();
+
+        // Transform the sites to include the latest metrics data
+        $sites->through(function ($site) {
+            $latestMetric = $site->metrics->first();
+
+            // Add the metrics data directly to the site object
+            $site->php_version = $latestMetric ? $latestMetric->php_version : null;
+            $site->last_check = $latestMetric ? $latestMetric->last_check : null;
+
+            // Remove the metrics relationship from the response to avoid duplication
+            unset($site->metrics);
+
+            return $site;
+        });
 
         return Inertia::render('sites/index', [
             'sites' => $sites,
