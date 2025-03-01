@@ -24,7 +24,7 @@ class SiteMetricController extends Controller
             $query->latest()->take(10);
         }]);
 
-        return Inertia::render('Sites/Metrics/Index', [
+        return Inertia::render('sites/metrics/Index', [
             'site' => $site,
             'metrics' => $site->metrics,
         ]);

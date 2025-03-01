@@ -46,7 +46,7 @@ class SiteCredentialController extends Controller
 
         $site->load('credential');
 
-        return Inertia::render('Sites/Credentials/Show', [
+        return Inertia::render('sites/credentials/Show', [
             'site' => $site,
             'credentials' => $site->credential ?? new SiteCredential(),
         ]);
@@ -63,7 +63,7 @@ class SiteCredentialController extends Controller
 
         $site->load('credential');
 
-        return Inertia::render('Sites/Credentials/Edit', [
+        return Inertia::render('sites/credentials/Edit', [
             'site' => $site,
             'credentials' => $site->credential ?? new SiteCredential(),
         ]);

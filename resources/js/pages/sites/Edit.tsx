@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
+import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
@@ -47,11 +48,11 @@ export default function EditSite({ site }: EditSiteProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Edit Site: ${site.name}`} />
-      <div className="container py-6">
+      <SiteLayout siteId={site.id} siteName={site.name}>
         <Card>
           <CardHeader>
-            <CardTitle>Edit Site</CardTitle>
-            <CardDescription>Update site information</CardDescription>
+            <CardTitle>Site Details</CardTitle>
+            <CardDescription>Update basic site information</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -130,7 +131,7 @@ export default function EditSite({ site }: EditSiteProps) {
             </form>
           </CardContent>
         </Card>
-      </div>
+      </SiteLayout>
     </AppLayout>
   );
 }

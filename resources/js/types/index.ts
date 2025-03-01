@@ -66,3 +66,42 @@ export interface Site {
   deleted_at: string | null;
   [key: string]: unknown;
 }
+
+export interface SiteCredential {
+  id: number;
+  site_id: number;
+  ftp_host: string | null;
+  ftp_username: string | null;
+  ftp_password: string | null;
+  db_host: string | null;
+  db_name: string | null;
+  db_username: string | null;
+  db_password: string | null;
+  login_url: string | null;
+  login_username: string | null;
+  login_password: string | null;
+  api_keys: string | null;
+  contract_start_date: string | null;
+  contract_end_date: string | null;
+  contract_capacity: string | null;
+  contract_storage_usage: string | null;
+  contract_storage_limit: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SiteMetric {
+  id: number;
+  site_id: number;
+  php_version: string | null;
+  memory_limit: string | null;
+  max_execution_time: string | null;
+  post_max_size: string | null;
+  upload_max_filesize: string | null;
+  max_input_vars: string | null;
+  server_ip: string | null;
+  lighthouse_score: number | null;
+  last_check: string | null;
+  created_at: string;
+  updated_at: string;
+}
