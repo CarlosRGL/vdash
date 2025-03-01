@@ -34,7 +34,7 @@ class SiteController extends Controller
         // Apply sorting
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        $allowedSortFields = ['id', 'name', 'url', 'type', 'status', 'created_at'];
+        $allowedSortFields = ['name', 'url', 'type', 'status', 'created_at'];
 
         if (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');

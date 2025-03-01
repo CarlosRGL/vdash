@@ -23,7 +23,7 @@ class SiteFactory extends Factory
 
         return [
             'name' => fake()->company() . ' ' . fake()->word(),
-            'url' => fake()->url(),
+            'url' => fake()->domainName(),
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
             'status' => fake()->randomElement($statuses),

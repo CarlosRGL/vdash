@@ -106,24 +106,6 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
 
   const columns: ColumnDef<Site>[] = [
     {
-      accessorKey: 'id',
-      header: () => (
-        <Button variant="ghost" onClick={() => handleSort('id')} className="flex items-center">
-          ID
-          {sorting.field === 'id' ? (
-            sorting.direction === 'asc' ? (
-              <ChevronUp className="ml-2 h-4 w-4" />
-            ) : (
-              <ChevronDown className="ml-2 h-4 w-4" />
-            )
-          ) : (
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          )}
-        </Button>
-      ),
-      cell: ({ row }) => <div className="text-center">{row.getValue('id')}</div>,
-    },
-    {
       accessorKey: 'name',
       header: () => (
         <Button variant="ghost" onClick={() => handleSort('name')} className="flex items-center">
@@ -329,7 +311,6 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
               {sites.data.length ? (
                 sites.data.map((site) => (
                   <TableRow key={site.id}>
-                    <TableCell className="text-center">{site.id}</TableCell>
                     <TableCell>{site.name}</TableCell>
                     <TableCell>
                       <a href={site.url} target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-600 hover:underline">
