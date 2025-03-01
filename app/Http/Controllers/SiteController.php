@@ -82,8 +82,12 @@ class SiteController extends Controller
         $site->user_id = Auth::id();
         $site->save();
 
-        return Redirect::route('sites.show', $site)
-            ->with('success', __('Site created successfully.'));
+        return Redirect::route('sites.index', $site)
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Site created successfully',
+                'description' => "The site {$request->name} has been added to the system.",
+            ]);
     }
 
     /**
@@ -137,8 +141,12 @@ class SiteController extends Controller
 
         $site->update($validated);
 
-        return Redirect::route('sites.show', $site)
-            ->with('success', __('Site updated successfully.'));
+        return Redirect::route('sites.edit', $site)
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Site updated successfully',
+                'description' => "The site {$request->name} has been updated.",
+            ]);
     }
 
     /**
