@@ -24,8 +24,8 @@ class SiteSeeder extends Seeder
             $users = User::factory(5)->create();
         }
 
-        // Create 20 sites with credentials and metrics
-        Site::factory(20)
+        // Create 10 sites with credentials and metrics
+        Site::factory(10)
             ->recycle($users) // Assign sites to existing users
             ->has(SiteCredential::factory(), 'credential')
             ->has(SiteMetric::factory()->count(rand(1, 5)), 'metrics')
@@ -33,32 +33,54 @@ class SiteSeeder extends Seeder
 
         // Create some specific site types
         // WordPress sites
-        Site::factory(5)
+        Site::factory(3)
             ->wordpress()
+            ->quai13() // Assign to Quai13 team
             ->recycle($users)
             ->has(SiteCredential::factory(), 'credential')
             ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
             ->create();
 
         // Laravel sites
-        Site::factory(5)
-            ->laravel()
-            ->recycle($users)
-            ->has(SiteCredential::factory(), 'credential')
-            ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
-            ->create();
-
-        // Sites in maintenance
         Site::factory(3)
-            ->maintenance()
+            ->laravel()
+            ->vernalis() // Assign to Vernalis team
             ->recycle($users)
             ->has(SiteCredential::factory(), 'credential')
             ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
             ->create();
 
-        // Inactive sites
-        Site::factory(2)
-            ->inactive()
+        // Drupal sites
+        Site::factory(3)
+            ->drupal()
+            ->quai13()
+            ->recycle($users)
+            ->has(SiteCredential::factory(), 'credential')
+            ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
+            ->create();
+
+        // SPIP sites
+        Site::factory(3)
+            ->spip()
+            ->vernalis()
+            ->recycle($users)
+            ->has(SiteCredential::factory(), 'credential')
+            ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
+            ->create();
+
+        // Typo3 sites
+        Site::factory(3)
+            ->typo3()
+            ->quai13()
+            ->recycle($users)
+            ->has(SiteCredential::factory(), 'credential')
+            ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')
+            ->create();
+
+        // Symfony sites
+        Site::factory(3)
+            ->symfony()
+            ->vernalis()
             ->recycle($users)
             ->has(SiteCredential::factory(), 'credential')
             ->has(SiteMetric::factory()->count(rand(1, 3)), 'metrics')

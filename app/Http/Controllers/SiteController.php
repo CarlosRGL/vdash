@@ -34,7 +34,7 @@ class SiteController extends Controller
         // Apply sorting
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        $allowedSortFields = ['name', 'url', 'type', 'status', 'created_at'];
+        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at'];
 
         if (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
@@ -74,8 +74,8 @@ class SiteController extends Controller
             'name' => 'required|string|max:255',
             'url' => 'required|url|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:wordpress,laravel,other',
-            'status' => 'required|in:active,inactive,maintenance',
+            'type' => 'required|in:WordPress,Drupal,SPIP,Typo3,laravel,symfony,other',
+            'team' => 'required|in:quai13,vernalis',
         ]);
 
         $site = new Site($validated);
@@ -131,8 +131,8 @@ class SiteController extends Controller
             'name' => 'required|string|max:255',
             'url' => 'required|url|max:255',
             'description' => 'nullable|string',
-            'type' => 'required|in:wordpress,laravel,other',
-            'status' => 'required|in:active,inactive,maintenance',
+            'type' => 'required|in:WordPress,Drupal,SPIP,Typo3,laravel,symfony,other',
+            'team' => 'required|in:quai13,vernalis',
         ]);
 
         $site->update($validated);

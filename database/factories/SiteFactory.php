@@ -18,15 +18,15 @@ class SiteFactory extends Factory
      */
     public function definition(): array
     {
-        $siteTypes = ['wordpress', 'laravel', 'other'];
-        $statuses = ['active', 'inactive', 'maintenance'];
+        $siteTypes = ['WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other'];
+        $teams = ['quai13', 'vernalis'];
 
         return [
             'name' => fake()->company() . ' ' . fake()->word(),
             'url' => fake()->domainName(),
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
-            'status' => fake()->randomElement($statuses),
+            'team' => fake()->randomElement($teams),
             'user_id' => User::inRandomOrder()->first()->id ?? User::factory(),
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
@@ -36,42 +36,12 @@ class SiteFactory extends Factory
     }
 
     /**
-     * Indicate that the site is active.
-     */
-    public function active(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'active',
-        ]);
-    }
-
-    /**
-     * Indicate that the site is in maintenance mode.
-     */
-    public function maintenance(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'maintenance',
-        ]);
-    }
-
-    /**
-     * Indicate that the site is inactive.
-     */
-    public function inactive(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'status' => 'inactive',
-        ]);
-    }
-
-    /**
      * Indicate that the site is a WordPress site.
      */
     public function wordpress(): static
     {
         return $this->state(fn (array $attributes) => [
-            'type' => 'wordpress',
+            'type' => 'WordPress',
         ]);
     }
 
@@ -82,6 +52,66 @@ class SiteFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => 'laravel',
+        ]);
+    }
+
+    /**
+     * Indicate that the site is a Drupal site.
+     */
+    public function drupal(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'Drupal',
+        ]);
+    }
+
+    /**
+     * Indicate that the site is a SPIP site.
+     */
+    public function spip(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'SPIP',
+        ]);
+    }
+
+    /**
+     * Indicate that the site is a Typo3 site.
+     */
+    public function typo3(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'Typo3',
+        ]);
+    }
+
+    /**
+     * Indicate that the site is a Symfony site.
+     */
+    public function symfony(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'type' => 'symfony',
+        ]);
+    }
+
+    /**
+     * Indicate that the site belongs to Quai13 team.
+     */
+    public function quai13(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'team' => 'quai13',
+        ]);
+    }
+
+    /**
+     * Indicate that the site belongs to Vernalis team.
+     */
+    public function vernalis(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'team' => 'vernalis',
         ]);
     }
 }

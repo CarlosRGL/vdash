@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('url');
             $table->text('description')->nullable();
-            $table->enum('type', ['wordpress', 'laravel', 'other'])->default('other');
-            $table->enum('status', ['active', 'inactive', 'maintenance'])->default('active');
+            $table->enum('type', ['WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other'])->default('other');
+            $table->enum('team', ['quai13', 'vernalis'])->default('quai13');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();

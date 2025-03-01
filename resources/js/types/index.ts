@@ -55,8 +55,8 @@ export interface Site {
   name: string;
   url: string;
   description: string | null;
-  type: 'wordpress' | 'laravel' | 'other';
-  status: 'active' | 'inactive' | 'maintenance';
+  type: 'WordPress' | 'Drupal' | 'SPIP' | 'Typo3' | 'laravel' | 'symfony' | 'other';
+  team: 'quai13' | 'vernalis';
   user_id: number;
   user?: User;
   created_at: string;

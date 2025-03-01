@@ -78,29 +78,35 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     );
   }, [debouncedSearchValue, pagination.pageIndex, pagination.pageSize, sorting.field, sorting.direction]);
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'active':
+  const getTypeBadgeColor = (type: string) => {
+    switch (type) {
+      case 'WordPress':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+      case 'Drupal':
+        return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300';
+      case 'SPIP':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
+      case 'Typo3':
+        return 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300';
+      case 'laravel':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+      case 'symfony':
         return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+      case 'other':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
   };
 
-  const getTypeBadgeColor = (type: string) => {
-    switch (type) {
-      case 'wordpress':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case 'laravel':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case 'other':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300';
+  const getTeamBadgeColor = (team: string) => {
+    switch (team) {
+      case 'quai13':
+        return 'bg-[#FE6213]/10 text-[#FE6213] border border-[#FE6213]/30 dark:bg-[#FE6213]/20 dark:text-[#FE6213] dark:border-[#FE6213]/50';
+      case 'vernalis':
+        return 'bg-[#01BB9D]/10 text-[#01BB9D] border border-[#01BB9D]/30 dark:bg-[#01BB9D]/20 dark:text-[#01BB9D] dark:border-[#01BB9D]/50';
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        return 'bg-gray-100 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
   };
 
@@ -172,11 +178,11 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       },
     },
     {
-      accessorKey: 'status',
+      accessorKey: 'team',
       header: () => (
-        <Button variant="ghost" onClick={() => handleSort('status')} className="flex items-center">
-          Status
-          {sorting.field === 'status' ? (
+        <Button variant="ghost" onClick={() => handleSort('team')} className="flex items-center">
+          Team
+          {sorting.field === 'team' ? (
             sorting.direction === 'asc' ? (
               <ChevronUp className="ml-2 h-4 w-4" />
             ) : (
@@ -188,8 +194,8 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         </Button>
       ),
       cell: ({ row }) => {
-        const status = row.getValue('status') as string;
-        return <Badge className={getStatusBadgeColor(status)}>{status.charAt(0).toUpperCase() + status.slice(1)}</Badge>;
+        const team = row.getValue('team') as string;
+        return <Badge className={getTeamBadgeColor(team)}>{team.charAt(0).toUpperCase() + team.slice(1)}</Badge>;
       },
     },
     {
@@ -322,7 +328,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
                       <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge className={getStatusBadgeColor(site.status)}>{site.status.charAt(0).toUpperCase() + site.status.slice(1)}</Badge>
+                      <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
                     </TableCell>
                     <TableCell>{new Date(site.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>

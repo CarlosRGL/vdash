@@ -24,7 +24,7 @@ class Site extends Model
         'url',
         'description',
         'type',
-        'status',
+        'team',
         'user_id',
     ];
 
