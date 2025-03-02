@@ -22,7 +22,7 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
     },
     {
       title: 'Credentials',
-      url: `/sites/${siteId}/credentials/edit`,
+      url: `/sites/${siteId}/credentials/`,
       icon: null,
     },
     {

@@ -2,18 +2,102 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { Check, Copy } from 'lucide-react';
+import { FormEvent, useState } from 'react';
 
 interface EditSiteCredentialsProps {
   site: Site;
-  credential: SiteCredential | null;
+  credentials: SiteCredential;
 }
 
-export default function EditSiteCredentials({ site, credential }: EditSiteCredentialsProps) {
+export default function EditSiteCredentials({ site, credentials }: EditSiteCredentialsProps) {
+  const [copiedFields, setCopiedFields] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
+
+  // Format date string to YYYY-MM-DD for date input
+  const formatDateForInput = (dateString: string | null): string => {
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+      return date.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  };
+
+  const copyToClipboard = (text: string, fieldName: string) => {
+    if (!text) return;
+
+    // Fallback function for copying text
+    const fallbackCopyTextToClipboard = (text: string) => {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+
+      // Make the textarea out of viewport
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        console.error('Fallback: Oops, unable to copy', err);
+      }
+
+      document.body.removeChild(textArea);
+      return success;
+    };
+
+    // Try to use the modern clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          setCopiedFields({ ...copiedFields, [fieldName]: true });
+
+          toast.success('Copied to clipboard', {
+            description: `${fieldName} has been copied to clipboard.`,
+          });
+
+          setTimeout(() => {
+            setCopiedFields({ ...copiedFields, [fieldName]: false });
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error('Could not copy text: ', err);
+        });
+    } else {
+      // Fallback for older browsers
+      const success = fallbackCopyTextToClipboard(text);
+      if (success) {
+        setCopiedFields({ ...copiedFields, [fieldName]: true });
+
+        toast.success('Copied to clipboard', {
+          description: `${fieldName} has been copied to clipboard.`,
+        });
+
+        setTimeout(() => {
+          setCopiedFields({ ...copiedFields, [fieldName]: false });
+        }, 2000);
+      } else {
+        toast.error('Copy failed', {
+          description: 'Please copy the text manually.',
+        });
+      }
+    }
+  };
+
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Sites',
@@ -29,52 +113,67 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
     },
   ];
 
-  const defaultCredential: SiteCredential = credential || {
-    id: 0,
-    site_id: site.id,
-    ftp_host: '',
-    ftp_username: '',
-    ftp_password: '',
-    db_host: '',
-    db_name: '',
-    db_username: '',
-    db_password: '',
-    login_url: '',
-    login_username: '',
-    login_password: '',
-    api_keys: '',
-    contract_start_date: null,
-    contract_end_date: null,
-    contract_capacity: '',
-    contract_storage_usage: '',
-    contract_storage_limit: '',
-    created_at: '',
-    updated_at: '',
-  };
-
+  // Initialize form with data from credentials
   const { setData, data, put, processing, errors } = useForm({
-    ftp_host: defaultCredential.ftp_host || '',
-    ftp_username: defaultCredential.ftp_username || '',
-    ftp_password: defaultCredential.ftp_password || '',
-    db_host: defaultCredential.db_host || '',
-    db_name: defaultCredential.db_name || '',
-    db_username: defaultCredential.db_username || '',
-    db_password: defaultCredential.db_password || '',
-    login_url: defaultCredential.login_url || '',
-    login_username: defaultCredential.login_username || '',
-    login_password: defaultCredential.login_password || '',
-    api_keys: defaultCredential.api_keys || '',
-    contract_start_date: defaultCredential.contract_start_date || '',
-    contract_end_date: defaultCredential.contract_end_date || '',
-    contract_capacity: defaultCredential.contract_capacity || '',
-    contract_storage_usage: defaultCredential.contract_storage_usage || '',
-    contract_storage_limit: defaultCredential.contract_storage_limit || '',
+    ftp_host: credentials?.ftp_host || '',
+    ftp_username: credentials?.ftp_username || '',
+    ftp_password: credentials?.ftp_password || '',
+    db_host: credentials?.db_host || '',
+    db_name: credentials?.db_name || '',
+    db_username: credentials?.db_username || '',
+    db_password: credentials?.db_password || '',
+    login_url: credentials?.login_url || '',
+    login_username: credentials?.login_username || '',
+    login_password: credentials?.login_password || '',
+    api_keys: credentials?.api_keys || '',
+    contract_start_date: formatDateForInput(credentials?.contract_start_date),
+    contract_end_date: formatDateForInput(credentials?.contract_end_date),
+    contract_capacity: credentials?.contract_capacity || '',
+    contract_storage_usage: credentials?.contract_storage_usage || '',
+    contract_storage_limit: credentials?.contract_storage_limit || '',
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     put(route('sites.credentials.update', site.id));
   };
+
+  // Helper component for input fields with copy button
+  const InputWithCopy = ({
+    id,
+    label,
+    value,
+    onChange,
+    type = 'text',
+    placeholder = '',
+    error = null,
+  }: {
+    id: string;
+    label: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    type?: string;
+    placeholder?: string;
+    error?: string | null;
+  }) => (
+    <div className="space-y-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex">
+        <Input id={id} type={type} placeholder={placeholder} value={value} onChange={onChange} className="rounded-r-none" />
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="h-10 rounded-l-none border-l-0"
+          onClick={() => copyToClipboard(value, id)}
+          disabled={!value}
+        >
+          {copiedFields[id] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -91,32 +190,31 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">FTP Credentials</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="ftp_host">FTP Host</Label>
-                    <Input id="ftp_host" placeholder="ftp.example.com" value={data.ftp_host} onChange={(e) => setData('ftp_host', e.target.value)} />
-                    {errors.ftp_host && <p className="text-sm text-red-500">{errors.ftp_host}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ftp_username">FTP Username</Label>
-                    <Input
-                      id="ftp_username"
-                      placeholder="username"
-                      value={data.ftp_username}
-                      onChange={(e) => setData('ftp_username', e.target.value)}
-                    />
-                    {errors.ftp_username && <p className="text-sm text-red-500">{errors.ftp_username}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ftp_password">FTP Password</Label>
-                    <Input
-                      id="ftp_password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={data.ftp_password}
-                      onChange={(e) => setData('ftp_password', e.target.value)}
-                    />
-                    {errors.ftp_password && <p className="text-sm text-red-500">{errors.ftp_password}</p>}
-                  </div>
+                  <InputWithCopy
+                    id="ftp_host"
+                    label="FTP Host"
+                    placeholder="ftp.example.com"
+                    value={data.ftp_host}
+                    onChange={(e) => setData('ftp_host', e.target.value)}
+                    error={errors.ftp_host}
+                  />
+                  <InputWithCopy
+                    id="ftp_username"
+                    label="FTP Username"
+                    placeholder="username"
+                    value={data.ftp_username}
+                    onChange={(e) => setData('ftp_username', e.target.value)}
+                    error={errors.ftp_username}
+                  />
+                  <InputWithCopy
+                    id="ftp_password"
+                    label="FTP Password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={data.ftp_password}
+                    onChange={(e) => setData('ftp_password', e.target.value)}
+                    error={errors.ftp_password}
+                  />
                 </div>
               </div>
 
@@ -124,32 +222,39 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Database Credentials</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="db_host">Database Host</Label>
-                    <Input id="db_host" placeholder="localhost" value={data.db_host} onChange={(e) => setData('db_host', e.target.value)} />
-                    {errors.db_host && <p className="text-sm text-red-500">{errors.db_host}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="db_name">Database Name</Label>
-                    <Input id="db_name" placeholder="database_name" value={data.db_name} onChange={(e) => setData('db_name', e.target.value)} />
-                    {errors.db_name && <p className="text-sm text-red-500">{errors.db_name}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="db_username">Database Username</Label>
-                    <Input id="db_username" placeholder="db_user" value={data.db_username} onChange={(e) => setData('db_username', e.target.value)} />
-                    {errors.db_username && <p className="text-sm text-red-500">{errors.db_username}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="db_password">Database Password</Label>
-                    <Input
-                      id="db_password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={data.db_password}
-                      onChange={(e) => setData('db_password', e.target.value)}
-                    />
-                    {errors.db_password && <p className="text-sm text-red-500">{errors.db_password}</p>}
-                  </div>
+                  <InputWithCopy
+                    id="db_host"
+                    label="Database Host"
+                    placeholder="localhost"
+                    value={data.db_host}
+                    onChange={(e) => setData('db_host', e.target.value)}
+                    error={errors.db_host}
+                  />
+                  <InputWithCopy
+                    id="db_name"
+                    label="Database Name"
+                    placeholder="database_name"
+                    value={data.db_name}
+                    onChange={(e) => setData('db_name', e.target.value)}
+                    error={errors.db_name}
+                  />
+                  <InputWithCopy
+                    id="db_username"
+                    label="Database Username"
+                    placeholder="db_user"
+                    value={data.db_username}
+                    onChange={(e) => setData('db_username', e.target.value)}
+                    error={errors.db_username}
+                  />
+                  <InputWithCopy
+                    id="db_password"
+                    label="Database Password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={data.db_password}
+                    onChange={(e) => setData('db_password', e.target.value)}
+                    error={errors.db_password}
+                  />
                 </div>
               </div>
 
@@ -157,37 +262,31 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Login Credentials</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="login_url">Login URL</Label>
-                    <Input
-                      id="login_url"
-                      placeholder="https://example.com/wp-admin"
-                      value={data.login_url}
-                      onChange={(e) => setData('login_url', e.target.value)}
-                    />
-                    {errors.login_url && <p className="text-sm text-red-500">{errors.login_url}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login_username">Login Username</Label>
-                    <Input
-                      id="login_username"
-                      placeholder="admin"
-                      value={data.login_username}
-                      onChange={(e) => setData('login_username', e.target.value)}
-                    />
-                    {errors.login_username && <p className="text-sm text-red-500">{errors.login_username}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login_password">Login Password</Label>
-                    <Input
-                      id="login_password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={data.login_password}
-                      onChange={(e) => setData('login_password', e.target.value)}
-                    />
-                    {errors.login_password && <p className="text-sm text-red-500">{errors.login_password}</p>}
-                  </div>
+                  <InputWithCopy
+                    id="login_url"
+                    label="Login URL"
+                    placeholder="https://example.com/wp-admin"
+                    value={data.login_url}
+                    onChange={(e) => setData('login_url', e.target.value)}
+                    error={errors.login_url}
+                  />
+                  <InputWithCopy
+                    id="login_username"
+                    label="Login Username"
+                    placeholder="admin"
+                    value={data.login_username}
+                    onChange={(e) => setData('login_username', e.target.value)}
+                    error={errors.login_username}
+                  />
+                  <InputWithCopy
+                    id="login_password"
+                    label="Login Password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={data.login_password}
+                    onChange={(e) => setData('login_password', e.target.value)}
+                    error={errors.login_password}
+                  />
                 </div>
               </div>
 
@@ -195,56 +294,46 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Contract Information</h3>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="contract_start_date">Contract Start Date</Label>
-                    <Input
-                      id="contract_start_date"
-                      type="date"
-                      value={data.contract_start_date as string}
-                      onChange={(e) => setData('contract_start_date', e.target.value)}
-                    />
-                    {errors.contract_start_date && <p className="text-sm text-red-500">{errors.contract_start_date}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contract_end_date">Contract End Date</Label>
-                    <Input
-                      id="contract_end_date"
-                      type="date"
-                      value={data.contract_end_date as string}
-                      onChange={(e) => setData('contract_end_date', e.target.value)}
-                    />
-                    {errors.contract_end_date && <p className="text-sm text-red-500">{errors.contract_end_date}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contract_capacity">Contract Capacity</Label>
-                    <Input
-                      id="contract_capacity"
-                      placeholder="e.g., 10 hours/month"
-                      value={data.contract_capacity}
-                      onChange={(e) => setData('contract_capacity', e.target.value)}
-                    />
-                    {errors.contract_capacity && <p className="text-sm text-red-500">{errors.contract_capacity}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contract_storage_limit">Storage Limit</Label>
-                    <Input
-                      id="contract_storage_limit"
-                      placeholder="e.g., 10GB"
-                      value={data.contract_storage_limit}
-                      onChange={(e) => setData('contract_storage_limit', e.target.value)}
-                    />
-                    {errors.contract_storage_limit && <p className="text-sm text-red-500">{errors.contract_storage_limit}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contract_storage_usage">Current Storage Usage</Label>
-                    <Input
-                      id="contract_storage_usage"
-                      placeholder="e.g., 5GB"
-                      value={data.contract_storage_usage}
-                      onChange={(e) => setData('contract_storage_usage', e.target.value)}
-                    />
-                    {errors.contract_storage_usage && <p className="text-sm text-red-500">{errors.contract_storage_usage}</p>}
-                  </div>
+                  <InputWithCopy
+                    id="contract_start_date"
+                    label="Contract Start Date"
+                    type="date"
+                    value={data.contract_start_date}
+                    onChange={(e) => setData('contract_start_date', e.target.value)}
+                    error={errors.contract_start_date}
+                  />
+                  <InputWithCopy
+                    id="contract_end_date"
+                    label="Contract End Date"
+                    type="date"
+                    value={data.contract_end_date}
+                    onChange={(e) => setData('contract_end_date', e.target.value)}
+                    error={errors.contract_end_date}
+                  />
+                  <InputWithCopy
+                    id="contract_capacity"
+                    label="Contract Capacity"
+                    placeholder="e.g., 10 hours/month"
+                    value={data.contract_capacity}
+                    onChange={(e) => setData('contract_capacity', e.target.value)}
+                    error={errors.contract_capacity}
+                  />
+                  <InputWithCopy
+                    id="contract_storage_limit"
+                    label="Storage Limit"
+                    placeholder="e.g., 10GB"
+                    value={data.contract_storage_limit}
+                    onChange={(e) => setData('contract_storage_limit', e.target.value)}
+                    error={errors.contract_storage_limit}
+                  />
+                  <InputWithCopy
+                    id="contract_storage_usage"
+                    label="Current Storage Usage"
+                    placeholder="e.g., 5GB"
+                    value={data.contract_storage_usage}
+                    onChange={(e) => setData('contract_storage_usage', e.target.value)}
+                    error={errors.contract_storage_usage}
+                  />
                 </div>
               </div>
 
@@ -253,13 +342,25 @@ export default function EditSiteCredentials({ site, credential }: EditSiteCreden
                 <h3 className="text-lg font-medium">API Keys</h3>
                 <div className="space-y-2">
                   <Label htmlFor="api_keys">API Keys (JSON format)</Label>
-                  <textarea
-                    id="api_keys"
-                    className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-20 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder='{"api_key": "your-key", "api_secret": "your-secret"}'
-                    value={data.api_keys}
-                    onChange={(e) => setData('api_keys', e.target.value)}
-                  />
+                  <div className="flex">
+                    <textarea
+                      id="api_keys"
+                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-20 w-full rounded-md rounded-r-none border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                      placeholder='{"api_key": "your-key", "api_secret": "your-secret"}'
+                      value={data.api_keys}
+                      onChange={(e) => setData('api_keys', e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      className="h-auto rounded-l-none border-l-0"
+                      onClick={() => copyToClipboard(data.api_keys, 'api_keys')}
+                      disabled={!data.api_keys}
+                    >
+                      {copiedFields['api_keys'] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                  </div>
                   {errors.api_keys && <p className="text-sm text-red-500">{errors.api_keys}</p>}
                   <p className="text-muted-foreground text-sm">Enter API keys in JSON format</p>
                 </div>
