@@ -4,12 +4,14 @@ import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Pencil, Search } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Pencil, RefreshCw, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,7 +40,7 @@ interface SitesPageProps {
 }
 
 export default function SitesPage({ sites, filters }: SitesPageProps) {
-  useToast();
+  const { toast } = useToast();
 
   const [searchValue, setSearchValue] = useState(filters.search);
   const [pagination, setPagination] = useState<PaginationState>({
@@ -109,6 +111,28 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       default:
         return 'bg-gray-100 text-gray-800 border border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600';
     }
+  };
+
+  const handleSync = (site: Site) => {
+    router.post(
+      route('sites.metrics.refresh', { site: site.id }),
+      {},
+      {
+        onSuccess: () => {
+          toast({
+            title: 'Success',
+            description: 'Site metrics synced successfully.',
+          });
+        },
+        onError: () => {
+          toast({
+            title: 'Error',
+            description: 'Failed to sync site metrics.',
+            variant: 'destructive',
+          });
+        },
+      },
+    );
   };
 
   const columns: ColumnDef<Site>[] = [
@@ -223,7 +247,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       ),
       cell: ({ row }) => {
         const lastCheck = row.original.last_check as string | null;
-        return <div className="text-sm">{lastCheck ? new Date(lastCheck).toLocaleString() : 'Never'}</div>;
+        return <div className="text-sm">{lastCheck ? formatDistanceToNow(new Date(lastCheck), { addSuffix: true }) : 'Never'}</div>;
       },
     },
     {
@@ -232,7 +256,20 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       cell: ({ row }) => {
         const site = row.original;
         return (
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" onClick={() => handleSync(site)}>
+                    <RefreshCw className="h-4 w-4" />
+                    <span className="sr-only">Sync</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Sync metrics</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button variant="ghost" size="icon" asChild>
               <Link href={route('sites.edit', { site: site.id })}>
                 <Pencil className="h-4 w-4" />
@@ -276,7 +313,9 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Sites" />
+      <Head>
+        <title>Sites</title>
+      </Head>
       <div className="container mx-auto space-y-4 px-4 py-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -321,45 +360,12 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
               ))}
             </TableHeader>
             <TableBody>
-              {sites.data.length ? (
-                sites.data.map((site) => (
-                  <TableRow key={site.id}>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{site.name}</span>
-                        <a
-                          href={site.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center text-sm text-blue-600 hover:underline"
-                        >
-                          {site.url}
-                          <ExternalLink className="ml-1 h-3 w-3" />
-                        </a>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getTypeBadgeColor(site.type)}>{site.type.charAt(0).toUpperCase() + site.type.slice(1)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="font-mono text-sm">{site.php_version || 'N/A'}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getTeamBadgeColor(site.team)}>{site.team.charAt(0).toUpperCase() + site.team.slice(1)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{site.last_check ? new Date(site.last_check as string).toLocaleString() : 'Never'}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-end">
-                        <Button variant="ghost" size="icon" asChild>
-                          <Link href={route('sites.edit', { site: site.id })}>
-                            <Pencil className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Link>
-                        </Button>
-                      </div>
-                    </TableCell>
+              {table.getRowModel().rows.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow key={row.id}>
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                    ))}
                   </TableRow>
                 ))
               ) : (
