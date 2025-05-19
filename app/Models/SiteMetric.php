@@ -23,7 +23,22 @@ class SiteMetric extends Model
         'post_max_size',
         'upload_max_filesize',
         'max_input_vars',
+        'php_extensions',
         'server_ip',
+        'server_software',
+        'server_os',
+        'server_hostname',
+        'mysql_version',
+        'mysql_server_info',
+        'wordpress_version',
+        'wordpress_site_url',
+        'wordpress_home_url',
+        'wordpress_is_multisite',
+        'wordpress_max_upload_size',
+        'wordpress_permalink_structure',
+        'wordpress_active_theme',
+        'wordpress_active_theme_version',
+        'wordpress_active_plugins',
         'lighthouse_score',
         'last_check',
     ];
@@ -34,6 +49,9 @@ class SiteMetric extends Model
      * @var array<string, string>
      */
     protected $casts = [
+        'php_extensions' => 'array',
+        'wordpress_is_multisite' => 'boolean',
+        'wordpress_active_plugins' => 'array',
         'lighthouse_score' => 'integer',
         'last_check' => 'datetime',
     ];

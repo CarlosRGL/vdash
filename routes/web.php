@@ -32,8 +32,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('sites/{site}/credentials', [SiteCredentialController::class, 'update'])->name('sites.credentials.update');
 
     // Site metrics routes
-    Route::get('sites/{site}/metrics', [SiteMetricController::class, 'index'])->name('sites.metrics.index');
-    Route::post('sites/{site}/metrics/refresh', [SiteMetricController::class, 'refresh'])->name('sites.metrics.refresh');
+    Route::get('/sites/{site}/metrics', [SiteMetricController::class, 'index'])->name('sites.metrics.index');
+    Route::post('/sites/{site}/metrics/refresh', [SiteMetricController::class, 'refresh'])->name('sites.metrics.refresh');
+    Route::post('/sites/{site}/metrics/api', [SiteMetricController::class, 'storeFromApi'])->name('sites.metrics.store-from-api');
 });
 
 require __DIR__ . '/settings.php';
