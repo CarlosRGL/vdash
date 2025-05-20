@@ -18,7 +18,7 @@ class SiteController extends Controller
     {
         $query = Site::with(['user', 'metrics' => function ($query) {
             $query->latest('last_check')->limit(1);
-        }])
+        }, 'credential'])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->where('user_id', Auth::id());
             });

@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,11 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, type Site } from '@/types';
+import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, PaginationState, useReactTable } from '@tanstack/react-table';
 import { formatDistanceToNow } from 'date-fns';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Pencil, RefreshCw, Search } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, Copy, ExternalLink, Pencil, RefreshCw, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -52,6 +53,9 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     direction: filters.sortDirection,
   });
   const [debouncedSearchValue, setDebouncedSearchValue] = useState(filters.search);
+  const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
+  const [selectedCredentials, setSelectedCredentials] = useState<SiteCredential | null>(null);
+  const [selectedSiteName, setSelectedSiteName] = useState<string>('');
 
   // Debounce search input
   useEffect(() => {
@@ -126,6 +130,26 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         },
       },
     );
+  };
+
+  const handleShowCredentials = (site: Site) => {
+    const cred =
+      site.credential && typeof site.credential === 'object' && 'login_url' in site.credential ? (site.credential as SiteCredential) : null;
+    setSelectedCredentials(cred);
+    setSelectedSiteName(site.name);
+    setCredentialsDialogOpen(true);
+  };
+
+  const handleCopy = async (value: string | null, label: string) => {
+    console.log(navigator.clipboard);
+
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`${label} copied to clipboard`);
+    } catch {
+      toast.error('Failed to copy');
+    }
   };
 
   const columns: ColumnDef<Site>[] = [
@@ -263,6 +287,19 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" onClick={() => handleShowCredentials(site)}>
+                    <Copy className="h-4 w-4" />
+                    <span className="sr-only">Show credentials</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Show credentials</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Button variant="ghost" size="icon" asChild>
               <Link href={route('sites.edit', { site: site.id })}>
                 <Pencil className="h-4 w-4" />
@@ -384,6 +421,57 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           to={sites.to}
         />
       </div>
+      <Drawer open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen} position="right">
+        <DrawerContent>
+          <div className="mx-auto w-xl">
+            <DrawerHeader>
+              <DrawerTitle>Credentials for {selectedSiteName}</DrawerTitle>
+              <DrawerDescription>Copy credentials for this site.</DrawerDescription>
+            </DrawerHeader>
+            {selectedCredentials ? (
+              <div className="space-y-4 px-4">
+                {selectedCredentials.login_url && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-32 font-medium">Login URL:</span>
+                    <span className="flex-1 truncate">{selectedCredentials.login_url}</span>
+                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_url, 'Login URL')}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {selectedCredentials.login_username && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-32 font-medium">Username:</span>
+                    <span className="flex-1 truncate">{selectedCredentials.login_username}</span>
+                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_username, 'Username')}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {selectedCredentials.login_password && (
+                  <div className="flex items-center gap-2">
+                    <span className="w-32 font-medium">Password:</span>
+                    <span className="flex-1 truncate">{selectedCredentials.login_password}</span>
+                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_password, 'Password')}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                {/* Add more credential fields as needed */}
+              </div>
+            ) : (
+              <div className="text-muted-foreground px-4">No credentials available for this site.</div>
+            )}
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="secondary" className="w-full">
+                  Close
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </AppLayout>
   );
 }
