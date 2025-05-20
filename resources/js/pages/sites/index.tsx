@@ -119,17 +119,10 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       {},
       {
         onSuccess: () => {
-          toast({
-            title: 'Success',
-            description: 'Site metrics synced successfully.',
-          });
+          toast.success('Site metrics synced successfully.');
         },
         onError: () => {
-          toast({
-            title: 'Error',
-            description: 'Failed to sync site metrics.',
-            variant: 'destructive',
-          });
+          toast.error('Failed to sync site metrics.');
         },
       },
     );
@@ -157,8 +150,8 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         const url = row.original.url as string;
         return (
           <div className="flex flex-col">
-            <span className="font-medium">{name}</span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-blue-600 hover:underline">
+            <span className="text-lg font-medium">{name}</span>
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
               {url}
               <ExternalLink className="ml-1 h-3 w-3" />
             </a>
@@ -316,7 +309,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       <Head>
         <title>Sites</title>
       </Head>
-      <div className="container mx-auto space-y-4 px-4 py-6">
+      <div className="w-full space-y-4 px-4 py-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 ---
-description: laravel inertia react
-globs: 
-alwaysApply: false
+description:
+globs:
+alwaysApply: true
 ---
 
   You are an expert in Laravel 12, PHP, InertiaJS, and shadcn.

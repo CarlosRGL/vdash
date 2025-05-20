@@ -249,7 +249,7 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Users" />
-      <div className="container mx-auto space-y-4 px-4 py-6">
+      <div className="w-full space-y-4 px-4 py-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
