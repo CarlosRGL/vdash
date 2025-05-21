@@ -1,9 +1,9 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Pagination } from '@/components/ui/pagination';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
@@ -141,12 +141,42 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
   };
 
   const handleCopy = async (value: string | null, label: string) => {
-    console.log(navigator.clipboard);
-
     if (!value) return;
+
+    // Fallback for insecure context or unsupported browsers
+    const fallbackCopyTextToClipboard = (text: string) => {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      let success = false;
+      try {
+        success = document.execCommand('copy');
+      } catch (err) {
+        success = false;
+      }
+      document.body.removeChild(textArea);
+      return success;
+    };
+
     try {
-      await navigator.clipboard.writeText(value);
-      toast.success(`${label} copied to clipboard`);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        toast.success(`${label} copied to clipboard`);
+      } else {
+        // Fallback for insecure context or unsupported browsers
+        const success = fallbackCopyTextToClipboard(value);
+        if (success) {
+          toast.success(`${label} copied to clipboard`);
+        } else {
+          toast.error('Failed to copy');
+        }
+      }
     } catch {
       toast.error('Failed to copy');
     }
@@ -349,7 +379,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       <div className="w-full space-y-4 px-4 py-6">
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-2">
               <Search className="h-4 w-4 text-gray-500" />
               <Input
                 type="search"
@@ -421,57 +451,101 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           to={sites.to}
         />
       </div>
-      <Drawer open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen} position="right">
-        <DrawerContent>
-          <div className="mx-auto w-xl">
-            <DrawerHeader>
-              <DrawerTitle>Credentials for {selectedSiteName}</DrawerTitle>
-              <DrawerDescription>Copy credentials for this site.</DrawerDescription>
-            </DrawerHeader>
-            {selectedCredentials ? (
-              <div className="space-y-4 px-4">
-                {selectedCredentials.login_url && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-32 font-medium">Login URL:</span>
-                    <span className="flex-1 truncate">{selectedCredentials.login_url}</span>
-                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_url, 'Login URL')}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                {selectedCredentials.login_username && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-32 font-medium">Username:</span>
-                    <span className="flex-1 truncate">{selectedCredentials.login_username}</span>
-                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_username, 'Username')}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                {selectedCredentials.login_password && (
-                  <div className="flex items-center gap-2">
-                    <span className="w-32 font-medium">Password:</span>
-                    <span className="flex-1 truncate">{selectedCredentials.login_password}</span>
-                    <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_password, 'Password')}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                  </div>
-                )}
-                {/* Add more credential fields as needed */}
-              </div>
-            ) : (
-              <div className="text-muted-foreground px-4">No credentials available for this site.</div>
-            )}
-            <DrawerFooter>
-              <DrawerClose asChild>
-                <Button variant="secondary" className="w-full">
-                  Close
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <Sheet open={credentialsDialogOpen} onOpenChange={setCredentialsDialogOpen}>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px]">
+          <SheetHeader>
+            <SheetTitle>Credentials for {selectedSiteName}</SheetTitle>
+            <SheetDescription>Copy credentials for this site.</SheetDescription>
+          </SheetHeader>
+          {selectedCredentials ? (
+            <div className="space-y-4 px-4">
+              {selectedCredentials.login_url && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">Login URL:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.login_url}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_url, 'Login URL')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {selectedCredentials.login_username && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">Username:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.login_username}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_username, 'Username')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {selectedCredentials.login_password && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">Password:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.login_password}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.login_password, 'Password')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {/* FTP Credentials */}
+              {selectedCredentials.ftp_username && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">FTP User:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.ftp_username}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.ftp_username, 'FTP User')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {selectedCredentials.ftp_password && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">FTP Password:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.ftp_password}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.ftp_password, 'FTP Password')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {/* BDD Credentials */}
+              {selectedCredentials.db_username && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">BDD User:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.db_username}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.db_username, 'BDD User')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {selectedCredentials.db_password && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">BDD Password:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.db_password}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.db_password, 'BDD Password')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              {selectedCredentials.db_host && (
+                <div className="flex flex-col gap-2">
+                  <span className="w-32 font-medium">BDD Host:</span>
+                  <span className="flex-1 text-sm break-all">{selectedCredentials.db_host}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleCopy(selectedCredentials.db_host, 'BDD Host')}>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-muted-foreground px-4">No credentials available for this site.</div>
+          )}
+          <SheetFooter>
+            <SheetClose asChild>
+              <Button variant="secondary" className="w-full">
+                Close
+              </Button>
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </AppLayout>
   );
 }
