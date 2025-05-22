@@ -59,6 +59,7 @@ export interface Site {
   team: 'quai13' | 'vernalis';
   user_id: number;
   user?: User;
+  credential?: SiteCredential;
   php_version?: string | null;
   last_check?: string | null;
   created_at: string;

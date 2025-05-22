@@ -36,7 +36,7 @@ class SiteController extends Controller
         // Apply sorting
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at', 'php_version', 'last_check'];
+        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at', 'php_version', 'last_check', 'contract_start_date', 'contract_end_date'];
 
         // Add support for sorting by metrics fields
         if ($sortField === 'php_version' || $sortField === 'last_check') {
@@ -46,6 +46,11 @@ class SiteController extends Controller
                         ORDER BY last_check DESC LIMIT 1";
 
             $query->orderByRaw("({$subQuery}) " . ($sortDirection === 'asc' ? 'asc' : 'desc'));
+        } elseif ($sortField === 'contract_start_date' || $sortField === 'contract_end_date') {
+            // For contract-based sorting, we need to join with site_credentials
+            $query->leftJoin('site_credentials', 'sites.id', '=', 'site_credentials.site_id')
+                  ->orderBy("site_credentials.{$sortField}", $sortDirection === 'asc' ? 'asc' : 'desc')
+                  ->select('sites.*'); // Ensure we only select site columns
         } elseif (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
         } else {
