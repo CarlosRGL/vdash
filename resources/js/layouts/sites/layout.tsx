@@ -30,6 +30,11 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
       url: `/sites/${siteId}/metrics`,
       icon: null,
     },
+    {
+      title: 'Contract Information',
+      url: `/sites/${siteId}/contract`,
+      icon: null,
+    },
   ];
 
   return (
@@ -60,7 +65,7 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
         <Separator className="my-6 md:hidden" />
 
         <div className="flex-1">
-          <section className="space-y-12">{children}</section>
+          <section className="space-y-12">{currentPath === `/sites/${siteId}/contract` ? <ContractInfo siteId={siteId} /> : children}</section>
         </div>
       </div>
     </div>

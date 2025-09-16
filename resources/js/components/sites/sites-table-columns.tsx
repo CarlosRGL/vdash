@@ -4,7 +4,7 @@ import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Copy, ExternalLink, HardDrive, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Copy, HardDrive, Pencil, RefreshCw } from 'lucide-react';
 import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
 
 interface SitesTableColumnsProps {
@@ -82,11 +82,11 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         const url = row.original.url as string;
         return (
           <div className="flex flex-col">
-            <span className="text-lg font-medium">{name}</span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
+            <span className="">{name}</span>
+            {/* <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
               {url}
               <ExternalLink className="ml-1 h-3 w-3" />
-            </a>
+            </a> */}
           </div>
         );
       },
@@ -156,7 +156,7 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         return (
           <div className="text-sm">
             <div>{formatDate(startDate)}</div>
-            <div className="text-muted-foreground">to {formatDate(endDate)}</div>
+            {/* <div className="text-muted-foreground">to {formatDate(endDate)}</div> */}
           </div>
         );
       },

@@ -1,12 +1,12 @@
-import { useTheme } from "next-themes"
+import { useAppearance } from "@/hooks/use-appearance"
 import { Toaster as Sonner, ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { appearance = "system" } = useAppearance()
 
   return (
     <Sonner
-      theme={theme as ToasterProps["theme"]}
+      theme={appearance as ToasterProps["theme"]}
       className="toaster group"
       toastOptions={{
         classNames: {

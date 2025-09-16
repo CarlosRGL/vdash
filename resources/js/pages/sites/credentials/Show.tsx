@@ -101,20 +101,21 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
   // Helper component for displaying field with copy button
   const FieldWithCopy = ({ label, value, id, isPassword = false }: { label: string; value: string | null; id: string; isPassword?: boolean }) => (
     <div className="space-y-1">
-      <p className="text-sm font-medium">{label}</p>
-      <div className="flex w-full max-w-md items-center overflow-hidden rounded-md">
-        <div className="bg-muted w-full max-w-md overflow-hidden rounded-l-md px-3 py-2">
+      <label className="text-foreground mb-1 block text-sm font-semibold">{label}</label>
+      <div className="border-input bg-background flex w-full max-w-md items-center rounded-md border">
+        <div className="text-foreground flex-1 truncate px-3 py-2 text-sm">
           {isPassword && value ? '••••••••' : value || <span className="text-muted-foreground italic">Not set</span>}
         </div>
         <Button
           type="button"
-          variant="outline"
+          variant="ghost"
           size="icon"
-          className="h-10 rounded-l-none"
+          className="border-input rounded-l-none border-l"
           onClick={() => copyToClipboard(value, id)}
           disabled={!value}
+          aria-label={`Copy ${label}`}
         >
-          {copiedFields[id] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {copiedFields[id] ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
     </div>
@@ -124,24 +125,24 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`Credentials: ${site.name}`} />
       <SiteLayout siteId={site.id} siteName={site.name}>
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Site Credentials</h1>
-          <Button asChild>
+        <div className="mb-8 flex items-center justify-between">
+          <h1 className="text-foreground text-3xl font-bold tracking-tight">Site Credentials</h1>
+          <Button asChild variant="default" size="sm" className="gap-2">
             <Link href={route('sites.credentials.edit', site.id)}>
-              <Pencil className="mr-2 h-4 w-4" />
+              <Pencil className="h-4 w-4" />
               Edit Credentials
             </Link>
           </Button>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* FTP Credentials */}
           <Card>
-            <CardHeader>
-              <CardTitle>FTP Credentials</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">FTP Credentials</CardTitle>
               <CardDescription>FTP access details for this site</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FieldWithCopy label="FTP Host" value={credentials.ftp_host} id="ftp_host" />
               <FieldWithCopy label="FTP Username" value={credentials.ftp_username} id="ftp_username" />
               <FieldWithCopy label="FTP Password" value={credentials.ftp_password} id="ftp_password" isPassword />
@@ -150,11 +151,11 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
 
           {/* Database Credentials */}
           <Card>
-            <CardHeader>
-              <CardTitle>Database Credentials</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Database Credentials</CardTitle>
               <CardDescription>Database access details for this site</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FieldWithCopy label="Database Host" value={credentials.db_host} id="db_host" />
               <FieldWithCopy label="Database Name" value={credentials.db_name} id="db_name" />
               <FieldWithCopy label="Database Username" value={credentials.db_username} id="db_username" />
@@ -164,11 +165,11 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
 
           {/* Login Credentials */}
           <Card>
-            <CardHeader>
-              <CardTitle>Login Credentials</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Login Credentials</CardTitle>
               <CardDescription>CMS login details for this site</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FieldWithCopy label="Login URL" value={credentials.login_url} id="login_url" />
               <FieldWithCopy label="Login Username" value={credentials.login_username} id="login_username" />
               <FieldWithCopy label="Login Password" value={credentials.login_password} id="login_password" isPassword />
@@ -177,11 +178,11 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
 
           {/* Contract Information */}
           <Card>
-            <CardHeader>
-              <CardTitle>Contract Information</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg">Contract Information</CardTitle>
               <CardDescription>Contract details for this site</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FieldWithCopy
                 label="Contract Start Date"
                 value={credentials.contract_start_date ? new Date(credentials.contract_start_date).toLocaleDateString() : null}

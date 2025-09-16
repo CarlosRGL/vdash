@@ -37,14 +37,6 @@ class Site extends Model
     }
 
     /**
-     * Get the metrics associated with the site.
-     */
-    public function metrics(): HasMany
-    {
-        return $this->hasMany(SiteMetric::class);
-    }
-
-    /**
      * Get the user that owns the site.
      */
     public function user(): BelongsTo

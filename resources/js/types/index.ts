@@ -90,19 +90,3 @@ export interface SiteCredential {
   created_at: string;
   updated_at: string;
 }
-
-export interface SiteMetric {
-  id: number;
-  site_id: number;
-  php_version: string | null;
-  memory_limit: string | null;
-  max_execution_time: string | null;
-  post_max_size: string | null;
-  upload_max_filesize: string | null;
-  max_input_vars: string | null;
-  server_ip: string | null;
-  lighthouse_score: number | null;
-  last_check: string | null;
-  created_at: string;
-  updated_at: string;
-}

@@ -17,7 +17,7 @@ class SiteController extends Controller
     public function index(Request $request)
     {
         $query = Site::with(['user', 'metrics' => function ($query) {
-            $query->latest('last_check')->limit(1);
+            $query->latest('last_check'); // Removed limit(1) to avoid redundant queries
         }, 'credential'])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->where('user_id', Auth::id());
@@ -38,21 +38,8 @@ class SiteController extends Controller
         $sortDirection = $request->input('sortDirection', 'asc');
         $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at', 'php_version', 'last_check', 'contract_start_date', 'contract_end_date'];
 
-        // Add support for sorting by metrics fields
-        if ($sortField === 'php_version' || $sortField === 'last_check') {
-            // For metrics-based sorting, we need to use a subquery
-            $subQuery = "SELECT {$sortField} FROM site_metrics
-                        WHERE site_metrics.site_id = sites.id
-                        ORDER BY last_check DESC LIMIT 1";
-
-            $query->orderByRaw("({$subQuery}) " . ($sortDirection === 'asc' ? 'asc' : 'desc'));
-        } elseif ($sortField === 'contract_start_date' || $sortField === 'contract_end_date') {
-            // For contract-based sorting, we need to join with site_credentials
-            $query->leftJoin('site_credentials', 'sites.id', '=', 'site_credentials.site_id')
-                  ->orderBy("site_credentials.{$sortField}", $sortDirection === 'asc' ? 'asc' : 'desc')
-                  ->select('sites.*'); // Ensure we only select site columns
-        } elseif (in_array($sortField, $allowedSortFields)) {
-            $query->orderBy($sortField, $sortDirection === 'asc' ? 'asc' : 'desc');
+        if (in_array($sortField, $allowedSortFields)) {
+            $query->orderBy($sortField, $sortDirection);
         } else {
             $query->orderBy('name', 'asc');
         }
@@ -62,15 +49,12 @@ class SiteController extends Controller
         $sites = $query->paginate($perPage)->withQueryString();
 
         // Transform the sites to include the latest metrics data
-        $sites->through(function ($site) {
+        $sites->getCollection()->transform(function ($site) {
             $latestMetric = $site->metrics->first();
 
             // Add the metrics data directly to the site object
-            $site->php_version = $latestMetric ? $latestMetric->php_version : null;
-            $site->last_check = $latestMetric ? $latestMetric->last_check : null;
-
-            // Remove the metrics relationship from the response to avoid duplication
-            unset($site->metrics);
+            $site->php_version = $latestMetric->php_version ?? null;
+            $site->last_check = $latestMetric->last_check ?? null;
 
             return $site;
         });
