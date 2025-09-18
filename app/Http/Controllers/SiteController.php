@@ -16,9 +16,7 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Site::with(['user', 'metrics' => function ($query) {
-            $query->latest('last_check'); // Removed limit(1) to avoid redundant queries
-        }, 'credential'])
+        $query = Site::with(['user' , 'credential'])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->where('user_id', Auth::id());
             });
@@ -48,16 +46,7 @@ class SiteController extends Controller
         $perPage = $request->input('perPage', 10);
         $sites = $query->paginate($perPage)->withQueryString();
 
-        // Transform the sites to include the latest metrics data
-        $sites->getCollection()->transform(function ($site) {
-            $latestMetric = $site->metrics->first();
 
-            // Add the metrics data directly to the site object
-            $site->php_version = $latestMetric->php_version ?? null;
-            $site->last_check = $latestMetric->last_check ?? null;
-
-            return $site;
-        });
 
         return Inertia::render('sites/index', [
             'sites' => $sites,

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteCredentialController;
+use App\Http\Controllers\SiteContractController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -26,9 +27,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('sites', SiteController::class);
 
     // Site credentials routes
-    Route::get('sites/{site}/credentials', [SiteCredentialController::class, 'show'])->name('sites.credentials.show');
-    Route::get('sites/{site}/credentials/edit', [SiteCredentialController::class, 'edit'])->name('sites.credentials.edit');
-    Route::put('sites/{site}/credentials', [SiteCredentialController::class, 'update'])->name('sites.credentials.update');
+    Route::get('sites/{site}/credentials', [SiteCredentialController::class, 'show'])
+        ->name('sites.credentials.show');
+    Route::get('sites/{site}/credentials/edit', [SiteCredentialController::class, 'edit'])
+        ->name('sites.credentials.edit');
+    Route::put('sites/{site}/credentials', [SiteCredentialController::class, 'update'])
+        ->name('sites.credentials.update');
+
+    // Site contracts routes
+    Route::get('sites/{site}/contracts', [SiteContractController::class, 'show'])
+        ->name('sites.contracts.show');
+    Route::get('sites/{site}/contracts/edit', [SiteContractController::class, 'edit'])
+        ->name('sites.contracts.edit');
+    Route::put('sites/{site}/contracts', [SiteContractController::class, 'update'])
+        ->name('sites.contracts.update');
+    Route::delete('sites/{site}/contracts', [SiteContractController::class, 'destroy'])
+        ->name('sites.contracts.destroy');
 });
 
 require __DIR__ . '/settings.php';

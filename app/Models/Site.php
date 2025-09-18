@@ -37,6 +37,14 @@ class Site extends Model
     }
 
     /**
+     * Get the contract associated with the site.
+     */
+    public function contract(): HasOne
+    {
+        return $this->hasOne(SiteContract::class);
+    }
+
+    /**
      * Get the user that owns the site.
      */
     public function user(): BelongsTo

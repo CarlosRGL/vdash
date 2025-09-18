@@ -25,11 +25,7 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
       url: `/sites/${siteId}/credentials/`,
       icon: null,
     },
-    {
-      title: 'Metrics',
-      url: `/sites/${siteId}/metrics`,
-      icon: null,
-    },
+
     {
       title: 'Contract Information',
       url: `/sites/${siteId}/contract`,

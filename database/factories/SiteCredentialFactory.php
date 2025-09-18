@@ -43,13 +43,6 @@ class SiteCredentialFactory extends Factory
                 'secret' => fake()->sha256(),
             ]),
 
-            // Contract information
-            'contract_start_date' => fake()->dateTimeBetween('-2 years', '-6 months'),
-            'contract_end_date' => fake()->dateTimeBetween('+6 months', '+2 years'),
-            'contract_capacity' => fake()->randomElement(['Basic', 'Standard', 'Premium', 'Enterprise']),
-            'contract_storage_usage' => fake()->numberBetween(100, 9000) . ' MB',
-            'contract_storage_limit' => fake()->randomElement(['10 GB', '20 GB', '50 GB', '100 GB']),
-
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], 'now');

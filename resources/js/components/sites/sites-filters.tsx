@@ -26,7 +26,7 @@ export function SitesFilters({ searchValue, onSearchChange, pageSize, onPageSize
           />
         </div>
         <Select value={pageSize.toString()} onValueChange={onPageSizeChange}>
-          <SelectTrigger className="w-[120px]">
+          <SelectTrigger className="min-w-[130px]">
             <SelectValue placeholder="Rows per page" />
           </SelectTrigger>
           <SelectContent>

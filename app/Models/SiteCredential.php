@@ -29,11 +29,6 @@ class SiteCredential extends Model
         'login_username',
         'login_password',
         'api_keys',
-        'contract_start_date',
-        'contract_end_date',
-        'contract_capacity',
-        'contract_storage_usage',
-        'contract_storage_limit',
     ];
 
     /**
@@ -42,8 +37,7 @@ class SiteCredential extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'contract_start_date' => 'date',
-        'contract_end_date' => 'date',
+        // Contract fields moved to SiteContract model
     ];
 
     /**

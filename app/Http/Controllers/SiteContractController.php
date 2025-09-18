@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Site;
-use App\Models\SiteCredential;
+use App\Models\SiteContract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-class SiteCredentialController extends Controller
+class SiteContractController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -44,11 +44,11 @@ class SiteCredentialController extends Controller
             abort(403);
         }
 
-        $site->load('credential');
+        $site->load('contract');
 
-        return Inertia::render('sites/credentials/Show', [
+        return Inertia::render('sites/contracts/Show', [
             'site' => $site,
-            'credentials' => $site->credential ?? new SiteCredential(),
+            'contract' => $site->contract ?? new SiteContract(),
         ]);
     }
 
@@ -61,11 +61,11 @@ class SiteCredentialController extends Controller
             abort(403);
         }
 
-        $site->load('credential');
+        $site->load('contract');
 
-        return Inertia::render('sites/credentials/Edit', [
+        return Inertia::render('sites/contracts/Edit', [
             'site' => $site,
-            'credentials' => $site->credential ?? new SiteCredential(),
+            'contract' => $site->contract ?? new SiteContract(),
         ]);
     }
 
@@ -79,34 +79,35 @@ class SiteCredentialController extends Controller
         }
 
         $validated = $request->validate([
-            'ftp_host' => 'nullable|string|max:255',
-            'ftp_username' => 'nullable|string|max:255',
-            'ftp_password' => 'nullable|string',
-            'db_host' => 'nullable|string|max:255',
-            'db_name' => 'nullable|string|max:255',
-            'db_username' => 'nullable|string|max:255',
-            'db_password' => 'nullable|string',
-            'login_url' => 'nullable|string|max:255',
-            'login_username' => 'nullable|string|max:255',
-            'login_password' => 'nullable|string',
-            'api_keys' => 'nullable|string',
+            'contract_start_date' => 'nullable|date',
+            'contract_end_date' => 'nullable|date',
+            'contract_capacity' => 'nullable|string|max:255',
+            'contract_storage_usage' => 'nullable|string|max:255',
+            'contract_storage_limit' => 'nullable|string|max:255',
         ]);
 
-        if ($site->credential) {
-            $site->credential->update($validated);
+        if ($site->contract) {
+            $site->contract->update($validated);
         } else {
-            $site->credential()->create($validated);
+            $site->contract()->create($validated);
         }
 
-        return Redirect::route('sites.credentials.show', $site)
-            ->with('success', __('Site credentials updated successfully.'));
+        return Redirect::route('sites.contracts.show', $site)
+            ->with('success', __('Site contract updated successfully.'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Site $site)
     {
-        //
+        if (Gate::denies('delete', $site)) {
+            abort(403);
+        }
+
+        $site->contract?->delete();
+
+        return Redirect::route('sites.show', $site)
+            ->with('success', __('Site contract deleted successfully.'));
     }
 }

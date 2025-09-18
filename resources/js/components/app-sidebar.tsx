@@ -22,6 +22,11 @@ const mainNavItems: NavItem[] = [
     url: '/sites',
     icon: LayoutGrid,
   },
+  {
+    title: 'Tickets',
+    url: '/tickets',
+    icon: LayoutGrid,
+  },
 ];
 
 const footerNavItems: NavItem[] = [
