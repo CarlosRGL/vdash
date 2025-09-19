@@ -175,57 +175,6 @@ export default function ShowSiteCredentials({ site, credentials }: ShowSiteCrede
               <FieldWithCopy label="Login Password" value={credentials.login_password} id="login_password" isPassword />
             </CardContent>
           </Card>
-
-          {/* Contract Information */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Contract Information</CardTitle>
-              <CardDescription>Contract details for this site</CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <FieldWithCopy
-                label="Contract Start Date"
-                value={credentials.contract_start_date ? new Date(credentials.contract_start_date).toLocaleDateString() : null}
-                id="contract_start_date"
-              />
-              <FieldWithCopy
-                label="Contract End Date"
-                value={credentials.contract_end_date ? new Date(credentials.contract_end_date).toLocaleDateString() : null}
-                id="contract_end_date"
-              />
-              <FieldWithCopy label="Contract Capacity" value={credentials.contract_capacity} id="contract_capacity" />
-              <FieldWithCopy label="Storage Limit" value={credentials.contract_storage_limit} id="contract_storage_limit" />
-              <FieldWithCopy label="Current Storage Usage" value={credentials.contract_storage_usage} id="contract_storage_usage" />
-            </CardContent>
-          </Card>
-
-          {/* API Keys */}
-          {/* <Card>
-            <CardHeader>
-              <CardTitle>API Keys</CardTitle>
-              <CardDescription>API access details for this site</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm font-medium">API Keys (JSON format)</p>
-                <div className="flex">
-                  <pre className="bg-muted flex-grow overflow-x-auto rounded-l-md px-3 py-2">
-                    {credentials.api_keys || <span className="text-muted-foreground italic">Not set</span>}
-                  </pre>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    className="h-auto rounded-l-none"
-                    onClick={() => copyToClipboard(credentials.api_keys, 'api_keys')}
-                    disabled={!credentials.api_keys}
-                  >
-                    {copiedFields['api_keys'] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
         </div>
       </SiteLayout>
     </AppLayout>

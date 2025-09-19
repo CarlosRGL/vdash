@@ -14,10 +14,10 @@ interface SitesTableColumnsProps {
   };
   onSort: (field: string) => void;
   onSync: (site: Site) => void;
-  onShowcontract_capacitys: (site: Site) => void;
+  onShowCredentials: (site: Site) => void;
 }
 
-export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontract_capacitys }: SitesTableColumnsProps): ColumnDef<Site>[] {
+export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredentials }: SitesTableColumnsProps): ColumnDef<Site>[] {
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
     <Button variant="ghost" onClick={() => onSort(field)} className="flex items-center">
       {children}
@@ -124,9 +124,9 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontrac
         </SortableHeader>
       ),
       cell: ({ row }) => {
-        const contract_capacity = row.original.contract_capacity;
-        const startDate = contract_capacity?.contract_start_date ?? null;
-        const endDate = contract_capacity?.contract_end_date ?? null;
+        const contract = row.original.contract;
+        const startDate = contract?.contract_start_date ?? null;
+        const endDate = contract?.contract_end_date ?? null;
         const { status, color } = getContractStatus(startDate, endDate);
 
         if (status === 'unknown') {
@@ -145,8 +145,6 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontrac
       id: 'contract_dates',
       header: () => <SortableHeader field="contract_start_date">Contract Period</SortableHeader>,
       cell: ({ row }) => {
-        console.log(row);
-
         const contract = row.original.contract;
         const startDate = contract?.contract_start_date ?? null;
         const endDate = contract?.contract_end_date ?? null;
@@ -167,8 +165,8 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontrac
       id: 'contract_capacity',
       header: () => <div>Capacity</div>,
       cell: ({ row }) => {
-        const contract_capacity = row.original.contract_capacity;
-        const capacity = contract_capacity?.contract_capacity;
+        const contract = row.original.contract;
+        const capacity = contract?.contract_capacity;
 
         return <div className="font-mono text-sm">{capacity || 'N/A'}</div>;
       },
@@ -182,9 +180,9 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontrac
         </div>
       ),
       cell: ({ row }) => {
-        const contract_capacity = row.original.contract_capacity;
-        const usage = contract_capacity?.contract_storage_usage ?? null;
-        const limit = contract_capacity?.contract_storage_limit ?? null;
+        const contract = row.original.contract;
+        const usage = contract?.contract_storage_usage ?? null;
+        const limit = contract?.contract_storage_limit ?? null;
 
         return <div className="font-mono text-sm">{formatStorage(usage, limit)}</div>;
       },
@@ -220,13 +218,13 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontrac
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Button variant="ghost" size="icon" onClick={() => onShowcontract_capacitys(site)}>
+                  <Button variant="ghost" size="icon" onClick={() => onShowCredentials(site)}>
                     <Copy className="h-4 w-4" />
-                    <span className="sr-only">Show contract_capacitys</span>
+                    <span className="sr-only">Show credentials</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Show contract_capacitys</p>
+                  <p>Show credentials</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
