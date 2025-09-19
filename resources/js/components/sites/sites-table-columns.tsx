@@ -1,12 +1,11 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { format, isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Copy, ExternalLink, HardDrive, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, ExternalLink, HardDrive, LockKeyhole, Pencil } from 'lucide-react';
 import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
 
 interface SitesTableColumnsProps {
@@ -82,10 +81,14 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
       cell: ({ row }) => {
         const name = row.getValue('name') as string;
         const url = row.original.url as string;
+        const team = row.original.team as string;
         return (
-          <div className="flex flex-col">
-            <span className="">{name}</span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
+          <div className="flex flex-col gap-2">
+            <span className="flex items-center gap-2 font-medium">
+              <SiteTeamBadge team={team === 'vernalis' ? team.charAt(0).toUpperCase() : 'Q13'} />
+              {name}
+            </span>
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-gray-400 underline hover:underline">
               {url}
               <ExternalLink className="ml-1 h-3 w-3" />
             </a>
@@ -93,30 +96,7 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         );
       },
     },
-    {
-      accessorKey: 'type',
-      header: () => <SortableHeader field="type">Type</SortableHeader>,
-      cell: ({ row }) => {
-        const type = row.getValue('type') as string;
-        return <SiteTypeBadge type={type} />;
-      },
-    },
-    // {
-    //   accessorKey: 'php_version',
-    //   header: () => <SortableHeader field="php_version">PHP Version</SortableHeader>,
-    //   cell: ({ row }) => {
-    //     const phpVersion = row.original.php_version as string | null;
-    //     return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
-    //   },
-    // },
-    {
-      accessorKey: 'team',
-      header: () => <SortableHeader field="team">Team</SortableHeader>,
-      cell: ({ row }) => {
-        const team = row.getValue('team') as string;
-        return <SiteTeamBadge team={team} />;
-      },
-    },
+
     {
       id: 'contract_status',
       header: () => (
@@ -190,6 +170,14 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
       },
     },
     {
+      accessorKey: 'type',
+      header: () => <SortableHeader field="type">Type</SortableHeader>,
+      cell: ({ row }) => {
+        const type = row.getValue('type') as string;
+        return <SiteTypeBadge type={type} />;
+      },
+    },
+    {
       accessorKey: 'users',
       header: () => 'Clients',
       cell: ({ row }) => {
@@ -239,7 +227,7 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         const site = row.original;
         return (
           <div className="flex justify-end gap-2">
-            <TooltipProvider>
+            {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Button variant="ghost" size="icon" onClick={() => onSync(site)}>
@@ -251,12 +239,12 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
                   <p>Sync metrics</p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider>
+            </TooltipProvider> */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <Button variant="ghost" size="icon" onClick={() => onShowCredentials(site)}>
-                    <Copy className="h-4 w-4" />
+                    <LockKeyhole className="h-4 w-4" />
                     <span className="sr-only">Show credentials</span>
                   </Button>
                 </TooltipTrigger>
