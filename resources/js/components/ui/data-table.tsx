@@ -10,7 +10,7 @@ import {
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Pagination } from "@/components/ui/pagination"
-import { DataTableToolbar } from "@/components/ui/data-table-toolbar"
+import { DataTableToolbar, ColumnGroup } from "@/components/ui/data-table-toolbar"
 import { LaravelPaginationData } from "@/types"
 
 export interface DataTablePaginationData<TData = unknown> extends LaravelPaginationData {
@@ -37,6 +37,8 @@ interface DataTableProps<TData, TValue> {
   showColumnVisibility?: boolean
   toolbarActions?: React.ReactNode
   className?: string
+  columnGroups?: ColumnGroup[]
+  alwaysVisibleColumns?: string[]
 }
 
 export function DataTable<TData, TValue>({
@@ -59,6 +61,8 @@ export function DataTable<TData, TValue>({
   showColumnVisibility = true,
   toolbarActions,
   className,
+  columnGroups = [],
+  alwaysVisibleColumns = [],
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data: data.data,
@@ -96,6 +100,8 @@ export function DataTable<TData, TValue>({
           }}
           showColumnVisibility={showColumnVisibility}
           actions={toolbarActions}
+          columnGroups={columnGroups}
+          alwaysVisibleColumns={alwaysVisibleColumns}
         />
       )}
 

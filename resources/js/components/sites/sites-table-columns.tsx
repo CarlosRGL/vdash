@@ -15,11 +15,10 @@ interface SitesTableColumnsProps {
     direction: string;
   };
   onSort: (field: string) => void;
-  onSync: (site: Site) => void;
   onShowCredentials: (site: Site) => void;
 }
 
-export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredentials }: SitesTableColumnsProps): ColumnDef<Site>[] {
+export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: SitesTableColumnsProps): ColumnDef<Site>[] {
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
     <Button variant="ghost" onClick={() => onSort(field)} className="flex items-center">
       {children}
@@ -206,6 +205,93 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
                 <span className="text-muted-foreground min-w-[30px] text-xs">{percentage}%</span>
               </div>
             )}
+          </div>
+        );
+      },
+    },
+    {
+      id: 'credentials_status',
+      header: () => (
+        <div className="flex items-center">
+          <LockKeyhole className="mr-2 h-4 w-4" />
+          Credentials
+        </div>
+      ),
+      cell: ({ row }) => {
+        const credential = row.original.credential;
+
+        if (!credential) {
+          return <div className="text-muted-foreground text-sm">No credentials</div>;
+        }
+
+        const hasCredentials = {
+          ftp: !!(credential.ftp_host && credential.ftp_username),
+          db: !!(credential.db_host && credential.db_name),
+          login: !!(credential.login_url && credential.login_username),
+          api: !!credential.api_keys,
+        };
+
+        const credentialCount = Object.values(hasCredentials).filter(Boolean).length;
+        const totalTypes = Object.keys(hasCredentials).length;
+
+        return (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {credentialCount}/{totalTypes} types
+              </span>
+            </div>
+            <div className="flex gap-1">
+              {hasCredentials.ftp && <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-800">FTP</span>}
+              {hasCredentials.db && <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">DB</span>}
+              {hasCredentials.login && <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs text-purple-800">Login</span>}
+              {hasCredentials.api && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-800">API</span>}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'ftp_status',
+      header: () => 'FTP Access',
+      cell: ({ row }) => {
+        const credential = row.original.credential;
+        const hasFtp = credential?.ftp_host && credential?.ftp_username;
+
+        return (
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${hasFtp ? 'bg-green-400' : 'bg-gray-300'}`} />
+            <span className="text-sm">{hasFtp ? 'Available' : 'Not set'}</span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'db_status',
+      header: () => 'Database Access',
+      cell: ({ row }) => {
+        const credential = row.original.credential;
+        const hasDb = credential?.db_host && credential?.db_name;
+
+        return (
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${hasDb ? 'bg-green-400' : 'bg-gray-300'}`} />
+            <span className="text-sm">{hasDb ? 'Available' : 'Not set'}</span>
+          </div>
+        );
+      },
+    },
+    {
+      id: 'login_status',
+      header: () => 'CMS Login',
+      cell: ({ row }) => {
+        const credential = row.original.credential;
+        const hasLogin = credential?.login_url && credential?.login_username;
+
+        return (
+          <div className="flex items-center gap-2">
+            <div className={`h-2 w-2 rounded-full ${hasLogin ? 'bg-green-400' : 'bg-gray-300'}`} />
+            <span className="text-sm">{hasLogin ? 'Available' : 'Not set'}</span>
           </div>
         );
       },

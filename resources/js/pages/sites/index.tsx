@@ -2,11 +2,10 @@ import { SiteCredentialsSheet, createSitesTableColumns } from '@/components/site
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 
-import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { PaginationState } from '@tanstack/react-table';
+import { PaginationState, VisibilityState } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -46,8 +45,6 @@ interface SitesPageProps {
 }
 
 export default function SitesPage({ sites, filters }: SitesPageProps) {
-  const { toast } = useToast();
-
   const [searchValue, setSearchValue] = useState(filters.search);
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: sites.current_page - 1,
@@ -61,6 +58,23 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
   const [credentialsDialogOpen, setCredentialsDialogOpen] = useState(false);
   const [selectedCredentials, setSelectedCredentials] = useState<SiteCredential | null>(null);
   const [selectedSiteName, setSelectedSiteName] = useState<string>('');
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+
+  // Define column groups for the sites table
+  const columnGroups = [
+    {
+      id: 'credentials',
+      label: 'Credentials',
+      columns: ['credentials_status', 'ftp_status', 'db_status', 'login_status'],
+    },
+    {
+      id: 'contract',
+      label: 'Contract',
+      columns: ['contract_info', 'storage_usage'],
+    },
+  ];
+
+  const alwaysVisibleColumns = ['name', 'type', 'users', 'actions'];
 
   // Debounce search input
   useEffect(() => {
@@ -90,21 +104,6 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     );
   }, [debouncedSearchValue, pagination.pageIndex, pagination.pageSize, sorting.field, sorting.direction]);
 
-  const handleSync = (site: Site) => {
-    router.post(
-      route('sites.metrics.refresh', { site: site.id }),
-      {},
-      {
-        onSuccess: () => {
-          toast.success('Site metrics synced successfully.');
-        },
-        onError: () => {
-          toast.error('Failed to sync site metrics.');
-        },
-      },
-    );
-  };
-
   const handleShowCredentials = (site: Site) => {
     const cred =
       site.credential && typeof site.credential === 'object' && 'login_url' in site.credential ? (site.credential as SiteCredential) : null;
@@ -123,7 +122,6 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
   const columns = createSitesTableColumns({
     sorting,
     onSort: handleSort,
-    onSync: handleSync,
     onShowCredentials: handleShowCredentials,
   });
 
@@ -139,11 +137,15 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           itemName="sites"
           pagination={pagination}
           setPagination={setPagination}
+          columnVisibility={columnVisibility}
+          setColumnVisibility={setColumnVisibility}
           showPagination={true}
           showToolbar={true}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           searchPlaceholder="Search sites..."
+          columnGroups={columnGroups}
+          alwaysVisibleColumns={alwaysVisibleColumns}
           toolbarActions={
             <Button asChild>
               <Link href={route('sites.create')}>Create Site</Link>
