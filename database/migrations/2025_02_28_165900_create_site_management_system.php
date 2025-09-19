@@ -21,9 +21,19 @@ return new class extends Migration
                 'WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other'
             ])->default('other');
             $table->enum('team', ['quai13', 'vernalis'])->default('quai13');
-            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->timestamps();
             $table->softDeletes();
+        });
+
+        // Create site_user pivot table for many-to-many relationship
+        Schema::create('site_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('site_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+
+            // Ensure unique combination of site and user
+            $table->unique(['site_id', 'user_id']);
         });
 
         // Create site_credentials table
@@ -76,6 +86,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('site_contracts');
         Schema::dropIfExists('site_credentials');
+        Schema::dropIfExists('site_user');
         Schema::dropIfExists('sites');
     }
 };

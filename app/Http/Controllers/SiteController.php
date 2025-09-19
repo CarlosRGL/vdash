@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Site;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -16,9 +17,11 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Site::with(['user' , 'credential'])
+        $query = Site::with(['users', 'credential', 'contract'])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
-                return $query->where('user_id', Auth::id());
+                return $query->whereHas('users', function ($q) {
+                    $q->where('user_id', Auth::id());
+                });
             });
 
         // Apply search filter
@@ -64,7 +67,11 @@ class SiteController extends Controller
      */
     public function create()
     {
-        return Inertia::render('sites/Create');
+        $availableUsers = User::select('id', 'name', 'email')->get();
+
+        return Inertia::render('sites/Create', [
+            'availableUsers' => $availableUsers,
+        ]);
     }
 
     /**
@@ -78,11 +85,15 @@ class SiteController extends Controller
             'description' => 'nullable|string',
             'type' => 'required|in:WordPress,Drupal,SPIP,Typo3,laravel,symfony,other',
             'team' => 'required|in:quai13,vernalis',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
         ]);
 
-        $site = new Site($validated);
-        $site->user_id = Auth::id();
-        $site->save();
+        $site = Site::create($validated);
+
+        // Assign users to the site
+        $userIds = $validated['user_ids'] ?? [Auth::id()];
+        $site->users()->sync($userIds);
 
         return Redirect::route('sites.index', $site)
             ->with('toast', [
@@ -101,7 +112,7 @@ class SiteController extends Controller
             abort(403);
         }
 
-        $site->load(['credential', 'metrics' => function ($query) {
+        $site->load(['users', 'credential', 'metrics' => function ($query) {
             $query->latest()->first();
         }]);
 
@@ -119,8 +130,12 @@ class SiteController extends Controller
             abort(403);
         }
 
+        $site->load('users');
+        $availableUsers = User::select('id', 'name', 'email')->get();
+
         return Inertia::render('sites/Edit', [
             'site' => $site,
+            'availableUsers' => $availableUsers,
         ]);
     }
 
@@ -139,9 +154,16 @@ class SiteController extends Controller
             'description' => 'nullable|string',
             'type' => 'required|in:WordPress,Drupal,SPIP,Typo3,laravel,symfony,other',
             'team' => 'required|in:quai13,vernalis',
+            'user_ids' => 'nullable|array',
+            'user_ids.*' => 'exists:users,id',
         ]);
 
         $site->update($validated);
+
+        // Update user assignments if provided
+        if (isset($validated['user_ids'])) {
+            $site->users()->sync($validated['user_ids']);
+        }
 
         return Redirect::route('sites.edit', $site)
             ->with('toast', [
@@ -164,5 +186,48 @@ class SiteController extends Controller
 
         return Redirect::route('sites.index')
             ->with('success', __('Site deleted successfully.'));
+    }
+
+    /**
+     * Assign users to a site.
+     */
+    public function assignUsers(Request $request, Site $site)
+    {
+        if (Gate::denies('update', $site)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'user_ids' => 'required|array|min:1',
+            'user_ids.*' => 'exists:users,id',
+        ]);
+
+        $site->users()->sync($validated['user_ids']);
+
+        return Redirect::back()
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'Users assigned successfully',
+                'description' => 'The selected users have been assigned to the site.',
+            ]);
+    }
+
+    /**
+     * Remove a user from a site.
+     */
+    public function removeUser(Request $request, Site $site, User $user)
+    {
+        if (Gate::denies('update', $site)) {
+            abort(403);
+        }
+
+        $site->users()->detach($user->id);
+
+        return Redirect::back()
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'User removed successfully',
+                'description' => "User {$user->name} has been removed from the site.",
+            ]);
     }
 }

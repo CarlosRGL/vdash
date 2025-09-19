@@ -22,8 +22,10 @@ class SitePolicy
      */
     public function view(User $user, Site $site): bool
     {
-        // Users can view their own sites or admins can view any site
-        return $user->id === $site->user_id || $user->hasRole('Admin') || $user->hasPermissionTo('view site');
+        // Users can view sites they're assigned to or admins can view any site
+        return $site->users()->where('user_id', $user->id)->exists() ||
+               $user->hasRole('Admin') ||
+               $user->hasPermissionTo('view site');
     }
 
     /**
@@ -40,8 +42,8 @@ class SitePolicy
      */
     public function update(User $user, Site $site): bool
     {
-        // Users can update their own sites or admins can update any site
-        return ($user->id === $site->user_id && $user->hasPermissionTo('update site')) ||
+        // Users can update sites they're assigned to or admins can update any site
+        return ($site->users()->where('user_id', $user->id)->exists() && $user->hasPermissionTo('update site')) ||
                $user->hasRole('Admin');
     }
 
@@ -50,8 +52,8 @@ class SitePolicy
      */
     public function delete(User $user, Site $site): bool
     {
-        // Users can delete their own sites or admins can delete any site
-        return ($user->id === $site->user_id && $user->hasPermissionTo('delete site')) ||
+        // Users can delete sites they're assigned to or admins can delete any site
+        return ($site->users()->where('user_id', $user->id)->exists() && $user->hasPermissionTo('delete site')) ||
                $user->hasRole('Admin');
     }
 
@@ -60,8 +62,8 @@ class SitePolicy
      */
     public function restore(User $user, Site $site): bool
     {
-        // Users can restore their own sites or admins can restore any site
-        return ($user->id === $site->user_id && $user->hasPermissionTo('restore site')) ||
+        // Users can restore sites they're assigned to or admins can restore any site
+        return ($site->users()->where('user_id', $user->id)->exists() && $user->hasPermissionTo('restore site')) ||
                $user->hasRole('Admin');
     }
 

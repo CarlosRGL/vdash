@@ -14,10 +14,10 @@ interface SitesTableColumnsProps {
   };
   onSort: (field: string) => void;
   onSync: (site: Site) => void;
-  onShowCredentials: (site: Site) => void;
+  onShowcontract_capacitys: (site: Site) => void;
 }
 
-export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredentials }: SitesTableColumnsProps): ColumnDef<Site>[] {
+export function createSitesTableColumns({ sorting, onSort, onSync, onShowcontract_capacitys }: SitesTableColumnsProps): ColumnDef<Site>[] {
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
     <Button variant="ghost" onClick={() => onSort(field)} className="flex items-center">
       {children}
@@ -124,9 +124,9 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         </SortableHeader>
       ),
       cell: ({ row }) => {
-        const credential = row.original.credential;
-        const startDate = credential?.contract_start_date ?? null;
-        const endDate = credential?.contract_end_date ?? null;
+        const contract_capacity = row.original.contract_capacity;
+        const startDate = contract_capacity?.contract_start_date ?? null;
+        const endDate = contract_capacity?.contract_end_date ?? null;
         const { status, color } = getContractStatus(startDate, endDate);
 
         if (status === 'unknown') {
@@ -145,9 +145,11 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
       id: 'contract_dates',
       header: () => <SortableHeader field="contract_start_date">Contract Period</SortableHeader>,
       cell: ({ row }) => {
-        const credential = row.original.credential;
-        const startDate = credential?.contract_start_date ?? null;
-        const endDate = credential?.contract_end_date ?? null;
+        console.log(row);
+
+        const contract = row.original.contract;
+        const startDate = contract?.contract_start_date ?? null;
+        const endDate = contract?.contract_end_date ?? null;
 
         if (!startDate && !endDate) {
           return <span className="text-muted-foreground text-sm">N/A</span>;
@@ -165,8 +167,8 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
       id: 'contract_capacity',
       header: () => <div>Capacity</div>,
       cell: ({ row }) => {
-        const credential = row.original.credential;
-        const capacity = credential?.contract_capacity;
+        const contract_capacity = row.original.contract_capacity;
+        const capacity = contract_capacity?.contract_capacity;
 
         return <div className="font-mono text-sm">{capacity || 'N/A'}</div>;
       },
@@ -180,9 +182,9 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         </div>
       ),
       cell: ({ row }) => {
-        const credential = row.original.credential;
-        const usage = credential?.contract_storage_usage ?? null;
-        const limit = credential?.contract_storage_limit ?? null;
+        const contract_capacity = row.original.contract_capacity;
+        const usage = contract_capacity?.contract_storage_usage ?? null;
+        const limit = contract_capacity?.contract_storage_limit ?? null;
 
         return <div className="font-mono text-sm">{formatStorage(usage, limit)}</div>;
       },
@@ -218,13 +220,13 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Button variant="ghost" size="icon" onClick={() => onShowCredentials(site)}>
+                  <Button variant="ghost" size="icon" onClick={() => onShowcontract_capacitys(site)}>
                     <Copy className="h-4 w-4" />
-                    <span className="sr-only">Show credentials</span>
+                    <span className="sr-only">Show contract_capacitys</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Show credentials</p>
+                  <p>Show contract_capacitys</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

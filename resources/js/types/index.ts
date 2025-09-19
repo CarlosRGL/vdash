@@ -60,12 +60,25 @@ export interface Site {
   user_id: number;
   user?: User;
   credential?: SiteCredential;
+  contract?: SiteContract;
   php_version?: string | null;
   last_check?: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
   [key: string]: unknown;
+}
+
+export interface SiteContract {
+  id: number;
+  site_id: number;
+  contract_start_date: string | null;
+  contract_end_date: string | null;
+  contract_capacity: string | null;
+  contract_storage_usage: string | null;
+  contract_storage_limit: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface SiteCredential {
@@ -82,11 +95,4 @@ export interface SiteCredential {
   login_username: string | null;
   login_password: string | null;
   api_keys: string | null;
-  contract_start_date: string | null;
-  contract_end_date: string | null;
-  contract_capacity: string | null;
-  contract_storage_usage: string | null;
-  contract_storage_limit: string | null;
-  created_at: string;
-  updated_at: string;
 }

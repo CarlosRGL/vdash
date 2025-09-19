@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Site extends Model
 {
@@ -25,7 +25,6 @@ class Site extends Model
         'description',
         'type',
         'team',
-        'user_id',
     ];
 
     /**
@@ -45,10 +44,10 @@ class Site extends Model
     }
 
     /**
-     * Get the user that owns the site.
+     * Get the users assigned to the site.
      */
-    public function user(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsToMany(User::class)->withTimestamps();
     }
 }

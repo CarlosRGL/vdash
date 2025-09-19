@@ -27,7 +27,6 @@ class SiteFactory extends Factory
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
             'team' => fake()->randomElement($teams),
-            'user_id' => User::inRandomOrder()->first()->id ?? User::factory(),
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], 'now');
@@ -113,5 +112,45 @@ class SiteFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'team' => 'vernalis',
         ]);
+    }
+
+    /**
+     * Configure the site to have users assigned after creation.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (Site $site) {
+            // Only assign users if none are already assigned
+            if ($site->users()->count() === 0) {
+                // Assign 1-3 random users to the site
+                $userCount = fake()->numberBetween(1, 3);
+                $users = User::inRandomOrder()->limit($userCount)->get();
+
+                if ($users->isEmpty()) {
+                    // If no users exist, create some
+                    $users = User::factory()->count($userCount)->create();
+                }
+
+                $site->users()->attach($users->pluck('id'));
+            }
+        });
+    }
+
+    /**
+     * Assign specific users to the site.
+     */
+    public function withUsers($users): static
+    {
+        return $this->afterCreating(function (Site $site) use ($users) {
+            if (is_array($users) || $users instanceof \Illuminate\Support\Collection) {
+                $userIds = collect($users)->map(function ($user) {
+                    return is_object($user) ? $user->id : $user;
+                });
+                $site->users()->sync($userIds);
+            } else {
+                $userId = is_object($users) ? $users->id : $users;
+                $site->users()->sync([$userId]);
+            }
+        });
     }
 }

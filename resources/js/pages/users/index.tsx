@@ -263,7 +263,7 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
               />
             </div>
             <Select value={pagination.pageSize.toString()} onValueChange={handlePerPageChange}>
-              <SelectTrigger className="w-[120px]">
+              <SelectTrigger className="min-w-[130px]">
                 <SelectValue placeholder="Rows per page" />
               </SelectTrigger>
               <SelectContent>

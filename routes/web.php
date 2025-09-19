@@ -26,6 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Sites routes
     Route::resource('sites', SiteController::class);
 
+    // Site user assignment routes
+    Route::post('sites/{site}/users', [SiteController::class, 'assignUsers'])
+        ->name('sites.users.assign');
+    Route::delete('sites/{site}/users/{user}', [SiteController::class, 'removeUser'])
+        ->name('sites.users.remove');
+
     // Site credentials routes
     Route::get('sites/{site}/credentials', [SiteCredentialController::class, 'show'])
         ->name('sites.credentials.show');
