@@ -161,16 +161,16 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         );
       },
     },
-    {
-      id: 'contract_capacity',
-      header: () => <div>Capacity</div>,
-      cell: ({ row }) => {
-        const contract = row.original.contract;
-        const capacity = contract?.contract_capacity;
+    // {
+    //   id: 'contract_capacity',
+    //   header: () => <div>Capacity</div>,
+    //   cell: ({ row }) => {
+    //     const contract = row.original.contract;
+    //     const capacity = contract?.contract_capacity;
 
-        return <div className="font-mono text-sm">{capacity || 'N/A'}</div>;
-      },
-    },
+    //     return <div className="font-mono text-sm">{capacity || 'N/A'}</div>;
+    //   },
+    // },
     {
       id: 'storage_usage',
       header: () => (

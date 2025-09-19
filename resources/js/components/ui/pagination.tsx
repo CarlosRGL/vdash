@@ -1,47 +1,50 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { PaginationState } from '@tanstack/react-table';
+import { Link, router } from '@inertiajs/react';
+import {LaravelPaginationData} from "@/types/index";
+
 
 interface PaginationProps {
-  pagination: PaginationState;
-  setPagination: (updater: (prev: PaginationState) => PaginationState) => void;
-  pageCount: number;
-  canPreviousPage: boolean;
-  canNextPage: boolean;
-  totalItems?: number;
+  pagination: LaravelPaginationData;
   itemName?: string;
   showTotalItems?: boolean;
-  from?: number;
-  to?: number;
+  onPerPageChange?: (perPage: number) => void;
 }
 
 export function Pagination({
   pagination,
-  setPagination,
-  pageCount,
-  canPreviousPage,
-  canNextPage,
-  totalItems,
   itemName = 'items',
   showTotalItems = false,
-  from,
-  to,
+  onPerPageChange,
 }: PaginationProps) {
   const handlePerPageChange = (value: string) => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: parseInt(value),
-      pageIndex: 0, // Reset to first page when changing page size
-    }));
+    if (onPerPageChange) {
+      onPerPageChange(parseInt(value));
+    } else {
+      // If no callback provided, navigate using current URL with updated per_page parameter
+      const url = new URL(window.location.href);
+      url.searchParams.set('per_page', value);
+      url.searchParams.set('page', '1'); // Reset to first page when changing per_page
+      
+      router.get(url.pathname + url.search, {}, {
+        preserveState: true,
+        replace: true,
+      });
+    }
   };
+  console.log(pagination.per_page?.toString());
+
+
+  const canPreviousPage = pagination.prev_page_url !== null;
+  const canNextPage = pagination.next_page_url !== null;
 
   return (
     <div className="mt-4 flex items-center justify-between border-t pt-4">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page</span>
-          <Select value={pagination.pageSize.toString()} onValueChange={handlePerPageChange}>
+          <Select value={pagination.per_page?.toString() || "10"} onValueChange={handlePerPageChange}>
             <SelectTrigger className="h-8 w-[70px]">
               <SelectValue placeholder="10" />
             </SelectTrigger>
@@ -54,59 +57,93 @@ export function Pagination({
           </Select>
         </div>
 
-        {showTotalItems && totalItems !== undefined && (
+        {showTotalItems && (
           <div className="text-sm text-muted-foreground">
-            {from !== undefined && to !== undefined
-              ? `Showing ${from || 0} to ${to || 0} of ${totalItems} ${itemName}`
-              : `Total: ${totalItems} ${itemName}`}
+            Showing {pagination.from} to {pagination.to} of {pagination.total} {itemName}
           </div>
         )}
       </div>
 
       <div className="flex items-center gap-2">
         <span className="text-sm">
-          Page {pagination.pageIndex + 1} of {pageCount}
+          Page {pagination.current_page} of {pagination.last_page}
         </span>
         <div className="flex gap-1">
           <Button
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-md border border-gray-200 shadow-sm"
-            onClick={() => setPagination((prev) => ({ ...prev, pageIndex: 0 }))}
             disabled={!canPreviousPage}
+            asChild={canPreviousPage}
           >
-            <span className="sr-only">First page</span>
-            <ChevronsLeft className="h-4 w-4" />
+            {canPreviousPage ? (
+              <Link href={pagination.first_page_url} preserveState>
+                <span className="sr-only">First page</span>
+                <ChevronsLeft className="h-4 w-4" />
+              </Link>
+            ) : (
+              <span>
+                <span className="sr-only">First page</span>
+                <ChevronsLeft className="h-4 w-4" />
+              </span>
+            )}
           </Button>
           <Button
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-md border border-gray-200 shadow-sm"
-            onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex - 1 }))}
             disabled={!canPreviousPage}
+            asChild={canPreviousPage}
           >
-            <span className="sr-only">Previous page</span>
-            <ChevronLeft className="h-4 w-4" />
+            {canPreviousPage ? (
+              <Link href={pagination.prev_page_url!} preserveState>
+                <span className="sr-only">Previous page</span>
+                <ChevronLeft className="h-4 w-4" />
+              </Link>
+            ) : (
+              <span>
+                <span className="sr-only">Previous page</span>
+                <ChevronLeft className="h-4 w-4" />
+              </span>
+            )}
           </Button>
           <Button
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-md border border-gray-200 shadow-sm"
-            onClick={() => setPagination((prev) => ({ ...prev, pageIndex: prev.pageIndex + 1 }))}
             disabled={!canNextPage}
+            asChild={canNextPage}
           >
-            <span className="sr-only">Next page</span>
-            <ChevronRight className="h-4 w-4" />
+            {canNextPage ? (
+              <Link href={pagination.next_page_url!} preserveState>
+                <span className="sr-only">Next page</span>
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <span>
+                <span className="sr-only">Next page</span>
+                <ChevronRight className="h-4 w-4" />
+              </span>
+            )}
           </Button>
           <Button
             variant="outline"
             size="icon"
             className="h-8 w-8 rounded-md border border-gray-200 shadow-sm"
-            onClick={() => setPagination((prev) => ({ ...prev, pageIndex: pageCount - 1 }))}
             disabled={!canNextPage}
+            asChild={canNextPage}
           >
-            <span className="sr-only">Last page</span>
-            <ChevronsRight className="h-4 w-4" />
+            {canNextPage ? (
+              <Link href={pagination.last_page_url} preserveState>
+                <span className="sr-only">Last page</span>
+                <ChevronsRight className="h-4 w-4" />
+              </Link>
+            ) : (
+              <span>
+                <span className="sr-only">Last page</span>
+                <ChevronsRight className="h-4 w-4" />
+              </span>
+            )}
           </Button>
         </div>
       </div>

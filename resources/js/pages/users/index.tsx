@@ -28,6 +28,17 @@ interface UsersPageProps {
     last_page: number;
     from: number;
     to: number;
+    first_page_url: string;
+    last_page_url: string;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+    path: string;
+    links: Array<{
+      url: string | null;
+      label: string;
+      page: number | null;
+      active: boolean;
+    }>;
   };
   filters: {
     search: string;
@@ -45,6 +56,7 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
     pageIndex: users.current_page - 1,
     pageSize: users.per_page,
   });
+
   const [sorting, setSorting] = useState({
     field: filters.sortField,
     direction: filters.sortDirection,
@@ -67,8 +79,6 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
       route('users.index'),
       {
         search: debouncedSearchValue,
-        page: pagination.pageIndex + 1,
-        perPage: pagination.pageSize,
         sortField: sorting.field,
         sortDirection: sorting.direction,
       },
@@ -78,7 +88,7 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
         only: ['users', 'filters'],
       },
     );
-  }, [debouncedSearchValue, pagination.pageIndex, pagination.pageSize, sorting.field, sorting.direction]);
+  }, [debouncedSearchValue, sorting.field, sorting.direction]);
 
   const columns: ColumnDef<User>[] = [
     {
@@ -334,16 +344,16 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
           </Table>
         </div>
         <Pagination
-          pagination={pagination}
-          setPagination={setPagination}
-          pageCount={table.getPageCount()}
-          canPreviousPage={table.getCanPreviousPage()}
-          canNextPage={table.getCanNextPage()}
-          totalItems={users.total}
+          pagination={users}
           itemName="users"
           showTotalItems={true}
-          from={users.from}
-          to={users.to}
+          onPerPageChange={(perPage) => {
+            setPagination((prev) => ({
+              ...prev,
+              pageSize: perPage,
+              pageIndex: 0, // Reset to first page when changing page size
+            }));
+          }}
         />
       </div>
     </AppLayout>

@@ -96,3 +96,25 @@ export interface SiteCredential {
   login_password: string | null;
   api_keys: string | null;
 }
+
+interface LaravelPaginationLink {
+  url: string | null;
+  label: string;
+  page: number | null;
+  active: boolean;
+}
+
+export interface LaravelPaginationData {
+  current_page: number;
+  first_page_url: string;
+  from: number;
+  last_page: number;
+  last_page_url: string;
+  links: LaravelPaginationLink[];
+  next_page_url: string | null;
+  path: string;
+  per_page: number;
+  prev_page_url: string | null;
+  to: number;
+  total: number;
+}

@@ -68,16 +68,16 @@ export function SitesTable({ sites, columns, pagination, setPagination }: SitesT
         </Table>
       </div>
       <Pagination
-        pagination={pagination}
-        setPagination={setPagination}
-        pageCount={table.getPageCount()}
-        canPreviousPage={table.getCanPreviousPage()}
-        canNextPage={table.getCanNextPage()}
-        totalItems={sites.total}
+        pagination={sites}
         itemName="sites"
         showTotalItems={true}
-        from={sites.from}
-        to={sites.to}
+        onPerPageChange={(perPage) => {
+          setPagination((prev) => ({
+            ...prev,
+            pageSize: perPage,
+            pageIndex: 0, // Reset to first page when changing page size
+          }));
+        }}
       />
     </div>
   );
