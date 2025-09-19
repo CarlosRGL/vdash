@@ -3,8 +3,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Copy, HardDrive, Pencil, RefreshCw } from 'lucide-react';
+import { format, isValid, parseISO } from 'date-fns';
+import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Copy, ExternalLink, HardDrive, Pencil, RefreshCw } from 'lucide-react';
 import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
 
 interface SitesTableColumnsProps {
@@ -83,10 +83,10 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         return (
           <div className="flex flex-col">
             <span className="">{name}</span>
-            {/* <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center text-sm text-gray-400 underline hover:underline">
               {url}
               <ExternalLink className="ml-1 h-3 w-3" />
-            </a> */}
+            </a>
           </div>
         );
       },
@@ -99,14 +99,14 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         return <SiteTypeBadge type={type} />;
       },
     },
-    {
-      accessorKey: 'php_version',
-      header: () => <SortableHeader field="php_version">PHP Version</SortableHeader>,
-      cell: ({ row }) => {
-        const phpVersion = row.original.php_version as string | null;
-        return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
-      },
-    },
+    // {
+    //   accessorKey: 'php_version',
+    //   header: () => <SortableHeader field="php_version">PHP Version</SortableHeader>,
+    //   cell: ({ row }) => {
+    //     const phpVersion = row.original.php_version as string | null;
+    //     return <div className="font-mono text-sm">{phpVersion || 'N/A'}</div>;
+    //   },
+    // },
     {
       accessorKey: 'team',
       header: () => <SortableHeader field="team">Team</SortableHeader>,
@@ -187,14 +187,14 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         return <div className="font-mono text-sm">{formatStorage(usage, limit)}</div>;
       },
     },
-    {
-      accessorKey: 'last_check',
-      header: () => <SortableHeader field="last_check">Last Check</SortableHeader>,
-      cell: ({ row }) => {
-        const lastCheck = row.original.last_check as string | null;
-        return <div className="text-sm">{lastCheck ? formatDistanceToNow(new Date(lastCheck), { addSuffix: true }) : 'Never'}</div>;
-      },
-    },
+    // {
+    //   accessorKey: 'last_check',
+    //   header: () => <SortableHeader field="last_check">Last Check</SortableHeader>,
+    //   cell: ({ row }) => {
+    //     const lastCheck = row.original.last_check as string | null;
+    //     return <div className="text-sm">{lastCheck ? formatDistanceToNow(new Date(lastCheck), { addSuffix: true }) : 'Never'}</div>;
+    //   },
+    // },
     {
       id: 'actions',
       header: () => <div className="text-right">Actions</div>,
