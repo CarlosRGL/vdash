@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type User } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ColumnDef, PaginationState, VisibilityState } from '@tanstack/react-table';
+import { ColumnDef, PaginationState } from '@tanstack/react-table';
 import { ArrowUpDown, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 import { useEffect, useState } from 'react';
 const breadcrumbs: BreadcrumbItem[] = [
@@ -60,7 +60,6 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
     direction: filters.sortDirection,
   });
   const [debouncedSearchValue, setDebouncedSearchValue] = useState(filters.search);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Debounce search input
   useEffect(() => {
@@ -235,15 +234,13 @@ export default function UsersPage({ users, filters }: UsersPageProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Users" />
-      <div className="w-full px-4 py-6">
+      <div className="px-4 py-6">
         <DataTable
           columns={columns}
           data={users}
           itemName="users"
           pagination={pagination}
           setPagination={setPagination}
-          columnVisibility={columnVisibility}
-          setColumnVisibility={setColumnVisibility}
           showToolbar={true}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
