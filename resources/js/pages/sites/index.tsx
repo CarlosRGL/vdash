@@ -1,8 +1,11 @@
-import { SiteCredentialsSheet, SitesFilters, SitesTable, createSitesTableColumns } from '@/components/sites';
+import { SiteCredentialsSheet, createSitesTableColumns } from '@/components/sites';
+import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
+
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PaginationState } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 
@@ -22,6 +25,17 @@ interface SitesPageProps {
     last_page: number;
     from: number;
     to: number;
+    first_page_url: string;
+    last_page_url: string;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+    path: string;
+    links: Array<{
+      url: string | null;
+      label: string;
+      page: number | null;
+      active: boolean;
+    }>;
   };
   filters: {
     search: string;
@@ -106,14 +120,6 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     }));
   };
 
-  const handlePerPageChange = (value: string) => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: parseInt(value),
-      pageIndex: 0, // Reset to first page when changing page size
-    }));
-  };
-
   const columns = createSitesTableColumns({
     sorting,
     onSort: handleSort,
@@ -127,14 +133,23 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         <title>Sites</title>
       </Head>
       <div className="w-full space-y-4 px-4 py-6">
-        <SitesFilters
+        <DataTable
+          columns={columns}
+          data={sites}
+          itemName="sites"
+          pagination={pagination}
+          setPagination={setPagination}
+          showPagination={true}
+          showToolbar={true}
           searchValue={searchValue}
           onSearchChange={setSearchValue}
-          pageSize={pagination.pageSize}
-          onPageSizeChange={handlePerPageChange}
+          searchPlaceholder="Search sites..."
+          toolbarActions={
+            <Button asChild>
+              <Link href={route('sites.create')}>Create Site</Link>
+            </Button>
+          }
         />
-
-        <SitesTable sites={sites} columns={columns} pagination={pagination} setPagination={setPagination} />
       </div>
 
       <SiteCredentialsSheet
