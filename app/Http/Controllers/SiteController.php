@@ -112,7 +112,7 @@ class SiteController extends Controller
             abort(403);
         }
 
-        $site->load(['users', 'credential', 'metrics' => function ($query) {
+        $site->load(['users', 'credential' => function ($query) {
             $query->latest()->first();
         }]);
 
