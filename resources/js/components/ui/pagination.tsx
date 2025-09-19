@@ -26,14 +26,13 @@ export function Pagination({
       const url = new URL(window.location.href);
       url.searchParams.set('per_page', value);
       url.searchParams.set('page', '1'); // Reset to first page when changing per_page
-      
+
       router.get(url.pathname + url.search, {}, {
         preserveState: true,
         replace: true,
       });
     }
   };
-  console.log(pagination.per_page?.toString());
 
 
   const canPreviousPage = pagination.prev_page_url !== null;

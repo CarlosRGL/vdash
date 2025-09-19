@@ -1,4 +1,6 @@
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -187,14 +189,49 @@ export function createSitesTableColumns({ sorting, onSort, onSync, onShowCredent
         return <div className="font-mono text-sm">{formatStorage(usage, limit)}</div>;
       },
     },
-    // {
-    //   accessorKey: 'last_check',
-    //   header: () => <SortableHeader field="last_check">Last Check</SortableHeader>,
-    //   cell: ({ row }) => {
-    //     const lastCheck = row.original.last_check as string | null;
-    //     return <div className="text-sm">{lastCheck ? formatDistanceToNow(new Date(lastCheck), { addSuffix: true }) : 'Never'}</div>;
-    //   },
-    // },
+    {
+      accessorKey: 'users',
+      header: () => 'Clients',
+      cell: ({ row }) => {
+        const users = row.original.users as Array<{ id: number; name: string; email: string }> | null;
+
+        if (!users || users.length === 0) {
+          return <div className="text-muted-foreground text-sm">No clients</div>;
+        }
+
+        return (
+          <div className="text-sm">
+            <div className="text-muted-foreground text-xs">
+              <div className="flex -space-x-2">
+                {users.slice(0, 3).map((user) => (
+                  <TooltipProvider key={user.id}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Avatar className="border-background border-2">
+                          <AvatarFallback>
+                            {user.name.charAt(0).toUpperCase()}
+                            {user.name.slice(1).split(' ').length > 1 ? user.name.split(' ')[1].charAt(0).toUpperCase() : ''}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{user.name}</p>
+                        <p className="text-muted-foreground text-xs">{user.email}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ))}
+              </div>
+              {users.length > 3 && (
+                <div className="border-background bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
+                  +{users.length - 3}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      },
+    },
     {
       id: 'actions',
       header: () => <div className="text-right">Actions</div>,

@@ -156,7 +156,7 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
     placeholder?: string;
     error?: string | null;
   }) => (
-    <div className="space-y-2">
+    <div className="flex flex-col gap-2">
       <Label htmlFor={id}>{label}</Label>
       <div className="flex">
         <Input id={id} type={type} placeholder={placeholder} value={value} onChange={onChange} className="rounded-r-none" />
@@ -164,7 +164,7 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
           type="button"
           variant="outline"
           size="icon"
-          className="h-10 rounded-l-none border-l-0"
+          className="rounded-l-none border-l-0"
           onClick={() => copyToClipboard(value, id)}
           disabled={!value}
         >
@@ -181,15 +181,15 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
       <SiteLayout siteId={site.id} siteName={site.name}>
         <Card>
           <CardHeader>
-            <CardTitle>Site Credentials</CardTitle>
+            <CardTitle className="text-lg">Site Credentials</CardTitle>
             <CardDescription>Manage access credentials for this site</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* FTP Credentials */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">FTP Credentials</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <h3 className="">FTP Credentials</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <InputWithCopy
                     id="ftp_host"
                     label="FTP Host"
@@ -220,8 +220,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
 
               {/* Database Credentials */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Database Credentials</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <h3 className="">Database Credentials</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <InputWithCopy
                     id="db_host"
                     label="Database Host"
@@ -260,8 +260,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
 
               {/* Login Credentials */}
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Login Credentials</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <h3 className="">Login Credentials</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <InputWithCopy
                     id="login_url"
                     label="Login URL"
@@ -287,82 +287,6 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     onChange={(e) => setData('login_password', e.target.value)}
                     error={errors.login_password}
                   />
-                </div>
-              </div>
-
-              {/* Contract Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Contract Information</h3>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <InputWithCopy
-                    id="contract_start_date"
-                    label="Contract Start Date"
-                    type="date"
-                    value={data.contract_start_date}
-                    onChange={(e) => setData('contract_start_date', e.target.value)}
-                    error={errors.contract_start_date}
-                  />
-                  <InputWithCopy
-                    id="contract_end_date"
-                    label="Contract End Date"
-                    type="date"
-                    value={data.contract_end_date}
-                    onChange={(e) => setData('contract_end_date', e.target.value)}
-                    error={errors.contract_end_date}
-                  />
-                  <InputWithCopy
-                    id="contract_capacity"
-                    label="Contract Capacity"
-                    placeholder="e.g., 10 hours/month"
-                    value={data.contract_capacity}
-                    onChange={(e) => setData('contract_capacity', e.target.value)}
-                    error={errors.contract_capacity}
-                  />
-                  <InputWithCopy
-                    id="contract_storage_limit"
-                    label="Storage Limit"
-                    placeholder="e.g., 10GB"
-                    value={data.contract_storage_limit}
-                    onChange={(e) => setData('contract_storage_limit', e.target.value)}
-                    error={errors.contract_storage_limit}
-                  />
-                  <InputWithCopy
-                    id="contract_storage_usage"
-                    label="Current Storage Usage"
-                    placeholder="e.g., 5GB"
-                    value={data.contract_storage_usage}
-                    onChange={(e) => setData('contract_storage_usage', e.target.value)}
-                    error={errors.contract_storage_usage}
-                  />
-                </div>
-              </div>
-
-              {/* API Keys */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">API Keys</h3>
-                <div className="space-y-2">
-                  <Label htmlFor="api_keys">API Keys (JSON format)</Label>
-                  <div className="flex">
-                    <textarea
-                      id="api_keys"
-                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-20 w-full rounded-md rounded-r-none border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                      placeholder='{"api_key": "your-key", "api_secret": "your-secret"}'
-                      value={data.api_keys}
-                      onChange={(e) => setData('api_keys', e.target.value)}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      className="h-auto rounded-l-none border-l-0"
-                      onClick={() => copyToClipboard(data.api_keys, 'api_keys')}
-                      disabled={!data.api_keys}
-                    >
-                      {copiedFields['api_keys'] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                  {errors.api_keys && <p className="text-sm text-red-500">{errors.api_keys}</p>}
-                  <p className="text-muted-foreground text-sm">Enter API keys in JSON format</p>
                 </div>
               </div>
 
