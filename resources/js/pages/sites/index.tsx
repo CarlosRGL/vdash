@@ -63,9 +63,9 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
   // Define column groups for the sites table
   const columnGroups = [
     {
-      id: 'credentials',
-      label: 'Credentials',
-      columns: ['credentials_status', 'ftp_status', 'db_status', 'login_status'],
+      id: 'server',
+      label: 'Server',
+      columns: ['php_info', 'mysql_info', 'server_details'],
     },
     {
       id: 'contract',

@@ -61,6 +61,7 @@ export interface Site {
   user?: User;
   credential?: SiteCredential;
   contract?: SiteContract;
+  server_info?: SiteServerInfo;
   php_version?: string | null;
   last_check?: string | null;
   created_at: string;
@@ -95,6 +96,22 @@ export interface SiteCredential {
   login_username: string | null;
   login_password: string | null;
   api_keys: string | null;
+}
+
+export interface SiteServerInfo {
+  id: number;
+  site_id: number;
+  php_version: string | null;
+  php_memory_limit: string | null;
+  php_max_execution_time: number | null;
+  php_post_max_size: string | null;
+  php_upload_max_filesize: string | null;
+  mysql_version: string | null;
+  mysql_server_info: string | null;
+  server_ip: string | null;
+  server_hostname: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface LaravelPaginationLink {

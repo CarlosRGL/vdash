@@ -17,7 +17,7 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Site::with(['users', 'credential', 'contract'])
+        $query = Site::with(['users', 'credential', 'contract', 'serverInfo'])
             ->when(!Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->whereHas('users', function ($q) {
                     $q->where('user_id', Auth::id());
