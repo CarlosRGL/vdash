@@ -74,7 +74,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     },
   ];
 
-  const alwaysVisibleColumns = ['name', 'type', 'users', 'actions'];
+  const alwaysVisibleColumns = ['name', 'type', 'clients', 'actions'];
 
   // Debounce search input
   useEffect(() => {
@@ -147,7 +147,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           columnGroups={columnGroups}
           alwaysVisibleColumns={alwaysVisibleColumns}
           toolbarActions={
-            <Button asChild>
+            <Button>
               <Link href={route('sites.create')}>Create Site</Link>
             </Button>
           }

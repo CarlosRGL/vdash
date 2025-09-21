@@ -144,6 +144,7 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
           Contract
         </SortableHeader>
       ),
+      size: 250,
       cell: ({ row }) => {
         const contract = row.original.contract;
         const startDate = contract?.contract_start_date ?? null;
@@ -299,14 +300,16 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
     {
       accessorKey: 'type',
       header: () => <SortableHeader field="type">Type</SortableHeader>,
+      size: 100,
       cell: ({ row }) => {
         const type = row.getValue('type') as string;
         return <SiteTypeBadge type={type} />;
       },
     },
     {
-      accessorKey: 'users',
+      accessorKey: 'clients',
       header: () => 'Clients',
+      size: 150,
       cell: ({ row }) => {
         const users = row.original.users as Array<{ id: number; name: string; email: string }> | null;
 
