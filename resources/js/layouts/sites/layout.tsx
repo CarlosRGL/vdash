@@ -28,7 +28,7 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
 
     {
       title: 'Contract Information',
-      url: `/sites/${siteId}/contract`,
+      url: `/sites/${siteId}/contracts/edit`,
       icon: null,
     },
   ];
