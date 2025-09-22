@@ -6,7 +6,7 @@ import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, Calendar, ChevronDown, ChevronUp, Database, ExternalLink, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
 import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
 
 interface SitesTableColumnsProps {
@@ -116,6 +116,7 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
   return [
     {
       accessorKey: 'name',
+
       header: () => <SortableHeader field="name">Site</SortableHeader>,
       cell: ({ row }) => {
         const name = row.getValue('name') as string;
@@ -137,50 +138,8 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
     },
 
     {
-      id: 'contract_info',
-      header: () => (
-        <SortableHeader field="contract_end_date">
-          <Calendar className="mr-2 h-4 w-4" />
-          Contract
-        </SortableHeader>
-      ),
-      size: 250,
-      cell: ({ row }) => {
-        const contract = row.original.contract;
-        const startDate = contract?.contract_start_date ?? null;
-        const endDate = contract?.contract_end_date ?? null;
-        const { status, color } = getContractStatus(startDate, endDate);
-        const monthsLeft = getMonthsLeft(endDate);
-
-        if (status === 'unknown') {
-          return <span className="text-muted-foreground text-sm">No contract</span>;
-        }
-
-        return (
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <div className={`h-2 w-2 rounded-full ${color}`} />
-              <span className="text-sm capitalize">{status}</span>
-            </div>
-            <div className="text-muted-foreground text-xs">
-              {monthsLeft !== null && <div>{monthsLeft === 0 ? 'Expired' : `${monthsLeft} month${monthsLeft !== 1 ? 's' : ''} left`}</div>}
-            </div>
-          </div>
-        );
-      },
-    },
-    // {
-    //   id: 'contract_capacity',
-    //   header: () => <div>Capacity</div>,
-    //   cell: ({ row }) => {
-    //     const contract = row.original.contract;
-    //     const capacity = contract?.contract_capacity;
-
-    //     return <div className="font-mono text-sm">{capacity || 'N/A'}</div>;
-    //   },
-    // },
-    {
       id: 'storage_usage',
+
       header: () => (
         <div className="flex items-center">
           <HardDrive className="mr-2 h-4 w-4" />
@@ -192,14 +151,27 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
         const usage = contract?.contract_storage_usage ?? null;
         const limit = contract?.contract_storage_limit ?? null;
         const percentage = getStoragePercentage(usage, limit);
+        const startDate = contract?.contract_start_date ?? null;
+        const endDate = contract?.contract_end_date ?? null;
+        const { status, color } = getContractStatus(startDate, endDate);
+        const monthsLeft = getMonthsLeft(endDate);
 
         if (!usage && !limit) {
-          return <div className="text-muted-foreground text-sm">N/A</div>;
+          return <div className="text-muted-foreground w-[120px] text-sm">N/A</div>;
         }
 
         return (
-          <div className="flex min-w-[120px] flex-col gap-2">
-            <div className="font-mono text-xs">{formatStorage(usage, limit)}</div>
+          <div className="flex max-w-[300px] min-w-[120px] flex-col gap-2">
+            <div className="flex items-center gap-3 font-mono text-xs">
+              <div className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${color}`} />
+                <span className="capitalize">{status}</span>
+              </div>
+              {formatStorage(usage, limit)}
+              <div className="text-muted-foreground text-xs">
+                {monthsLeft !== null && <div>{monthsLeft === 0 ? 'Expired' : `${monthsLeft} month${monthsLeft !== 1 ? 's' : ''} left`}</div>}
+              </div>
+            </div>
             {limit && (
               <div className="flex items-center gap-2">
                 <Progress value={percentage} className="h-2 flex-1" />
@@ -211,11 +183,12 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
       },
     },
     {
-      id: 'php_info',
+      id: 'server_info',
+
       header: () => (
         <div className="flex items-center">
           <Server className="mr-2 h-4 w-4" />
-          PHP
+          Server Info
         </div>
       ),
       cell: ({ row }) => {
@@ -226,62 +199,25 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
         }
 
         return (
-          <div className="flex flex-col gap-1">
-            <div className="font-mono text-xs">v{serverInfo.php_version || 'Unknown'}</div>
-            <div className="text-muted-foreground text-xs">{serverInfo.php_memory_limit || 'N/A'} memory</div>
-          </div>
-        );
-      },
-    },
-    {
-      id: 'mysql_info',
-      header: () => (
-        <div className="flex items-center">
-          <Database className="mr-2 h-4 w-4" />
-          MySQL
-        </div>
-      ),
-      cell: ({ row }) => {
-        const serverInfo = row.original.server_info;
-
-        if (!serverInfo || !serverInfo.mysql_version) {
-          return <div className="text-muted-foreground text-sm">N/A</div>;
-        }
-
-        return (
-          <div className="flex flex-col gap-1">
-            <div className="font-mono text-xs">v{serverInfo.mysql_version}</div>
-            {serverInfo.mysql_server_info && (
-              <div className="text-muted-foreground text-xs">{serverInfo.mysql_server_info.includes('MariaDB') ? 'MariaDB' : 'MySQL'}</div>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      id: 'server_details',
-      header: () => (
-        <div className="flex items-center">
-          <Server className="mr-2 h-4 w-4" />
-          Server
-        </div>
-      ),
-      cell: ({ row }) => {
-        const serverInfo = row.original.server_info;
-
-        if (!serverInfo) {
-          return <div className="text-muted-foreground text-sm">N/A</div>;
-        }
-
-        return (
-          <div className="flex flex-col gap-1">
-            {serverInfo.server_ip && <div className="font-mono text-xs">{serverInfo.server_ip}</div>}
-            {serverInfo.server_hostname && (
-              <div className="text-muted-foreground max-w-[120px] truncate text-xs" title={serverInfo.server_hostname}>
-                {serverInfo.server_hostname}
+          <div className="flex flex-col">
+            {/* PHP Info */}
+            {(serverInfo.php_version || serverInfo.php_memory_limit) && (
+              <div className="mb-1 flex flex-col gap-1">
+                <div className="font-mono text-xs font-medium">PHP {serverInfo.php_version || 'Unknown'}</div>
               </div>
             )}
-            {!serverInfo.server_ip && !serverInfo.server_hostname && <div className="text-muted-foreground text-sm">N/A</div>}
+
+            {/* Server Details */}
+            {(serverInfo.server_ip || serverInfo.server_hostname) && (
+              <div className="flex flex-col gap-1">
+                {serverInfo.server_ip && <div className="font-mono text-xs">{serverInfo.server_ip}</div>}
+                {serverInfo.server_hostname && (
+                  <div className="text-muted-foreground max-w-[150px] truncate text-xs" title={serverInfo.server_hostname}>
+                    {serverInfo.server_hostname}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
       },
@@ -375,8 +311,9 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
     // },
     {
       accessorKey: 'type',
+
       header: () => <SortableHeader field="type">Type</SortableHeader>,
-      size: 100,
+
       cell: ({ row }) => {
         const type = row.getValue('type') as string;
         return <SiteTypeBadge type={type} />;
@@ -384,8 +321,9 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
     },
     {
       accessorKey: 'clients',
+
       header: () => 'Clients',
-      size: 150,
+
       cell: ({ row }) => {
         const users = row.original.users as Array<{ id: number; name: string; email: string }> | null;
 
@@ -428,6 +366,7 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
     },
     {
       id: 'actions',
+      size: 50,
       header: () => <div className="text-right">Actions</div>,
       cell: ({ row }) => {
         const site = row.original;

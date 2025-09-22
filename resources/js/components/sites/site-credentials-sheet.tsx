@@ -87,7 +87,7 @@ export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName
     const displayValue = isPassword && !isVisible ? '••••••••••••' : value;
 
     return (
-      <div className="space-y-1 rounded-lg border p-3">
+      <div className="space-y-1 rounded-lg border p-2">
         <div className="flex items-center justify-between">
           <label className="text-foreground text-sm font-medium">{label}</label>
           <div className="flex items-center gap-1">
@@ -114,8 +114,8 @@ export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="flex flex-col sm:max-w-[540px]">
-        <SheetHeader>
+      <SheetContent side="right" className="flex flex-col gap-2 sm:max-w-[540px]">
+        <SheetHeader className="pb-2">
           <SheetTitle>Site Credentials</SheetTitle>
           <SheetDescription>
             Access credentials for <span className="font-medium">{siteName}</span>
@@ -123,7 +123,7 @@ export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="space-y-4 p-4">
+          <div className="space-y-2 p-2">
             {credentials ? (
               <>
                 <CredentialField label="Login URL" value={credentials.login_url} fieldKey="login_url" />

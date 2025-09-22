@@ -144,8 +144,8 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           searchPlaceholder="Search sites..."
-          columnGroups={columnGroups}
-          alwaysVisibleColumns={alwaysVisibleColumns}
+          // columnGroups={columnGroups}
+          // alwaysVisibleColumns={alwaysVisibleColumns}
           toolbarActions={
             <Button>
               <Link href={route('sites.create')}>Create Site</Link>

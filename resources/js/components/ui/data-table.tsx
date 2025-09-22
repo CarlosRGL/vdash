@@ -82,6 +82,12 @@ export function DataTable<TData, TValue>({
     manualFiltering: true,
   })
 
+  table.getRowModel().rows.map((row) => (row.getVisibleCells().map((cell) => {
+    const colSize = cell.column.columnDef.size;
+    console.log(colSize);
+
+  })))
+
   return (
     <div className={`space-y-4 ${className || ""}`}>
       {showToolbar && onSearchChange && (
@@ -111,7 +117,7 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead key={header.id} className="px-3" >
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -134,7 +140,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="px-3">
+                    <TableCell key={cell.id} className="px-3" >
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
