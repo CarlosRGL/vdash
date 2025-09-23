@@ -3,10 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { formatStorage, getContractStatus, getMonthsLeft, getStoragePercentage } from '@/lib/utils';
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { isValid, parseISO } from 'date-fns';
 import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, RefreshCw, Server } from 'lucide-react';
 import { SiteTypeBadge } from './site-badges';
 interface SitesTableColumnsProps {
@@ -34,85 +34,6 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
       )}
     </Button>
   );
-
-  const getMonthsLeft = (endDate: string | null) => {
-    if (!endDate) return null;
-
-    try {
-      const end = parseISO(endDate);
-      const now = new Date();
-
-      if (!isValid(end)) return null;
-
-      if (end < now) return 0; // Contract already ended
-
-      const monthsLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24 * 30.44)); // Average days per month
-      return monthsLeft;
-    } catch {
-      return null;
-    }
-  };
-
-  const parseStorageValue = (value: string | null): number | null => {
-    if (!value) return null;
-    // Extract numeric value and convert to MB
-    const match = value.match(/([0-9,.]+)\s*(GB|MB|KB|B)?/i);
-    if (!match) return null;
-
-    const num = parseFloat(match[1].replace(',', ''));
-    const unit = match[2]?.toUpperCase() || 'MB';
-
-    switch (unit) {
-      case 'GB':
-        return num * 1024;
-      case 'MB':
-        return num;
-      case 'KB':
-        return num / 1024;
-      case 'B':
-        return num / (1024 * 1024);
-      default:
-        return num;
-    }
-  };
-
-  const formatStorage = (usage: string | null, limit: string | null) => {
-    if (!usage && !limit) return 'N/A';
-    if (!usage) return `0 / ${limit || 'N/A'}`;
-    if (!limit) return usage;
-    return `${usage} / ${limit}`;
-  };
-
-  const getStoragePercentage = (usage: string | null, limit: string | null): number => {
-    const usageValue = parseStorageValue(usage);
-    const limitValue = parseStorageValue(limit);
-
-    if (!usageValue || !limitValue || limitValue === 0) return 0;
-    return Math.min(Math.round((usageValue / limitValue) * 100), 100);
-  };
-
-  const getContractStatus = (startDate: string | null, endDate: string | null) => {
-    if (!startDate || !endDate) return { status: 'unknown', color: 'bg-gray-400' };
-
-    try {
-      const start = parseISO(startDate);
-      const end = parseISO(endDate);
-      const now = new Date();
-
-      if (!isValid(start) || !isValid(end)) return { status: 'unknown', color: 'bg-gray-400' };
-
-      if (now < start) return { status: 'upcoming', color: 'bg-blue-400' };
-      if (now > end) return { status: 'expired', color: 'bg-red-400' };
-
-      // Check if contract expires within 30 days
-      const daysUntilExpiry = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysUntilExpiry <= 30) return { status: 'expiring', color: 'bg-orange-400' };
-
-      return { status: 'active', color: 'bg-green-400' };
-    } catch {
-      return { status: 'unknown', color: 'bg-gray-400' };
-    }
-  };
 
   return [
     {
@@ -144,14 +65,12 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
         );
       },
     },
-
     {
       id: 'storage_usage',
-
       header: () => (
         <div className="flex items-center">
           <HardDrive className="mr-2 h-4 w-4" />
-          Storage
+          Contract
         </div>
       ),
       cell: ({ row }) => {
@@ -177,7 +96,7 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
               </div>
               {formatStorage(usage, limit)}
               <div className="text-muted-foreground text-xs">
-                {monthsLeft !== null && <div>{monthsLeft === 0 ? 'Expired' : `${monthsLeft} month${monthsLeft !== 1 ? 's' : ''} left`}</div>}
+                {monthsLeft !== null && <div>{monthsLeft === 0 ? 'Expired' : `${monthsLeft}`}</div>}
               </div>
             </div>
             {limit && (
@@ -192,11 +111,10 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
     },
     {
       id: 'server_info',
-
       header: () => (
         <div className="flex items-center">
           <Server className="mr-2 h-4 w-4" />
-          Server Info
+          Server
         </div>
       ),
       cell: ({ row }) => {
@@ -208,13 +126,6 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
 
         return (
           <div className="flex flex-col">
-            {/* PHP Info */}
-            {(serverInfo.php_version || serverInfo.php_memory_limit) && (
-              <div className="mb-1 flex flex-col gap-1">
-                <div className="font-mono text-xs font-medium">PHP {serverInfo.php_version || 'Unknown'}</div>
-              </div>
-            )}
-
             {/* Server Details */}
             {(serverInfo.server_ip || serverInfo.server_hostname) && (
               <div className="flex flex-col gap-1">
@@ -230,93 +141,35 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
         );
       },
     },
-    // {
-    //   id: 'credentials_status',
-    //   header: () => (
-    //     <div className="flex items-center">
-    //       <LockKeyhole className="mr-2 h-4 w-4" />
-    //       Credentials
-    //     </div>
-    //   ),
-    //   cell: ({ row }) => {
-    //     const credential = row.original.credential;
 
-    //     if (!credential) {
-    //       return <div className="text-muted-foreground text-sm">No credentials</div>;
-    //     }
+    {
+      id: 'php_info',
+      header: () => (
+        <div className="flex items-center">
+          <Server className="mr-2 h-4 w-4" />
+          PHP
+        </div>
+      ),
+      cell: ({ row }) => {
+        const serverInfo = row.original.server_info;
 
-    //     const hasCredentials = {
-    //       ftp: !!(credential.ftp_host && credential.ftp_username),
-    //       db: !!(credential.db_host && credential.db_name),
-    //       login: !!(credential.login_url && credential.login_username),
-    //       api: !!credential.api_keys,
-    //     };
+        if (!serverInfo) {
+          return <div className="text-muted-foreground text-sm">N/A</div>;
+        }
 
-    //     const credentialCount = Object.values(hasCredentials).filter(Boolean).length;
-    //     const totalTypes = Object.keys(hasCredentials).length;
+        return (
+          <div className="flex flex-col">
+            {/* PHP Info */}
+            {(serverInfo.php_version || serverInfo.php_memory_limit) && (
+              <div className="mb-1 flex flex-col gap-1">
+                <div className="font-mono text-xs font-medium">{serverInfo.php_version || 'Unknown'}</div>
+              </div>
+            )}
+          </div>
+        );
+      },
+    },
 
-    //     return (
-    //       <div className="flex flex-col gap-1">
-    //         <div className="flex items-center gap-2">
-    //           <span className="text-sm font-medium">
-    //             {credentialCount}/{totalTypes} types
-    //           </span>
-    //         </div>
-    //         <div className="flex gap-1">
-    //           {hasCredentials.ftp && <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-800">FTP</span>}
-    //           {hasCredentials.db && <span className="rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">DB</span>}
-    //           {hasCredentials.login && <span className="rounded bg-purple-100 px-1.5 py-0.5 text-xs text-purple-800">Login</span>}
-    //           {hasCredentials.api && <span className="rounded bg-orange-100 px-1.5 py-0.5 text-xs text-orange-800">API</span>}
-    //         </div>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   id: 'ftp_status',
-    //   header: () => 'FTP Access',
-    //   cell: ({ row }) => {
-    //     const credential = row.original.credential;
-    //     const hasFtp = credential?.ftp_host && credential?.ftp_username;
-
-    //     return (
-    //       <div className="flex items-center gap-2">
-    //         <div className={`h-2 w-2 rounded-full ${hasFtp ? 'bg-green-400' : 'bg-gray-300'}`} />
-    //         <span className="text-sm">{hasFtp ? 'Available' : 'Not set'}</span>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   id: 'db_status',
-    //   header: () => 'Database Access',
-    //   cell: ({ row }) => {
-    //     const credential = row.original.credential;
-    //     const hasDb = credential?.db_host && credential?.db_name;
-
-    //     return (
-    //       <div className="flex items-center gap-2">
-    //         <div className={`h-2 w-2 rounded-full ${hasDb ? 'bg-green-400' : 'bg-gray-300'}`} />
-    //         <span className="text-sm">{hasDb ? 'Available' : 'Not set'}</span>
-    //       </div>
-    //     );
-    //   },
-    // },
-    // {
-    //   id: 'login_status',
-    //   header: () => 'CMS Login',
-    //   cell: ({ row }) => {
-    //     const credential = row.original.credential;
-    //     const hasLogin = credential?.login_url && credential?.login_username;
-
-    //     return (
-    //       <div className="flex items-center gap-2">
-    //         <div className={`h-2 w-2 rounded-full ${hasLogin ? 'bg-green-400' : 'bg-gray-300'}`} />
-    //         <span className="text-sm">{hasLogin ? 'Available' : 'Not set'}</span>
-    //       </div>
-    //     );
-    //   },
-    // },
     {
       accessorKey: 'type',
 
@@ -327,51 +180,52 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
         return <SiteTypeBadge type={type} />;
       },
     },
-    {
-      accessorKey: 'clients',
 
-      header: () => 'Clients',
+    // {
+    //   accessorKey: 'clients',
 
-      cell: ({ row }) => {
-        const users = row.original.users as Array<{ id: number; name: string; email: string }> | null;
+    //   header: () => 'Clients',
 
-        if (!users || users.length === 0) {
-          return <div className="text-muted-foreground text-sm">No clients</div>;
-        }
+    //   cell: ({ row }) => {
+    //     const users = row.original.users as Array<{ id: number; name: string; email: string }> | null;
 
-        return (
-          <div className="text-sm">
-            <div className="text-muted-foreground text-xs">
-              <div className="flex -space-x-2">
-                {users.slice(0, 3).map((user) => (
-                  <TooltipProvider key={user.id}>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Avatar className="border-background border-2">
-                          <AvatarFallback>
-                            {user.name.charAt(0).toUpperCase()}
-                            {user.name.slice(1).split(' ').length > 1 ? user.name.split(' ')[1].charAt(0).toUpperCase() : ''}
-                          </AvatarFallback>
-                        </Avatar>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{user.name}</p>
-                        <p className="text-muted-foreground text-xs">{user.email}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                ))}
-              </div>
-              {users.length > 3 && (
-                <div className="border-background bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
-                  +{users.length - 3}
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      },
-    },
+    //     if (!users || users.length === 0) {
+    //       return <div className="text-muted-foreground text-sm">No clients</div>;
+    //     }
+
+    //     return (
+    //       <div className="text-sm">
+    //         <div className="text-muted-foreground text-xs">
+    //           <div className="flex -space-x-2">
+    //             {users.slice(0, 3).map((user) => (
+    //               <TooltipProvider key={user.id}>
+    //                 <Tooltip>
+    //                   <TooltipTrigger>
+    //                     <Avatar className="border-background border-2">
+    //                       <AvatarFallback>
+    //                         {user.name.charAt(0).toUpperCase()}
+    //                         {user.name.slice(1).split(' ').length > 1 ? user.name.split(' ')[1].charAt(0).toUpperCase() : ''}
+    //                       </AvatarFallback>
+    //                     </Avatar>
+    //                   </TooltipTrigger>
+    //                   <TooltipContent>
+    //                     <p>{user.name}</p>
+    //                     <p className="text-muted-foreground text-xs">{user.email}</p>
+    //                   </TooltipContent>
+    //                 </Tooltip>
+    //               </TooltipProvider>
+    //             ))}
+    //           </div>
+    //           {users.length > 3 && (
+    //             <div className="border-background bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
+    //               +{users.length - 3}
+    //             </div>
+    //           )}
+    //         </div>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       id: 'actions',
       size: 50,

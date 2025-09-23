@@ -43,9 +43,9 @@ export function Pagination({
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <span className="text-sm">Rows per page</span>
-          <Select value={pagination.per_page?.toString() || "10"} onValueChange={handlePerPageChange}>
+          <Select value={pagination.per_page?.toString() || "25"} onValueChange={handlePerPageChange}>
             <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder="10" />
+              <SelectValue placeholder="0" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="5">5</SelectItem>

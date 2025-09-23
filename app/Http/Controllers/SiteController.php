@@ -47,7 +47,7 @@ class SiteController extends Controller
         }
 
         // Apply pagination
-        $perPage = $request->input('perPage', 10);
+        $perPage = $request->input('perPage', 25);
         $sites = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('sites/index', [
