@@ -4,50 +4,51 @@ import { Label, Pie, PieChart } from 'recharts';
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-const chartData = [
-  { browser: 'chrome', visitors: 275, fill: 'var(--chart-1)' },
-  { browser: 'safari', visitors: 200, fill: 'var(--chart-2)' },
-  { browser: 'firefox', visitors: 287, fill: 'var(--chart-3)' },
-  { browser: 'edge', visitors: 173, fill: 'var(--chart-4)' },
-  { browser: 'other', visitors: 190, fill: 'var(--chart-5)' },
-];
 
-const chartConfig = {
-  visitors: {
-    label: 'Visitors',
-  },
-  chrome: {
-    label: 'Chrome',
-    color: 'var(--chart-1)',
-  },
-  safari: {
-    label: 'Safari',
-    color: 'var(--chart-2)',
-  },
-  firefox: {
-    label: 'Firefox',
-    color: 'var(--chart-3)',
-  },
-  edge: {
-    label: 'Edge',
-    color: 'var(--chart-4)',
-  },
-  other: {
-    label: 'Other',
-    color: 'var(--chart-5)',
-  },
-} satisfies ChartConfig;
+interface SiteTypeStat {
+  type: string;
+  count: number;
+  fill: string;
+}
 
-export default function DashboardChart() {
+interface DashboardChartProps {
+  siteTypeStats: SiteTypeStat[];
+}
+
+export default function DashboardChart({ siteTypeStats }: DashboardChartProps) {
+  // Transform the data for the chart
+  const chartData = siteTypeStats.map((stat) => ({
+    browser: stat.type,
+    visitors: stat.count,
+    fill: stat.fill,
+  }));
+
+  // Create dynamic chart config based on the data
+  const chartConfig: ChartConfig = siteTypeStats.reduce(
+    (config, stat) => {
+      const key = stat.type.toLowerCase().replace(/\s+/g, '');
+      config[key] = {
+        label: stat.type,
+        color: stat.fill,
+      };
+      return config;
+    },
+    {
+      visitors: {
+        label: 'Sites',
+      },
+    } as ChartConfig,
+  );
+
   const totalVisitors = React.useMemo(() => {
     return chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  }, []);
+  }, [chartData]);
 
   return (
     <Card className="flex flex-col">
       <CardHeader className="items-center pb-0">
-        <CardTitle>Pie Chart - Donut with Text</CardTitle>
-        <CardDescription>January - June 2024</CardDescription>
+        <CardTitle>Sites by Type</CardTitle>
+        <CardDescription>Distribution of managed sites</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
         <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px]">
@@ -63,7 +64,7 @@ export default function DashboardChart() {
                           {totalVisitors.toLocaleString()}
                         </tspan>
                         <tspan x={viewBox.cx} y={(viewBox.cy || 0) + 24} className="fill-muted-foreground">
-                          Visitors
+                          Sites
                         </tspan>
                       </text>
                     );
@@ -76,9 +77,9 @@ export default function DashboardChart() {
       </CardContent>
       <CardFooter className="flex-col gap-2 text-sm">
         <div className="flex items-center gap-2 leading-none font-medium">
-          Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
+          {totalVisitors} total sites managed <TrendingUp className="h-4 w-4" />
         </div>
-        <div className="text-muted-foreground leading-none">Showing total visitors for the last 6 months</div>
+        <div className="text-muted-foreground leading-none">Showing distribution across all site types</div>
       </CardFooter>
     </Card>
   );
