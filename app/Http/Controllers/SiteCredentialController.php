@@ -98,8 +98,18 @@ class SiteCredentialController extends Controller
             $site->credential()->create($validated);
         }
 
-        return Redirect::route('sites.credentials.show', $site)
-            ->with('success', __('Site credentials updated successfully.'));
+
+        return Inertia::render('sites/credentials/Edit', [
+            'site' => $site,
+            'credentials' => $site->credential ?? new SiteCredential(),
+            'flash' => [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Site credentials updated successfully',
+                    'description' => "The credentials for site {$site->name} have been updated.",
+                ],
+            ],
+        ]);
     }
 
     /**

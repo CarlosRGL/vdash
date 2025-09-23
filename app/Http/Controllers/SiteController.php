@@ -94,12 +94,17 @@ class SiteController extends Controller
         $userIds = $validated['user_ids'] ?? [Auth::id()];
         $site->users()->sync($userIds);
 
-        return Redirect::route('sites.index', $site)
-            ->with('toast', [
-                'type' => 'success',
-                'message' => 'Site created successfully',
-                'description' => "The site {$request->name} has been added to the system.",
-            ]);
+
+        return Inertia::render('sites/Show', [
+            'site' => $site,
+            'flash' => [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'Site created successfully',
+                    'description' => "The site {$request->name} has been added to the system.",
+                ],
+            ],
+        ]);
     }
 
     /**
@@ -270,5 +275,49 @@ class SiteController extends Controller
                     'description' => 'Failed to sync site data. Please check the API token and try again.',
                 ]);
         }
+    }
+
+    /**
+     * Show the form for editing API & Sync settings.
+     */
+    public function editApiSync(Site $site)
+    {
+        if (Gate::denies('update', $site)) {
+            abort(403);
+        }
+
+
+
+        return Inertia::render('sites/api-sync/Edit', [
+            'site' => $site,
+        ]);
+    }
+
+    /**
+     * Update API & Sync settings.
+     */
+    public function updateApiSync(Request $request, Site $site)
+    {
+        if (Gate::denies('update', $site)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'sync_enabled' => 'boolean',
+            'api_token' => 'string|max:255',
+        ]);
+
+        $site->update($validated);
+
+        return Inertia::render('sites/api-sync/Edit', [
+            'site' => $site,
+            'flash' => [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'API & Sync settings updated successfully',
+                    'description' => "The API & Sync settings for {$site->name} have been updated.",
+                ],
+            ],
+        ]);
     }
 }

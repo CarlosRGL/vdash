@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 function Show({ site }: Props) {
+  useToast();
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
 
   const togglePasswordVisibility = (field: string) => {

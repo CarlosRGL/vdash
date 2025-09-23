@@ -10,6 +10,8 @@ interface ToastData {
 
 export function useToast() {
   const page = usePage();
+  console.log(page.props.flash);
+
   const flash = page.props.flash as { toast?: ToastData };
 
   useEffect(() => {

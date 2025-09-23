@@ -1,3 +1,5 @@
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +8,6 @@ import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { Check, Copy, Pencil } from 'lucide-react';
-import { useState } from 'react';
 
 interface ShowSiteCredentialsProps {
   site: Site;
@@ -14,7 +15,7 @@ interface ShowSiteCredentialsProps {
 }
 
 export default function ShowSiteCredentials({ site, credentials }: ShowSiteCredentialsProps) {
-  const [copiedFields, setCopiedFields] = useState<Record<string, boolean>>({});
+  const [copy, isCopied] = useCopyToClipboard();
   const { toast } = useToast();
 
   const copyToClipboard = (text: string | null, fieldName: string) => {

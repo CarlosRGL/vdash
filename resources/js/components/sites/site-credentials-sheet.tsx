@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useToast } from '@/hooks/use-toast';
 import { type SiteCredential } from '@/types';
 import { Copy, Eye, EyeOff } from 'lucide-react';
@@ -13,50 +14,9 @@ interface SiteCredentialsSheetProps {
 }
 
 export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName }: SiteCredentialsSheetProps) {
+  const [copy, isCopied] = useCopyToClipboard();
   const { toast } = useToast();
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set());
-
-  const handleCopy = async (value: string | null, label: string) => {
-    if (!value) return;
-
-    // Fallback for insecure context or unsupported browsers
-    const fallbackCopyTextToClipboard = (text: string) => {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      let success = false;
-      try {
-        success = document.execCommand('copy');
-      } catch {
-        success = false;
-      }
-      document.body.removeChild(textArea);
-      return success;
-    };
-
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(value);
-        toast.success(`${label} copied to clipboard`);
-      } else {
-        // Fallback for insecure context or unsupported browsers
-        const success = fallbackCopyTextToClipboard(value);
-        if (success) {
-          toast.success(`${label} copied to clipboard`);
-        } else {
-          toast.error('Failed to copy');
-        }
-      }
-    } catch {
-      toast.error('Failed to copy');
-    }
-  };
 
   const toggleVisibility = (fieldKey: string) => {
     setVisibleFields((prev) => {
@@ -99,7 +59,12 @@ export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName
                 </span>
               </Button>
             )}
-            <Button variant="ghost" size="sm" onClick={() => handleCopy(value, label)} className="h-8 w-8 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => copy(value).then(() => toast.success(`${label} copied to clipboard`))}
+              className="h-8 w-8 p-0"
+            >
               <Copy className="h-4 w-4" />
               <span className="sr-only">Copy {label}</span>
             </Button>

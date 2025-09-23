@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteContract } from '@/types';
@@ -17,8 +16,6 @@ interface EditSiteContractProps {
 }
 
 export default function EditSiteContract({ site, contract }: EditSiteContractProps) {
-  const { toast } = useToast();
-
   // Format date string to YYYY-MM-DD for date input
   const formatDateForInput = (dateString: string | null): string => {
     if (!dateString) return '';
@@ -53,7 +50,7 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
   ];
 
   // Initialize form with data from contract
-  const { setData, data, put, processing, errors } = useForm({
+  const { setData, data, processing, errors } = useForm({
     contract_start_date: formatDateForInput(contract?.contract_start_date),
     contract_end_date: formatDateForInput(contract?.contract_end_date),
     contract_capacity: contract?.contract_capacity || '',
@@ -74,14 +71,7 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
     };
 
     // Submit the form using router
-    router.put(route('sites.contracts.update', site.id), formData, {
-      onSuccess: () => {
-        toast.success('Contract information updated successfully.');
-      },
-      onError: () => {
-        toast.error('Failed to update contract information. Please try again.');
-      },
-    });
+    router.put(route('sites.contracts.update', site.id), formData);
   };
 
   return (

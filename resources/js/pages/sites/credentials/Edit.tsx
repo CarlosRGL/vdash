@@ -2,13 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { Check, Copy } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { FormEvent } from 'react';
 
 interface EditSiteCredentialsProps {
   site: Site;
@@ -16,87 +16,8 @@ interface EditSiteCredentialsProps {
 }
 
 export default function EditSiteCredentials({ site, credentials }: EditSiteCredentialsProps) {
-  const [copiedFields, setCopiedFields] = useState<Record<string, boolean>>({});
-  const { toast } = useToast();
-
-  // Format date string to YYYY-MM-DD for date input
-  const formatDateForInput = (dateString: string | null): string => {
-    if (!dateString) return '';
-
-    try {
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0];
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return '';
-    }
-  };
-
-  const copyToClipboard = (text: string, fieldName: string) => {
-    if (!text) return;
-
-    // Fallback function for copying text
-    const fallbackCopyTextToClipboard = (text: string) => {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-
-      // Make the textarea out of viewport
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      let success = false;
-      try {
-        success = document.execCommand('copy');
-      } catch (err) {
-        console.error('Fallback: Oops, unable to copy', err);
-      }
-
-      document.body.removeChild(textArea);
-      return success;
-    };
-
-    // Try to use the modern clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard
-        .writeText(text)
-        .then(() => {
-          setCopiedFields({ ...copiedFields, [fieldName]: true });
-
-          toast.success('Copied to clipboard', {
-            description: `${fieldName} has been copied to clipboard.`,
-          });
-
-          setTimeout(() => {
-            setCopiedFields({ ...copiedFields, [fieldName]: false });
-          }, 2000);
-        })
-        .catch((err) => {
-          console.error('Could not copy text: ', err);
-        });
-    } else {
-      // Fallback for older browsers
-      const success = fallbackCopyTextToClipboard(text);
-      if (success) {
-        setCopiedFields({ ...copiedFields, [fieldName]: true });
-
-        toast.success('Copied to clipboard', {
-          description: `${fieldName} has been copied to clipboard.`,
-        });
-
-        setTimeout(() => {
-          setCopiedFields({ ...copiedFields, [fieldName]: false });
-        }, 2000);
-      } else {
-        toast.error('Copy failed', {
-          description: 'Please copy the text manually.',
-        });
-      }
-    }
-  };
+  const [copy, isCopied] = useCopyToClipboard();
+  // const { toast } = useToast();
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -126,11 +47,6 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
     login_username: credentials?.login_username || '',
     login_password: credentials?.login_password || '',
     api_keys: credentials?.api_keys || '',
-    contract_start_date: formatDateForInput(credentials?.contract_start_date),
-    contract_end_date: formatDateForInput(credentials?.contract_end_date),
-    contract_capacity: credentials?.contract_capacity || '',
-    contract_storage_usage: credentials?.contract_storage_usage || '',
-    contract_storage_limit: credentials?.contract_storage_limit || '',
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -165,10 +81,10 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
           variant="outline"
           size="icon"
           className="rounded-l-none border-l-0"
-          onClick={() => copyToClipboard(value, id)}
+          onClick={() => copy(value).then(() => toast.success('Copied to clipboard', { description: `${label} has been copied to clipboard.` }))}
           disabled={!value}
         >
-          {copiedFields[id] ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
       {error && <p className="text-sm text-red-500">{error}</p>}
@@ -210,7 +126,6 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     id="ftp_password"
                     label="FTP Password"
                     type="password"
-                    placeholder="••••••••"
                     value={data.ftp_password}
                     onChange={(e) => setData('ftp_password', e.target.value)}
                     error={errors.ftp_password}
@@ -250,7 +165,6 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     id="db_password"
                     label="Database Password"
                     type="password"
-                    placeholder="••••••••"
                     value={data.db_password}
                     onChange={(e) => setData('db_password', e.target.value)}
                     error={errors.db_password}
@@ -282,7 +196,6 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     id="login_password"
                     label="Login Password"
                     type="password"
-                    placeholder="••••••••"
                     value={data.login_password}
                     onChange={(e) => setData('login_password', e.target.value)}
                     error={errors.login_password}

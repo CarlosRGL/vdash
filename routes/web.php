@@ -53,6 +53,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('sites.contracts.update');
     Route::delete('sites/{site}/contracts', [SiteContractController::class, 'destroy'])
         ->name('sites.contracts.destroy');
+
+    // Site API & Sync routes
+    Route::get('sites/{site}/api-sync', [SiteController::class, 'editApiSync'])
+        ->name('sites.api-sync.edit');
+    Route::put('sites/{site}/api-sync', [SiteController::class, 'updateApiSync'])
+        ->name('sites.api-sync.update');
 });
 
 require __DIR__ . '/settings.php';

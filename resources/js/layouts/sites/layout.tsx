@@ -1,6 +1,7 @@
 import Heading from '@/components/heading';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
@@ -12,6 +13,7 @@ interface SiteLayoutProps {
 }
 
 export default function SiteLayout({ children, siteId, siteName }: SiteLayoutProps) {
+  useToast();
   const currentPath = window.location.pathname;
 
   const sidebarNavItems: NavItem[] = [
@@ -29,6 +31,11 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
     {
       title: 'Contract Information',
       url: `/sites/${siteId}/contracts/edit`,
+      icon: null,
+    },
+    {
+      title: 'API & Sync',
+      url: `/sites/${siteId}/api-sync`,
       icon: null,
     },
   ];
