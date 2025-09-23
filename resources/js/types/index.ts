@@ -64,6 +64,8 @@ export interface Site {
   server_info?: SiteServerInfo;
   php_version?: string | null;
   last_check?: string | null;
+  sync_enabled: boolean;
+  api_token: string;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Site;
 use App\Models\User;
+use App\Services\SiteSyncService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -18,7 +19,7 @@ class SiteController extends Controller
     public function index(Request $request)
     {
         $query = Site::with(['users', 'credential', 'contract', 'serverInfo'])
-            ->when(!Gate::allows('viewAny', Site::class), function ($query) {
+            ->when(! Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->whereHas('users', function ($q) {
                     $q->where('user_id', Auth::id());
                 });
@@ -29,8 +30,8 @@ class SiteController extends Controller
             $search = $request->input('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('url', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('url', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
 
@@ -48,8 +49,6 @@ class SiteController extends Controller
         // Apply pagination
         $perPage = $request->input('perPage', 10);
         $sites = $query->paginate($perPage)->withQueryString();
-
-
 
         return Inertia::render('sites/index', [
             'sites' => $sites,
@@ -116,7 +115,7 @@ class SiteController extends Controller
             'users',
             'credential',
             'contract',
-            'serverInfo'
+            'serverInfo',
         ]);
 
         return Inertia::render('sites/Show', [
@@ -159,6 +158,8 @@ class SiteController extends Controller
             'team' => 'required|in:quai13,vernalis',
             'user_ids' => 'nullable|array',
             'user_ids.*' => 'exists:users,id',
+            'sync_enabled' => 'boolean',
+            'api_token' => 'required_if:sync_enabled,true|string|max:255',
         ]);
 
         $site->update($validated);
@@ -168,7 +169,7 @@ class SiteController extends Controller
             $site->users()->sync($validated['user_ids']);
         }
 
-        return Redirect::route('sites.edit', $site)
+        return Redirect::route('sites.show', $site)
             ->with('toast', [
                 'type' => 'success',
                 'message' => 'Site updated successfully',
@@ -232,5 +233,42 @@ class SiteController extends Controller
                 'message' => 'User removed successfully',
                 'description' => "User {$user->name} has been removed from the site.",
             ]);
+    }
+
+    /**
+     * Sync site data from WordPress API.
+     */
+    public function sync(Request $request, Site $site, SiteSyncService $syncService)
+    {
+        if (Gate::denies('update', $site)) {
+            abort(403);
+        }
+
+        if (! $site->sync_enabled) {
+            return Redirect::back()
+                ->with('toast', [
+                    'type' => 'error',
+                    'message' => 'Sync not enabled',
+                    'description' => 'Please enable sync for this site before attempting to sync data.',
+                ]);
+        }
+
+        $success = $syncService->syncSiteData($site);
+
+        if ($success) {
+            return Redirect::back()
+                ->with('toast', [
+                    'type' => 'success',
+                    'message' => 'Site data synced successfully',
+                    'description' => 'The site information has been updated from the WordPress API.',
+                ]);
+        } else {
+            return Redirect::back()
+                ->with('toast', [
+                    'type' => 'error',
+                    'message' => 'Sync failed',
+                    'description' => 'Failed to sync site data. Please check the API token and try again.',
+                ]);
+        }
     }
 }

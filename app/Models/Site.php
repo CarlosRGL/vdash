@@ -26,6 +26,8 @@ class Site extends Model
         'team',
         'wordpress_version',
         'is_multisite',
+        'sync_enabled',
+        'api_token',
     ];
 
     /**
@@ -37,6 +39,7 @@ class Site extends Model
     {
         return [
             'is_multisite' => 'boolean',
+            'sync_enabled' => 'boolean',
         ];
     }
 

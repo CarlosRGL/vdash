@@ -4,12 +4,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site } from '@/types';
-import { Head, Link } from '@inertiajs/react';
-import { Calendar, Copy, Database, ExternalLink, Eye, EyeOff, Globe, HardDrive, Key, Monitor, Server, Shield, Users } from 'lucide-react';
+import { Head, Link, router } from '@inertiajs/react';
+import { Calendar, Copy, Database, ExternalLink, Eye, EyeOff, Globe, HardDrive, Key, Monitor, RefreshCw, Server, Shield, Users } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
   site: Site;
+}
+
+interface SyncButtonProps {
+  site: Site;
+}
+
+function SyncButton({ site }: SyncButtonProps) {
+  const [syncing, setSyncing] = useState(false);
+
+  const handleSync = () => {
+    if (!site.sync_enabled) {
+      alert('Please enable sync first and save the settings.');
+      return;
+    }
+
+    setSyncing(true);
+    router.post(
+      route('sites.sync', site.id),
+      {},
+      {
+        onFinish: () => setSyncing(false),
+      },
+    );
+  };
+
+  return (
+    <Button onClick={handleSync} disabled={syncing || !site.sync_enabled} className="flex items-center gap-2">
+      <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
+      {syncing ? 'Syncing...' : 'Sync Now'}
+    </Button>
+  );
 }
 
 function Show({ site }: Props) {
@@ -88,7 +119,7 @@ function Show({ site }: Props) {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
-                <Link href={`/sites/${site.id}/edit`}>Edit Site</Link>
+                <Link href={`/sites/${site.id}/edit`}>Edit Site & Sync Settings</Link>
               </Button>
               <Button asChild>
                 <Link href="/sites">Back to Sites</Link>
@@ -115,7 +146,7 @@ function Show({ site }: Props) {
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Site URL</CardTitle>
@@ -178,6 +209,35 @@ function Show({ site }: Props) {
                       </div>
                     ) : (
                       <span className="text-gray-500">No data</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* API Sync Status Card */}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">API Sync</CardTitle>
+                  <RefreshCw className="text-muted-foreground h-4 w-4" />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <div className="text-lg font-bold">
+                      {site.sync_enabled ? (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                          Enabled
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-gray-500">
+                          Disabled
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="text-xs text-gray-500">{site.api_token ? 'API token configured' : 'No API token set'}</div>
+                    {site.sync_enabled && (
+                      <div className="pt-2">
+                        <SyncButton site={site} />
+                      </div>
                     )}
                   </div>
                 </CardContent>

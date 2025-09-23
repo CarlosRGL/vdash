@@ -119,10 +119,26 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
     }));
   };
 
+  const handleSync = (site: Site) => {
+    if (!site.sync_enabled) {
+      alert('Sync is not enabled for this site. Please enable it in the site settings.');
+      return;
+    }
+
+    router.post(
+      route('sites.sync', site.id),
+      {},
+      {
+        preserveScroll: true,
+      },
+    );
+  };
+
   const columns = createSitesTableColumns({
     sorting,
     onSort: handleSort,
     onShowCredentials: handleShowCredentials,
+    onSync: handleSync,
   });
 
   return (

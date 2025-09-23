@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -38,6 +39,8 @@ export default function EditSite({ site }: EditSiteProps) {
     description: site.description || '',
     type: site.type as SiteType,
     team: site.team as SiteTeam,
+    sync_enabled: site.sync_enabled || false,
+    api_token: site.api_token || 'SEec1oWGvJWmpja4CnWId6ONRwyWFkSF',
   });
 
   const handleSubmit = (e: FormEvent) => {
@@ -119,6 +122,40 @@ export default function EditSite({ site }: EditSiteProps) {
                   <p className="text-muted-foreground text-sm">The team responsible for the site</p>
                 </div>
               </div>
+
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>API Sync Settings</CardTitle>
+                  <CardDescription>Configure automatic sync from WordPress system info API</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="sync_enabled"
+                      checked={data.sync_enabled}
+                      onCheckedChange={(checked) => setData('sync_enabled', checked as boolean)}
+                    />
+                    <Label htmlFor="sync_enabled" className="text-sm font-medium">
+                      Enable automatic sync
+                    </Label>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="api_token" className="text-sm font-medium">
+                      API Token
+                    </Label>
+                    <Input
+                      id="api_token"
+                      type="text"
+                      value={data.api_token}
+                      onChange={(e) => setData('api_token', e.target.value)}
+                      placeholder="Enter API token"
+                    />
+                    {errors.api_token && <p className="text-sm text-red-500">{errors.api_token}</p>}
+                    <p className="text-xs text-gray-500">API token for accessing /wp-json/teamtreize/v1/system-info/{'{token}'}</p>
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => window.history.back()}>

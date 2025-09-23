@@ -7,7 +7,7 @@ import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, RefreshCw, Server } from 'lucide-react';
 import { SiteTypeBadge } from './site-badges';
 interface SitesTableColumnsProps {
   sorting: {
@@ -16,9 +16,10 @@ interface SitesTableColumnsProps {
   };
   onSort: (field: string) => void;
   onShowCredentials: (site: Site) => void;
+  onSync: (site: Site) => void;
 }
 
-export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: SitesTableColumnsProps): ColumnDef<Site>[] {
+export function createSitesTableColumns({ sorting, onSort, onShowCredentials, onSync }: SitesTableColumnsProps): ColumnDef<Site>[] {
   const SortableHeader = ({ field, children }: { field: string; children: React.ReactNode }) => (
     <Button variant="ghost" onClick={() => onSort(field)} className="flex items-center">
       {children}
@@ -379,19 +380,19 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
         const site = row.original;
         return (
           <div className="flex justify-end">
-            {/* <TooltipProvider>
+            <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <Button variant="ghost" size="icon" onClick={() => onSync(site)}>
+                  <Button variant="ghost" size="icon" onClick={() => onSync(site)} disabled={!site.sync_enabled}>
                     <RefreshCw className="h-4 w-4" />
                     <span className="sr-only">Sync</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Sync metrics</p>
+                  <p>{site.sync_enabled ? 'Sync site data' : 'Sync not enabled'}</p>
                 </TooltipContent>
               </Tooltip>
-            </TooltipProvider> */}
+            </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>

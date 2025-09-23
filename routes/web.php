@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\SiteContractController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteCredentialController;
-use App\Http\Controllers\SiteContractController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -25,6 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Sites routes
     Route::resource('sites', SiteController::class);
+
+    // Site sync routes
+    Route::post('sites/{site}/sync', [SiteController::class, 'sync'])
+        ->name('sites.sync');
 
     // Site user assignment routes
     Route::post('sites/{site}/users', [SiteController::class, 'assignUsers'])
