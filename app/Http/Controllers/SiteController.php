@@ -112,9 +112,12 @@ class SiteController extends Controller
             abort(403);
         }
 
-        $site->load(['users', 'credential' => function ($query) {
-            $query->latest()->first();
-        }]);
+        $site->load([
+            'users',
+            'credential',
+            'contract',
+            'serverInfo'
+        ]);
 
         return Inertia::render('sites/Show', [
             'site' => $site,

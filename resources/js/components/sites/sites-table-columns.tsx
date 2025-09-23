@@ -6,7 +6,7 @@ import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { isValid, parseISO } from 'date-fns';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
 import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
 
 interface SitesTableColumnsProps {
@@ -371,7 +371,7 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
       cell: ({ row }) => {
         const site = row.original;
         return (
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end">
             {/* <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
@@ -398,12 +398,36 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            <Button variant="ghost" size="icon" asChild>
-              <Link href={route('sites.edit', { site: site.id })}>
-                <Pencil className="h-4 w-4" />
-                <span className="sr-only">Edit</span>
-              </Link>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href={route('sites.edit', { site: site.id })}>
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Edit</span>
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Edit</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link href={route('sites.show', { site: site.id })}>
+                      <Eye className="h-4 w-4" />
+                      <span className="sr-only">View</span>
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>View</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         );
       },
