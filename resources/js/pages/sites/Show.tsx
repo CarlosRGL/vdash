@@ -68,7 +68,7 @@ function Show({ site }: Props) {
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="mb-2 text-2xl font-bold">{site.name}</h1>
+              <h1 className="mb-2 text-xl font-bold">{site.name}</h1>
               <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
                 {site.url && (
                   <a
@@ -105,7 +105,7 @@ function Show({ site }: Props) {
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="mb-10 grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="credentials">Credentials</TabsTrigger>
             <TabsTrigger value="server">Server Info</TabsTrigger>
@@ -122,7 +122,7 @@ function Show({ site }: Props) {
                   <Globe className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
+                  <div className="text-lg font-bold">
                     {site.url ? (
                       <a href={site.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">
                         {site.url}
@@ -134,26 +134,136 @@ function Show({ site }: Props) {
                 </CardContent>
               </Card>
 
+              {/* PHP Version Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Site Type</CardTitle>
-                  <Monitor className="text-muted-foreground h-4 w-4" />
+                  <CardTitle className="text-sm font-medium">PHP Version</CardTitle>
+                  <Server className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{site.type || <span className="text-gray-500">Not specified</span>}</div>
+                  <div className="text-lg font-bold">
+                    {site.server_info?.php_version ? (
+                      <Badge variant="secondary" className="text-sm">
+                        {site.server_info.php_version}
+                      </Badge>
+                    ) : (
+                      <span className="text-gray-500">Unknown</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
+              {/* Storage Usage Card */}
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Team</CardTitle>
-                  <Users className="text-muted-foreground h-4 w-4" />
+                  <CardTitle className="text-sm font-medium">Storage Usage</CardTitle>
+                  <HardDrive className="text-muted-foreground h-4 w-4" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{site.team || <span className="text-gray-500">Not assigned</span>}</div>
+                  <div className="text-lg font-bold">
+                    {site.contract?.contract_storage_usage && site.contract?.contract_storage_limit ? (
+                      <div className="space-y-2">
+                        <span>{getStoragePercentage().toFixed(1)}%</span>
+                        <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
+                          <div
+                            className={`h-2 rounded-full ${
+                              getStoragePercentage() > 90 ? 'bg-red-500' : getStoragePercentage() > 75 ? 'bg-yellow-500' : 'bg-green-500'
+                            }`}
+                            style={{ width: `${Math.min(getStoragePercentage(), 100)}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          {site.contract.contract_storage_usage}GB / {site.contract.contract_storage_limit}GB
+                        </p>
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">No data</span>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>
+
+            {/* Contract Status Card */}
+            {site.contract && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5" />
+                    Contract Overview
+                  </CardTitle>
+                  <CardDescription>Current contract status and details</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {site.contract.contract_start_date && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Start Date</span>
+                        <p className="text-base font-semibold">{formatDate(site.contract.contract_start_date)}</p>
+                      </div>
+                    )}
+                    {site.contract.contract_end_date && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">End Date</span>
+                        <p className="text-base font-semibold">{formatDate(site.contract.contract_end_date)}</p>
+                      </div>
+                    )}
+                    {site.contract.contract_capacity && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Capacity</span>
+                        <p className="text-base font-semibold">{site.contract.contract_capacity}</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Server Information Card */}
+            {site.server_info && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Server className="h-5 w-5" />
+                    Server Overview
+                  </CardTitle>
+                  <CardDescription>Key server configuration details</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {site.server_info.php_version && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">PHP Version</span>
+                        <p className="text-base font-semibold">{site.server_info.php_version}</p>
+                      </div>
+                    )}
+                    {site.server_info.php_memory_limit && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Memory Limit</span>
+                        <p className="text-base font-semibold">{site.server_info.php_memory_limit}</p>
+                      </div>
+                    )}
+                    {site.server_info.mysql_version && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">MySQL Version</span>
+                        <p className="text-base font-semibold">{site.server_info.mysql_version}</p>
+                      </div>
+                    )}
+                    {site.server_info.server_ip && (
+                      <div>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Server IP</span>
+                        <div className="flex items-center gap-2">
+                          <p className="font-mono text-base font-semibold">{site.server_info.server_ip}</p>
+                          <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.server_info!.server_ip!)}>
+                            <Copy className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader>
@@ -497,19 +607,19 @@ function Show({ site }: Props) {
                     {site.contract.contract_start_date && (
                       <div>
                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Start Date:</span>
-                        <p className="text-lg font-semibold">{formatDate(site.contract.contract_start_date)}</p>
+                        <p className="text-base font-semibold">{formatDate(site.contract.contract_start_date)}</p>
                       </div>
                     )}
                     {site.contract.contract_end_date && (
                       <div>
                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">End Date:</span>
-                        <p className="text-lg font-semibold">{formatDate(site.contract.contract_end_date)}</p>
+                        <p className="text-base font-semibold">{formatDate(site.contract.contract_end_date)}</p>
                       </div>
                     )}
                     {site.contract.contract_capacity && (
                       <div>
                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Capacity:</span>
-                        <p className="text-lg font-semibold">{site.contract.contract_capacity}</p>
+                        <p className="text-base font-semibold">{site.contract.contract_capacity}</p>
                       </div>
                     )}
                   </CardContent>
@@ -528,11 +638,11 @@ function Show({ site }: Props) {
                         <div className="flex items-end justify-between">
                           <div>
                             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Used:</span>
-                            <p className="text-lg font-semibold">{site.contract.contract_storage_usage} GB</p>
+                            <p className="text-base font-semibold">{site.contract.contract_storage_usage} GB</p>
                           </div>
                           <div>
                             <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Limit:</span>
-                            <p className="text-lg font-semibold">{site.contract.contract_storage_limit} GB</p>
+                            <p className="text-base font-semibold">{site.contract.contract_storage_limit} GB</p>
                           </div>
                         </div>
                         <div>
