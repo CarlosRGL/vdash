@@ -2,10 +2,23 @@
 
 use App\Models\Site;
 use App\Models\User;
+use Spatie\Permission\Models\Permission;
 
 beforeEach(function () {
+    // Create the permission if it doesn't exist
+    Permission::findOrCreate('update site', 'web');
+
     $this->user = User::factory()->create();
     $this->site = Site::factory()->create();
+
+    // Give the user the update site permission
+    $this->user->givePermissionTo('update site');
+
+    // Associate the user with the site (check if not already associated)
+    if (! $this->site->users()->where('user_id', $this->user->id)->exists()) {
+        $this->site->users()->attach($this->user);
+    }
+
     $this->actingAs($this->user);
 });
 
@@ -29,7 +42,7 @@ it('can update contract information', function () {
 
     $response = $this->put("/sites/{$this->site->id}/contracts", $contractData);
 
-    $response->assertRedirect("/sites/{$this->site->id}/contracts");
+    $response->assertRedirect("/sites/{$this->site->id}/contracts/edit");
 
     $this->site->refresh();
     expect($this->site->contract)->not->toBeNull();

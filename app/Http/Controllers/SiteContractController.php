@@ -48,7 +48,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Show', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract(),
+            'contract' => $site->contract ?? new SiteContract,
         ]);
     }
 
@@ -65,7 +65,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Edit', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract(),
+            'contract' => $site->contract ?? new SiteContract,
         ]);
     }
 
@@ -92,7 +92,7 @@ class SiteContractController extends Controller
             $site->contract()->create($validated);
         }
 
-        return Redirect::route('sites.contracts.show', $site)
+        return Redirect::route('sites.contracts.edit', $site)
             ->with('success', __('Site contract updated successfully.'));
     }
 

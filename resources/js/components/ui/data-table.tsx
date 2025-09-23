@@ -82,11 +82,6 @@ export function DataTable<TData, TValue>({
     manualFiltering: true,
   })
 
-  table.getRowModel().rows.map((row) => (row.getVisibleCells().map((cell) => {
-    const colSize = cell.column.columnDef.size;
-    console.log(colSize);
-
-  })))
 
   return (
     <div className={`space-y-4 ${className || ""}`}>

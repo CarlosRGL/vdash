@@ -1,14 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteContract } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { CalendarDays, HardDrive } from 'lucide-react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 
 interface EditSiteContractProps {
   site: Site;
@@ -21,6 +22,7 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
   // Format date string to YYYY-MM-DD for date input
   const formatDateForInput = (dateString: string | null): string => {
     if (!dateString) return '';
+    console.log(dateString);
 
     try {
       const date = new Date(dateString);
@@ -30,6 +32,10 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
       return '';
     }
   };
+
+  // State for date picker values
+  const [startDate, setStartDate] = useState<Date | undefined>(contract?.contract_start_date ? new Date(contract.contract_start_date) : undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(contract?.contract_end_date ? new Date(contract.contract_end_date) : undefined);
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -57,7 +63,18 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    put(route('sites.contracts.update', site.id), {
+
+    // Prepare the form data with current date values
+    const formData = {
+      contract_start_date: startDate ? formatDateForInput(startDate.toISOString()) : '',
+      contract_end_date: endDate ? formatDateForInput(endDate.toISOString()) : '',
+      contract_capacity: data.contract_capacity,
+      contract_storage_usage: data.contract_storage_usage,
+      contract_storage_limit: data.contract_storage_limit,
+    };
+
+    // Submit the form using router
+    router.put(route('sites.contracts.update', site.id), formData, {
       onSuccess: () => {
         toast.success('Contract information updated successfully.');
       },
@@ -86,11 +103,10 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="contract_start_date">Start Date</Label>
-                  <Input
-                    id="contract_start_date"
-                    type="date"
-                    value={data.contract_start_date}
-                    onChange={(e) => setData('contract_start_date', e.target.value)}
+                  <DatePicker
+                    date={startDate}
+                    onSelect={setStartDate}
+                    placeholder="Select start date"
                     className={errors.contract_start_date ? 'border-red-500' : ''}
                   />
                   {errors.contract_start_date && <p className="text-sm text-red-600">{errors.contract_start_date}</p>}
@@ -98,11 +114,10 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
 
                 <div className="space-y-2">
                   <Label htmlFor="contract_end_date">End Date</Label>
-                  <Input
-                    id="contract_end_date"
-                    type="date"
-                    value={data.contract_end_date}
-                    onChange={(e) => setData('contract_end_date', e.target.value)}
+                  <DatePicker
+                    date={endDate}
+                    onSelect={setEndDate}
+                    placeholder="Select end date (optional)"
                     className={errors.contract_end_date ? 'border-red-500' : ''}
                   />
                   {errors.contract_end_date && <p className="text-sm text-red-600">{errors.contract_end_date}</p>}
