@@ -43,12 +43,6 @@ class SiteSeeder extends Seeder
             // Assign random users to the site
             $site->users()->attach($users->random(rand(1, 3))->pluck('id'));
         }
-
-        // Create some additional factory sites if needed
-        Site::factory(5)
-            ->recycle($users)
-            ->has(SiteCredential::factory(), 'credential')
-            ->create();
     }
 
     /**

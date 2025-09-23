@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -7,8 +8,7 @@ import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { isValid, parseISO } from 'date-fns';
 import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, Server } from 'lucide-react';
-import { SiteTeamBadge, SiteTypeBadge } from './site-badges';
-
+import { SiteTypeBadge } from './site-badges';
 interface SitesTableColumnsProps {
   sorting: {
     field: string;
@@ -123,15 +123,22 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials }: 
         const url = row.original.url as string;
         const team = row.original.team as string;
         return (
-          <div className="flex flex-col gap-2">
-            <span className="flex items-center gap-2 font-medium">
-              <SiteTeamBadge team={team === 'vernalis' ? team.charAt(0).toUpperCase() : 'Q13'} />
-              {name}
-            </span>
-            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-gray-400 underline hover:underline">
-              {url}
-              <ExternalLink className="ml-1 h-3 w-3" />
-            </a>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              <AvatarFallback>{name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="flex items-center gap-2 font-semibold">
+                {name}
+                <Badge variant="outline" className="text-xs">
+                  {team}
+                </Badge>
+              </span>
+              <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center text-gray-400 underline hover:underline">
+                {url}
+                <ExternalLink className="ml-1 h-3 w-3" />
+              </a>
+            </div>
           </div>
         );
       },

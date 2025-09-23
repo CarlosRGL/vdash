@@ -24,7 +24,21 @@ class Site extends Model
         'description',
         'type',
         'team',
+        'wordpress_version',
+        'is_multisite',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_multisite' => 'boolean',
+        ];
+    }
 
     /**
      * Get the credentials associated with the site.

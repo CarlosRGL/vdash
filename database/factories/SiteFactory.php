@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
 use App\Models\Site;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,6 +27,8 @@ class SiteFactory extends Factory
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
             'team' => fake()->randomElement($teams),
+            'wordpress_version' => null,
+            'is_multisite' => false,
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], 'now');
@@ -39,8 +41,32 @@ class SiteFactory extends Factory
      */
     public function wordpress(): static
     {
+        $wordpressVersions = ['6.3.2', '6.4.1', '6.4.2', '6.5.0', '6.5.1', '6.5.2', '6.5.3'];
+
         return $this->state(fn (array $attributes) => [
             'type' => 'WordPress',
+            'wordpress_version' => fake()->randomElement($wordpressVersions),
+            'is_multisite' => fake()->boolean(20), // 20% chance of being multisite
+        ]);
+    }
+
+    /**
+     * Indicate that the WordPress site is a multisite.
+     */
+    public function wordpressMultisite(): static
+    {
+        return $this->wordpress()->state(fn (array $attributes) => [
+            'is_multisite' => true,
+        ]);
+    }
+
+    /**
+     * Indicate that the WordPress site has a specific version.
+     */
+    public function wordpressVersion(string $version): static
+    {
+        return $this->wordpress()->state(fn (array $attributes) => [
+            'wordpress_version' => $version,
         ]);
     }
 
