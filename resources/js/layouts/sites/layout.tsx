@@ -67,7 +67,7 @@ export default function SiteLayout({ children, siteId, siteName }: SiteLayoutPro
 
         <Separator className="my-6 md:hidden" />
 
-        <div className="flex-1">
+        <div className="max-w-4xl flex-1">
           <section className="space-y-12">{children}</section>
         </div>
       </div>

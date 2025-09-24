@@ -135,6 +135,19 @@ export default function EditSite({ site }: EditSiteProps) {
             </form>
           </CardContent>
         </Card>
+        {/* card to delete the ite */}
+        <Card className="mt-6 border-red-600">
+          <CardHeader>
+            <CardTitle className="text-red-600">Delete Site</CardTitle>
+            <CardDescription>Delete this site permanently</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground mb-4 text-sm">Once you delete a site, there is no going back. Please be certain.</p>
+            <Button type="button" variant="destructive" onClick={() => alert('Delete functionality not implemented yet.')}>
+              Delete Site
+            </Button>
+          </CardContent>
+        </Card>
       </SiteLayout>
     </AppLayout>
   );

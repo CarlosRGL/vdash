@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { CirclePlus, X } from 'lucide-react';
+import { Check, CirclePlus, X } from 'lucide-react';
 import { useState } from 'react';
 
 export const SITE_TYPES = [
@@ -68,39 +69,28 @@ export function SiteTypeFilter({ selectedTypes, onTypesChange, className }: Site
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
-        <div className="border-b p-4">
-          <div className="flex items-center justify-between">
-            <h4 className="leading-none font-medium">Site Type</h4>
-            {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearAllTypes} className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs">
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4">
-          <div className="space-y-2">
-            {SITE_TYPES.map((type) => (
-              <div key={type.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`type-${type.value}`}
-                  checked={selectedTypes.includes(type.value)}
-                  onCheckedChange={() => handleTypeToggle(type.value)}
-                />
-                <label
-                  htmlFor={`type-${type.value}`}
-                  className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {type.label}
-                </label>
-              </div>
-            ))}
-          </div>
+        <div className="">
+          <Command>
+            <CommandInput placeholder="Search site types..." />
+            <CommandList>
+              <CommandEmpty>No site types found.</CommandEmpty>
+              <CommandGroup>
+                {SITE_TYPES.map((type) => (
+                  <CommandItem key={type.value} value={type.value} onSelect={() => handleTypeToggle(type.value)}>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox checked={selectedTypes.includes(type.value)} onChange={() => {}} />
+                      <span>{type.label}</span>
+                    </div>
+                    {selectedTypes.includes(type.value) && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
 
           {hasActiveFilters && (
             <>
-              <Separator className="my-4" />
+              <Separator className="my-0" />
               <Button variant="ghost" onClick={clearAllTypes} className="h-8 w-full justify-center text-sm">
                 <X className="mr-2 h-3 w-3" />
                 Clear filters

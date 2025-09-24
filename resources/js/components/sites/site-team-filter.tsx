@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { CirclePlus, X } from 'lucide-react';
+import { Check, CirclePlus, X } from 'lucide-react';
 import { useState } from 'react';
 
 export const SITE_TEAMS = [
@@ -63,35 +64,24 @@ export function SiteTeamFilter({ selectedTeams, onTeamsChange, className }: Site
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
-        <div className="border-b p-4">
-          <div className="flex items-center justify-between">
-            <h4 className="leading-none font-medium">Team</h4>
-            {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearAllTeams} className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs">
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4">
-          <div className="space-y-2">
-            {SITE_TEAMS.map((team) => (
-              <div key={team.value} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`team-${team.value}`}
-                  checked={selectedTeams.includes(team.value)}
-                  onCheckedChange={() => handleTeamToggle(team.value)}
-                />
-                <label
-                  htmlFor={`team-${team.value}`}
-                  className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {team.label}
-                </label>
-              </div>
-            ))}
-          </div>
+        <div className="">
+          <Command>
+            <CommandInput placeholder="Search teams..." />
+            <CommandList>
+              <CommandEmpty>No teams found.</CommandEmpty>
+              <CommandGroup>
+                {SITE_TEAMS.map((team) => (
+                  <CommandItem key={team.value} value={team.value} onSelect={() => handleTeamToggle(team.value)}>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox checked={selectedTeams.includes(team.value)} onChange={() => {}} />
+                      <span>{team.label}</span>
+                    </div>
+                    {selectedTeams.includes(team.value) && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
 
           {hasActiveFilters && (
             <>

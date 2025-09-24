@@ -1,3 +1,4 @@
+import Heading from '@/components/heading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
@@ -52,8 +53,9 @@ function Show({ site }: Props) {
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`${site.name} - Site Details`} />
 
-      <div className="mx-auto flex h-full w-full max-w-[1920px] flex-1 flex-col gap-4 p-4">
+      <div className="flex h-full w-full max-w-[1920px] flex-1 flex-col gap-4 p-4">
         {/* Header */}
+        <Heading title={site.name} description="Manage site details, credentials, and metrics" />
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>

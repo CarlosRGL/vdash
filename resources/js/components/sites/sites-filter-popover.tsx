@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Filter, X } from 'lucide-react';
+import { Check, Filter, X } from 'lucide-react';
 import { useState } from 'react';
 
 export interface SiteFilters {
@@ -39,28 +40,65 @@ export const SYNC_STATUS = [
   { value: false, label: 'Sync Disabled' },
 ];
 
-export function SitesFilterPopover({ filters, onFiltersChange, className }: SitesFilterPopoverProps) {
+interface ComboboxFilterProps<T = string | boolean> {
+  title: string;
+  options: { value: T; label: string }[];
+  selectedValues: T[];
+  onSelectionChange: (values: T[]) => void;
+  placeholder?: string;
+}
+
+function ComboboxFilter<T = string | boolean>({ title, options, selectedValues, onSelectionChange, placeholder }: ComboboxFilterProps<T>) {
   const [open, setOpen] = useState(false);
 
-  const handleTypeToggle = (type: string) => {
-    const newTypes = filters.type.includes(type) ? filters.type.filter((t) => t !== type) : [...filters.type, type];
-
-    onFiltersChange({ ...filters, type: newTypes });
+  const toggleSelection = (value: T) => {
+    const isSelected = selectedValues.includes(value);
+    if (isSelected) {
+      onSelectionChange(selectedValues.filter((v) => v !== value));
+    } else {
+      onSelectionChange([...selectedValues, value]);
+    }
   };
 
-  const handleTeamToggle = (team: string) => {
-    const newTeams = filters.team.includes(team) ? filters.team.filter((t) => t !== team) : [...filters.team, team];
+  return (
+    <div className="space-y-3">
+      <h5 className="text-sm font-medium">{title}</h5>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-full justify-between text-left font-normal">
+            {selectedValues.length > 0
+              ? selectedValues.length === 1
+                ? options.find((option) => option.value === selectedValues[0])?.label
+                : `${selectedValues.length} selected`
+              : placeholder || `Select ${title.toLowerCase()}...`}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[200px] p-0">
+          <Command>
+            <CommandInput placeholder={`Search ${title.toLowerCase()}...`} />
+            <CommandList>
+              <CommandEmpty>No {title.toLowerCase()} found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((option) => (
+                  <CommandItem key={String(option.value)} value={String(option.value)} onSelect={() => toggleSelection(option.value)}>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox checked={selectedValues.includes(option.value)} onChange={() => {}} />
+                      <span>{option.label}</span>
+                    </div>
+                    {selectedValues.includes(option.value) && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}
 
-    onFiltersChange({ ...filters, team: newTeams });
-  };
-
-  const handleSyncToggle = (syncEnabled: boolean) => {
-    const newSync = filters.sync_enabled.includes(syncEnabled)
-      ? filters.sync_enabled.filter((s) => s !== syncEnabled)
-      : [...filters.sync_enabled, syncEnabled];
-
-    onFiltersChange({ ...filters, sync_enabled: newSync });
-  };
+export function SitesFilterPopover({ filters, onFiltersChange, className }: SitesFilterPopoverProps) {
+  const [open, setOpen] = useState(false);
 
   const clearAllFilters = () => {
     onFiltersChange({
@@ -128,74 +166,35 @@ export function SitesFilterPopover({ filters, onFiltersChange, className }: Site
 
         <div className="p-4">
           {/* Site Type Filter */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium">Site Type</h5>
-            <div className="space-y-2">
-              {SITE_TYPES.map((type) => (
-                <div key={type.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`type-${type.value}`}
-                    checked={filters.type.includes(type.value)}
-                    onCheckedChange={() => handleTypeToggle(type.value)}
-                  />
-                  <label
-                    htmlFor={`type-${type.value}`}
-                    className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {type.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ComboboxFilter
+            title="Site Type"
+            options={SITE_TYPES}
+            selectedValues={filters.type}
+            onSelectionChange={(types) => onFiltersChange({ ...filters, type: types })}
+            placeholder="Select site types..."
+          />
 
           <Separator className="my-4" />
 
           {/* Team Filter */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium">Team</h5>
-            <div className="space-y-2">
-              {SITE_TEAMS.map((team) => (
-                <div key={team.value} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`team-${team.value}`}
-                    checked={filters.team.includes(team.value)}
-                    onCheckedChange={() => handleTeamToggle(team.value)}
-                  />
-                  <label
-                    htmlFor={`team-${team.value}`}
-                    className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {team.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ComboboxFilter
+            title="Team"
+            options={SITE_TEAMS}
+            selectedValues={filters.team}
+            onSelectionChange={(teams) => onFiltersChange({ ...filters, team: teams })}
+            placeholder="Select teams..."
+          />
 
           <Separator className="my-4" />
 
           {/* Sync Status Filter */}
-          <div className="space-y-3">
-            <h5 className="text-sm font-medium">Sync Status</h5>
-            <div className="space-y-2">
-              {SYNC_STATUS.map((status) => (
-                <div key={status.value.toString()} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`sync-${status.value}`}
-                    checked={filters.sync_enabled.includes(status.value)}
-                    onCheckedChange={() => handleSyncToggle(status.value)}
-                  />
-                  <label
-                    htmlFor={`sync-${status.value}`}
-                    className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {status.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+          <ComboboxFilter
+            title="Sync Status"
+            options={SYNC_STATUS}
+            selectedValues={filters.sync_enabled}
+            onSelectionChange={(syncEnabled) => onFiltersChange({ ...filters, sync_enabled: syncEnabled })}
+            placeholder="Select sync status..."
+          />
 
           {/* Clear filters button */}
           {hasActiveFilters && (

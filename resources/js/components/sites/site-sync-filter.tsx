@@ -1,10 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { CirclePlus, X } from 'lucide-react';
+import { Check, CirclePlus, X } from 'lucide-react';
 import { useState } from 'react';
 
 export const SYNC_STATUS = [
@@ -65,35 +66,24 @@ export function SiteSyncFilter({ selectedSyncStatus, onSyncStatusChange, classNa
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0" align="start">
-        <div className="border-b p-4">
-          <div className="flex items-center justify-between">
-            <h4 className="leading-none font-medium">Sync Status</h4>
-            {hasActiveFilters && (
-              <Button variant="ghost" onClick={clearAllSync} className="text-muted-foreground hover:text-foreground h-auto p-0 text-xs">
-                Reset
-              </Button>
-            )}
-          </div>
-        </div>
-
-        <div className="p-4">
-          <div className="space-y-2">
-            {SYNC_STATUS.map((status) => (
-              <div key={status.value.toString()} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`sync-${status.value}`}
-                  checked={selectedSyncStatus.includes(status.value)}
-                  onCheckedChange={() => handleSyncToggle(status.value)}
-                />
-                <label
-                  htmlFor={`sync-${status.value}`}
-                  className="text-sm leading-none font-normal peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                  {status.label}
-                </label>
-              </div>
-            ))}
-          </div>
+        <div className="">
+          <Command>
+            <CommandInput placeholder="Search sync status..." />
+            <CommandList>
+              <CommandEmpty>No sync status found.</CommandEmpty>
+              <CommandGroup>
+                {SYNC_STATUS.map((status) => (
+                  <CommandItem key={status.value.toString()} value={status.value.toString()} onSelect={() => handleSyncToggle(status.value)}>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox checked={selectedSyncStatus.includes(status.value)} onChange={() => {}} />
+                      <span>{status.label}</span>
+                    </div>
+                    {selectedSyncStatus.includes(status.value) && <Check className="ml-auto h-4 w-4" />}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
 
           {hasActiveFilters && (
             <>
