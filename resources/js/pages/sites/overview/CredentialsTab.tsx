@@ -4,7 +4,7 @@ import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import { useToast } from '@/hooks/use-toast';
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Copy, Database, Eye, EyeOff, Key, Server, Shield } from 'lucide-react';
+import { Copy, Database, ExternalLink, Eye, EyeOff, Key, Server, Shield } from 'lucide-react';
 
 interface CredentialsTabProps {
   site: Site;
@@ -16,14 +16,67 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility }
   const [copyToClipboard] = useCopyToClipboard();
   const { toast } = useToast();
 
+  const handleCopy = (value: string, label: string) => {
+    copyToClipboard(value).then(() => toast.success(`${label} copied to clipboard`));
+  };
+
+  const CredentialField = ({
+    label,
+    value,
+    type = 'text',
+    isPassword = false,
+    isUrl = false,
+  }: {
+    label: string;
+    value: string;
+    type?: string;
+    isPassword?: boolean;
+    isUrl?: boolean;
+  }) => (
+    <div className="grid grid-cols-3 items-center gap-3 py-2 text-sm">
+      <span className="text-muted-foreground font-medium">{label}</span>
+      <div className="col-span-2 flex items-center gap-2">
+        {isUrl ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 truncate font-mono text-blue-600 hover:underline dark:text-blue-400"
+          >
+            {value}
+          </a>
+        ) : (
+          <span className="flex-1 truncate font-mono">{isPassword && !showPasswords[type] ? '••••••••' : value}</span>
+        )}
+        <div className="flex items-center gap-1">
+          {isPassword && (
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => togglePasswordVisibility(type)}>
+              {showPasswords[type] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+            </Button>
+          )}
+          {isUrl && (
+            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" asChild>
+              <a href={value} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </Button>
+          )}
+          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => handleCopy(value, label)}>
+            <Copy className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   if (!site.credential) {
     return (
       <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12">
-          <Shield className="mb-4 h-12 w-12 text-gray-400" />
-          <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">No credentials found</h3>
-          <p className="mb-4 text-center text-gray-600 dark:text-gray-400">No credentials have been added for this site yet.</p>
-          <Button asChild>
+        <CardContent className="flex flex-col items-center justify-center py-8">
+          <Shield className="text-muted-foreground mb-3 h-10 w-10" />
+          <h3 className="mb-2 text-base font-semibold">No credentials found</h3>
+          <p className="text-muted-foreground mb-4 text-center text-sm">No credentials have been added for this site yet.</p>
+          <Button asChild size="sm">
             <Link href={`/sites/${site.id}/credentials/create`}>Add Credentials</Link>
           </Button>
         </CardContent>
@@ -31,215 +84,60 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility }
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-      {/* FTP Credentials */}
-      {(site.credential.ftp_host || site.credential.ftp_username) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Server className="h-5 w-5" />
-              FTP Access
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {site.credential.ftp_host && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Host:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.ftp_host}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.ftp_host!).then(() => toast.success('FTP host copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.ftp_username && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Username:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.ftp_username}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.ftp_username!).then(() => toast.success('FTP username copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.ftp_password && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Password:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{showPasswords.ftp_password ? site.credential.ftp_password : '••••••••'}</span>
-                  <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('ftp_password')}>
-                    {showPasswords.ftp_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.ftp_password!).then(() => toast.success('FTP password copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+  const credential = site.credential;
+  const hasFtp = credential.ftp_host || credential.ftp_username || credential.ftp_password;
+  const hasDb = credential.db_host || credential.db_name || credential.db_username || credential.db_password;
+  const hasLogin = credential.login_url || credential.login_username || credential.login_password;
 
-      {/* Database Credentials */}
-      {(site.credential.db_host || site.credential.db_name) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              Database Access
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {site.credential.db_host && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Host:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.db_host}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.db_host!).then(() => toast.success('DB host copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.db_name && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Database:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.db_name}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.db_name!).then(() => toast.success('DB name copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.db_username && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Username:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.db_username}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.db_username!).then(() => toast.success('DB username copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.db_password && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Password:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{showPasswords.db_password ? site.credential.db_password : '••••••••'}</span>
-                  <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('db_password')}>
-                    {showPasswords.db_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.db_password!).then(() => toast.success('DB password copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Login Credentials */}
-      {(site.credential.login_url || site.credential.login_username) && (
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Key className="h-5 w-5" />
-              Login Access
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {site.credential.login_url && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Login URL:</span>
-                <div className="flex items-center gap-2">
-                  <a
-                    href={site.credential.login_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-mono text-sm text-blue-600 hover:underline dark:text-blue-400"
-                  >
-                    {site.credential.login_url}
-                  </a>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.login_url!).then(() => toast.success('Login URL copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.login_username && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Username:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{site.credential.login_username}</span>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.login_username!).then(() => toast.success('Login Username copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-            {site.credential.login_password && (
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Password:</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{showPasswords.login_password ? site.credential.login_password : '••••••••'}</span>
-                  <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('login_password')}>
-                    {showPasswords.login_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => copyToClipboard(site.credential!.login_password!).then(() => toast.success('Login Password copied to clipboard'))}
-                  >
-                    <Copy className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+  const SectionHeader = ({ icon: Icon, title }: { icon: React.ComponentType<{ className?: string }>; title: string }) => (
+    <div className="flex items-center gap-2 pt-6 pb-3 first:pt-0">
+      <Icon className="text-muted-foreground h-4 w-4" />
+      <span className="text-muted-foreground text-sm font-medium">{title}</span>
     </div>
+  );
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Shield className="h-4 w-4" />
+          Site Credentials
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        <div className="divide-border/50 divide-y">
+          {/* FTP Credentials */}
+          {hasFtp && (
+            <>
+              <SectionHeader icon={Server} title="FTP Access" />
+              {credential.ftp_host && <CredentialField label="Host" value={credential.ftp_host} />}
+              {credential.ftp_username && <CredentialField label="Username" value={credential.ftp_username} />}
+              {credential.ftp_password && <CredentialField label="Password" value={credential.ftp_password} type="ftp_password" isPassword />}
+            </>
+          )}
+
+          {/* Database Credentials */}
+          {hasDb && (
+            <>
+              <SectionHeader icon={Database} title="Database Access" />
+              {credential.db_host && <CredentialField label="Host" value={credential.db_host} />}
+              {credential.db_name && <CredentialField label="Database" value={credential.db_name} />}
+              {credential.db_username && <CredentialField label="Username" value={credential.db_username} />}
+              {credential.db_password && <CredentialField label="Password" value={credential.db_password} type="db_password" isPassword />}
+            </>
+          )}
+
+          {/* Login Credentials */}
+          {hasLogin && (
+            <>
+              <SectionHeader icon={Key} title="Login Access" />
+              {credential.login_url && <CredentialField label="URL" value={credential.login_url} isUrl />}
+              {credential.login_username && <CredentialField label="Username" value={credential.login_username} />}
+              {credential.login_password && <CredentialField label="Password" value={credential.login_password} type="login_password" isPassword />}
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

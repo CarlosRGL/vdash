@@ -56,7 +56,6 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
               )}
               {site.server_info?.server_hostname && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Hostname:</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm">{site.server_info.server_hostname}</span>
                     <Button

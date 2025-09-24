@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site } from '@/types';
@@ -17,6 +18,7 @@ type SiteType = 'WordPress' | 'Drupal' | 'SPIP' | 'Typo3' | 'laravel' | 'symfony
 type SiteTeam = 'quai13' | 'vernalis';
 
 export default function EditSite({ site }: EditSiteProps) {
+  useToast();
   const breadcrumbs: BreadcrumbItem[] = [
     {
       title: 'Sites',

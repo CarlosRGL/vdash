@@ -95,7 +95,7 @@ class SiteController extends Controller
         $site->users()->sync($userIds);
 
 
-        return Inertia::render('sites/Show', [
+        return Inertia::render('sites/Edit', [
             'site' => $site,
             'flash' => [
                 'toast' => [
