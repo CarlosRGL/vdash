@@ -1,4 +1,4 @@
-import { SiteCredentialsSheet, createSitesTableColumns } from '@/components/sites';
+import { SiteCredentialsSheet, SiteSyncFilter, SiteTeamFilter, SiteTypeFilter, createSitesTableColumns, type SiteFilters } from '@/components/sites';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 
@@ -6,6 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { PaginationState, VisibilityState } from '@tanstack/react-table';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -38,6 +39,9 @@ interface SitesPageProps {
   };
   filters: {
     search: string;
+    type: string[];
+    team: string[];
+    sync_enabled: boolean[];
     sortField: string;
     sortDirection: string;
     perPage: number;
@@ -46,6 +50,11 @@ interface SitesPageProps {
 
 export default function SitesPage({ sites, filters }: SitesPageProps) {
   const [searchValue, setSearchValue] = useState(filters.search);
+  const [siteFilters, setSiteFilters] = useState<SiteFilters>({
+    type: filters.type || [],
+    team: filters.team || [],
+    sync_enabled: filters.sync_enabled || [],
+  });
   const [pagination, setPagination] = useState<PaginationState>({
     pageIndex: sites.current_page - 1,
     pageSize: sites.per_page,
@@ -91,6 +100,9 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
       route('sites.index'),
       {
         search: debouncedSearchValue,
+        type: siteFilters.type,
+        team: siteFilters.team,
+        sync_enabled: siteFilters.sync_enabled,
         page: pagination.pageIndex + 1,
         perPage: pagination.pageSize,
         sortField: sorting.field,
@@ -102,7 +114,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
         only: ['sites', 'filters'],
       },
     );
-  }, [debouncedSearchValue, pagination.pageIndex, pagination.pageSize, sorting.field, sorting.direction]);
+  }, [debouncedSearchValue, siteFilters, pagination.pageIndex, pagination.pageSize, sorting.field, sorting.direction]);
 
   const handleShowCredentials = (site: Site) => {
     const cred =
@@ -162,8 +174,19 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
           searchPlaceholder="Search sites..."
           // columnGroups={columnGroups}
           // alwaysVisibleColumns={alwaysVisibleColumns}
+          leftActions={
+            <>
+              <SiteTypeFilter selectedTypes={siteFilters.type} onTypesChange={(types) => setSiteFilters({ ...siteFilters, type: types })} />
+              <SiteTeamFilter selectedTeams={siteFilters.team} onTeamsChange={(teams) => setSiteFilters({ ...siteFilters, team: teams })} />
+              <SiteSyncFilter
+                selectedSyncStatus={siteFilters.sync_enabled}
+                onSyncStatusChange={(syncStatus) => setSiteFilters({ ...siteFilters, sync_enabled: syncStatus })}
+              />
+            </>
+          }
           toolbarActions={
             <Button>
+              <Plus />
               <Link href={route('sites.create')}>Create Site</Link>
             </Button>
           }

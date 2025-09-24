@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Table } from "@tanstack/react-table"
-import { Search, ChevronDown } from "lucide-react"
+import { Search, ChevronDown, Settings2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,6 +30,7 @@ interface DataTableToolbarProps<TData> {
   perPage: number
   onPerPageChange: (perPage: string) => void
   showColumnVisibility?: boolean
+  leftActions?: React.ReactNode
   actions?: React.ReactNode
   columnGroups?: ColumnGroup[]
   alwaysVisibleColumns?: string[]
@@ -43,6 +44,7 @@ export function DataTableToolbar<TData>({
   perPage,
   onPerPageChange,
   showColumnVisibility = true,
+  leftActions,
   actions,
   columnGroups = [],
   alwaysVisibleColumns = [],
@@ -98,6 +100,7 @@ export function DataTableToolbar<TData>({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-4">
+
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-gray-500" />
           <Input
@@ -108,17 +111,10 @@ export function DataTableToolbar<TData>({
             className="w-64"
           />
         </div>
-        <Select value={perPage.toString()} onValueChange={onPerPageChange}>
-          <SelectTrigger className="min-w-[130px]">
-            <SelectValue placeholder="Rows per page" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="5">5 per page</SelectItem>
-            <SelectItem value="10">10 per page</SelectItem>
-            <SelectItem value="25">25 per page</SelectItem>
-            <SelectItem value="50">50 per page</SelectItem>
-          </SelectContent>
-        </Select>
+
+
+        {leftActions && <div className="flex items-center gap-2">{leftActions}</div>}
+      </div>
 
         {/* Column Group Toggle Buttons */}
         {columnGroups.length > 0 && (
@@ -141,7 +137,8 @@ export function DataTableToolbar<TData>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Columns <ChevronDown className="ml-2 h-4 w-4" />
+                <Settings2 />
+                View
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -165,8 +162,8 @@ export function DataTableToolbar<TData>({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-      </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
+
     </div>
   )
 }

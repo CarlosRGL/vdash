@@ -35,10 +35,39 @@ class SiteController extends Controller
             });
         }
 
+        // Apply type filter
+        if ($request->has('type') && is_array($request->input('type')) && count($request->input('type')) > 0) {
+            $types = $request->input('type');
+            $query->whereIn('type', $types);
+        }
+
+        // Apply team filter
+        if ($request->has('team') && is_array($request->input('team')) && count($request->input('team')) > 0) {
+            $teams = $request->input('team');
+            $query->whereIn('team', $teams);
+        }
+
+        // Apply sync enabled filter
+        if (
+            $request->has('sync_enabled') &&
+            is_array($request->input('sync_enabled')) &&
+            count($request->input('sync_enabled')) > 0
+        ) {
+            $syncEnabled = $request->input('sync_enabled');
+            $query->where(function ($q) use ($syncEnabled) {
+                foreach ($syncEnabled as $enabled) {
+                    $q->orWhere('sync_enabled', filter_var($enabled, FILTER_VALIDATE_BOOLEAN));
+                }
+            });
+        }
+
         // Apply sorting
         $sortField = $request->input('sortField', 'name');
         $sortDirection = $request->input('sortDirection', 'asc');
-        $allowedSortFields = ['name', 'url', 'type', 'team', 'created_at', 'php_version', 'last_check', 'contract_start_date', 'contract_end_date'];
+        $allowedSortFields = [
+            'name', 'url', 'type', 'team', 'created_at',
+            'php_version', 'last_check', 'contract_start_date', 'contract_end_date',
+        ];
 
         if (in_array($sortField, $allowedSortFields)) {
             $query->orderBy($sortField, $sortDirection);
@@ -54,6 +83,9 @@ class SiteController extends Controller
             'sites' => $sites,
             'filters' => [
                 'search' => $request->input('search', ''),
+                'type' => $request->input('type', []),
+                'team' => $request->input('team', []),
+                'sync_enabled' => $request->input('sync_enabled', []),
                 'sortField' => $sortField,
                 'sortDirection' => $sortDirection,
                 'perPage' => (int) $perPage,
@@ -93,7 +125,6 @@ class SiteController extends Controller
         // Assign users to the site
         $userIds = $validated['user_ids'] ?? [Auth::id()];
         $site->users()->sync($userIds);
-
 
         return Inertia::render('sites/Edit', [
             'site' => $site,
@@ -285,8 +316,6 @@ class SiteController extends Controller
         if (Gate::denies('update', $site)) {
             abort(403);
         }
-
-
 
         return Inertia::render('sites/api-sync/Edit', [
             'site' => $site,

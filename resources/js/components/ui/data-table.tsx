@@ -35,6 +35,7 @@ interface DataTableProps<TData, TValue> {
   onSearchChange?: (value: string) => void
   searchPlaceholder?: string
   showColumnVisibility?: boolean
+  leftActions?: React.ReactNode
   toolbarActions?: React.ReactNode
   className?: string
   columnGroups?: ColumnGroup[]
@@ -59,6 +60,7 @@ export function DataTable<TData, TValue>({
   onSearchChange,
   searchPlaceholder,
   showColumnVisibility = true,
+  leftActions,
   toolbarActions,
   className,
   columnGroups = [],
@@ -100,6 +102,7 @@ export function DataTable<TData, TValue>({
             }));
           }}
           showColumnVisibility={showColumnVisibility}
+          leftActions={leftActions}
           actions={toolbarActions}
           columnGroups={columnGroups}
           alwaysVisibleColumns={alwaysVisibleColumns}
