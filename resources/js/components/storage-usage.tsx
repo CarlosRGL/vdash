@@ -78,7 +78,7 @@ export default function StorageUsage({ storageUsage }: StorageUsageProps) {
       </CardHeader>
       <CardContent className="flex-1">
         <ScrollArea className="h-64">
-          <div className="space-y-4">
+          <div className="space-y-4 px-4">
             {storageUsage.slice(0, 8).map((site) => (
               <div
                 key={site.site_id}

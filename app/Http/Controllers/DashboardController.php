@@ -44,7 +44,7 @@ class DashboardController extends Controller
                     'site_id' => $contract->site_id,
                     'contract_end_date' => $contract->contract_end_date->format('Y-m-d'),
                     'contract_end_date_formatted' => $contract->contract_end_date->format('M j, Y'),
-                    'days_remaining' => max(0, $daysRemaining),
+                    'days_remaining' => max(0, (int) $daysRemaining),
                     'is_urgent' => $daysRemaining <= 7,
                 ];
             });

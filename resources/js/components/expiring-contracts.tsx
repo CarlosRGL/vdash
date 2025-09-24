@@ -60,7 +60,7 @@ export default function ExpiringContracts({ expiringContracts }: ExpiringContrac
       </CardHeader>
       <CardContent className="flex-1">
         <ScrollArea className="h-64">
-          <div className="space-y-3">
+          <div className="space-y-3 px-4">
             {expiringContracts.slice(0, 8).map((contract) => (
               <div
                 key={contract.site_id}

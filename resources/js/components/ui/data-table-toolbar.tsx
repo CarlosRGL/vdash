@@ -103,7 +103,7 @@ export function DataTableToolbar<TData>({
           <Input
             type="search"
             placeholder={searchPlaceholder}
-            value={searchValue}
+            value={searchValue || ''}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-64"
           />
