@@ -69,6 +69,7 @@ export interface Site {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
+  wordpress_version?: string | null;
   [key: string]: unknown;
 }
 

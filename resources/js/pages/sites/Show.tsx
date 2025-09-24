@@ -1,38 +1,18 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ExternalLink, Globe } from 'lucide-react';
 import { useState } from 'react';
-import { ContractTab, CredentialsTab, OverviewTab, ServerInfoTab, UsersTab } from './overview';
+import { CredentialsTab, OverviewTab } from './overview';
 
 interface Props {
   site: Site;
 }
 
 function Show({ site }: Props) {
-  useToast();
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
-
-  const togglePasswordVisibility = (field: string) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      // You might want to add a toast notification here
-    } catch (err) {
-      console.error('Failed to copy text: ', err);
-    }
-  };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -61,6 +41,13 @@ function Show({ site }: Props) {
     },
   ];
 
+  const togglePasswordVisibility = (field: string) => {
+    setShowPasswords((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title={`${site.name} - Site Details`} />
@@ -87,6 +74,16 @@ function Show({ site }: Props) {
                 {site.type && <Badge variant="secondary">{site.type}</Badge>}
                 {site.team && <Badge variant="outline">{site.team}</Badge>}
               </div>
+              <div className="mt-4 flex space-x-4 text-sm text-gray-500 dark:text-gray-400">
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</label>
+                  <p className="text-sm">{formatDate(site.created_at)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</label>
+                  <p className="text-sm">{formatDate(site.updated_at)}</p>
+                </div>
+              </div>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" asChild>
@@ -105,46 +102,8 @@ function Show({ site }: Props) {
           )}
         </div>
 
-        {/* Tabs */}
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="mb-10 grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="credentials">Credentials</TabsTrigger>
-            <TabsTrigger value="server">Server Info</TabsTrigger>
-            <TabsTrigger value="contract">Contract</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <OverviewTab site={site} copyToClipboard={copyToClipboard} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
-          </TabsContent>
-
-          {/* Credentials Tab */}
-          <TabsContent value="credentials" className="space-y-6">
-            <CredentialsTab
-              site={site}
-              showPasswords={showPasswords}
-              togglePasswordVisibility={togglePasswordVisibility}
-              copyToClipboard={copyToClipboard}
-            />
-          </TabsContent>
-
-          {/* Server Info Tab */}
-          <TabsContent value="server" className="space-y-6">
-            <ServerInfoTab site={site} copyToClipboard={copyToClipboard} />
-          </TabsContent>
-
-          {/* Contract Tab */}
-          <TabsContent value="contract" className="space-y-6">
-            <ContractTab site={site} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
-          </TabsContent>
-
-          {/* Users Tab */}
-          <TabsContent value="users" className="space-y-6">
-            <UsersTab site={site} />
-          </TabsContent>
-        </Tabs>
+        <OverviewTab site={site} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
+        <CredentialsTab site={site} showPasswords={showPasswords} togglePasswordVisibility={togglePasswordVisibility} />
       </div>
     </AppLayout>
   );

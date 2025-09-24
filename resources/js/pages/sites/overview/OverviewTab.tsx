@@ -1,6 +1,8 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useToast } from '@/hooks/use-toast';
 import { getMonthsLeft } from '@/lib/utils';
 import { type Site } from '@/types';
 import { Copy, Globe, HardDrive, RefreshCw, Server } from 'lucide-react';
@@ -8,12 +10,15 @@ import { SyncButton } from './SyncButton';
 
 interface OverviewTabProps {
   site: Site;
-  copyToClipboard: (text: string) => void;
+
   formatDate: (dateString: string) => string;
   getStoragePercentage: () => number;
 }
 
-export function OverviewTab({ site, copyToClipboard, formatDate, getStoragePercentage }: OverviewTabProps) {
+export function OverviewTab({ site, formatDate, getStoragePercentage }: OverviewTabProps) {
+  const { toast } = useToast();
+  const [copy] = useCopyToClipboard();
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -37,10 +42,13 @@ export function OverviewTab({ site, copyToClipboard, formatDate, getStoragePerce
               </div>
               {site.server_info?.server_ip && (
                 <div>
-                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Server IP:</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm">{site.server_info.server_ip}</span>
-                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.server_info!.server_ip!)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copy(site.server_info!.server_ip!).then(() => toast.success(`server IP copied to clipboard`))}
+                    >
                       <Copy className="size-2" />
                     </Button>
                   </div>
@@ -51,7 +59,11 @@ export function OverviewTab({ site, copyToClipboard, formatDate, getStoragePerce
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Hostname:</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm">{site.server_info.server_hostname}</span>
-                    <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.server_info!.server_hostname!)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => copy(site.server_info!.server_hostname!).then(() => toast.success(`server hostname copied to clipboard`))}
+                    >
                       <Copy className="size-2" />
                     </Button>
                   </div>
@@ -168,31 +180,6 @@ export function OverviewTab({ site, copyToClipboard, formatDate, getStoragePerce
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Site Information</CardTitle>
-          <CardDescription>Basic details about this site</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Created</label>
-              <p className="text-sm">{formatDate(site.created_at)}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Last Updated</label>
-              <p className="text-sm">{formatDate(site.updated_at)}</p>
-            </div>
-          </div>
-          {site.description && (
-            <div>
-              <label className="text-sm font-medium text-gray-500 dark:text-gray-400">Description</label>
-              <p className="mt-1 text-sm">{site.description}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }

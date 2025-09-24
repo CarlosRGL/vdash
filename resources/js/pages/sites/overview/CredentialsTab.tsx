@@ -1,5 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useToast } from '@/hooks/use-toast';
 import { type Site } from '@/types';
 import { Link } from '@inertiajs/react';
 import { Copy, Database, Eye, EyeOff, Key, Server, Shield } from 'lucide-react';
@@ -8,10 +10,12 @@ interface CredentialsTabProps {
   site: Site;
   showPasswords: { [key: string]: boolean };
   togglePasswordVisibility: (field: string) => void;
-  copyToClipboard: (text: string) => void;
 }
 
-export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, copyToClipboard }: CredentialsTabProps) {
+export function CredentialsTab({ site, showPasswords, togglePasswordVisibility }: CredentialsTabProps) {
+  const [copyToClipboard] = useCopyToClipboard();
+  const { toast } = useToast();
+
   if (!site.credential) {
     return (
       <Card>
@@ -44,7 +48,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Host:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.ftp_host}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.ftp_host!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.ftp_host!).then(() => toast.success('FTP host copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -55,7 +63,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Username:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.ftp_username}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.ftp_username!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.ftp_username!).then(() => toast.success('FTP username copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -69,7 +81,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                   <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('ftp_password')}>
                     {showPasswords.ftp_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.ftp_password!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.ftp_password!).then(() => toast.success('FTP password copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -94,7 +110,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Host:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.db_host}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.db_host!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.db_host!).then(() => toast.success('DB host copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -105,7 +125,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Database:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.db_name}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.db_name!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.db_name!).then(() => toast.success('DB name copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -116,7 +140,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Username:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.db_username}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.db_username!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.db_username!).then(() => toast.success('DB username copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -130,7 +158,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                   <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('db_password')}>
                     {showPasswords.db_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.db_password!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.db_password!).then(() => toast.success('DB password copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -162,7 +194,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                   >
                     {site.credential.login_url}
                   </a>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.login_url!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.login_url!).then(() => toast.success('Login URL copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -173,7 +209,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                 <span className="text-sm font-medium">Username:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{site.credential.login_username}</span>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.login_username!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.login_username!).then(() => toast.success('Login Username copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
@@ -187,7 +227,11 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility, 
                   <Button size="sm" variant="ghost" onClick={() => togglePasswordVisibility('login_password')}>
                     {showPasswords.login_password ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </Button>
-                  <Button size="sm" variant="ghost" onClick={() => copyToClipboard(site.credential!.login_password!)}>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => copyToClipboard(site.credential!.login_password!).then(() => toast.success('Login Password copied to clipboard'))}
+                  >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
