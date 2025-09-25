@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Site;
-use App\Models\SiteCredential;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -33,11 +32,6 @@ class SiteSeeder extends Seeder
                 'type' => $siteData['type'],
                 'team' => $siteData['team'],
                 'description' => $siteData['description'] ?? null,
-            ]);
-
-            // Create credentials for each site
-            SiteCredential::factory()->create([
-                'site_id' => $site->id,
             ]);
 
             // Assign random users to the site
