@@ -34,8 +34,9 @@ class SiteSeeder extends Seeder
                 'description' => $siteData['description'] ?? null,
             ]);
 
-            // Assign random users to the site
-            $site->users()->attach($users->random(rand(1, 3))->pluck('id'));
+            // Assign random users to the site (ensure we don't request more users than available)
+            $userCount = min(rand(1, 3), $users->count());
+            $site->users()->attach($users->random($userCount)->pluck('id'));
         }
     }
 

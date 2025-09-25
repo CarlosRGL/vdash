@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Site;
-use App\Models\SiteContract;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -14,26 +12,11 @@ class SiteContractSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get all sites that don't already have contracts
-        $sitesWithoutContracts = Site::whereDoesntHave('contract')->get();
+        // No dummy contracts will be created during seeding
+        // Contracts should be created manually through the application
+        // or via specific data imports when real contract information is available
 
-        $this->command->info("Found {$sitesWithoutContracts->count()} sites without contracts.");
-
-        // Create contracts for approximately 70% of sites (some sites might not have contracts)
-        $sitesToCreateContractsFor = $sitesWithoutContracts->random(
-            min($sitesWithoutContracts->count(), (int) ($sitesWithoutContracts->count() * 0.7))
-        );
-
-        $this->command->info("Creating contracts for {$sitesToCreateContractsFor->count()} sites...");
-
-        $sitesToCreateContractsFor->each(function (Site $site) {
-            SiteContract::factory()->create([
-                'site_id' => $site->id,
-            ]);
-
-            $this->command->info("Created contract for site: {$site->name}");
-        });
-
-        $this->command->info('Site contracts seeded successfully!');
+        $this->command->info('SiteContractSeeder: Skipping dummy contract creation.');
+        $this->command->info('Contracts will be created manually when real contract data is available.');
     }
 }
