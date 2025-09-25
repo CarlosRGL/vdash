@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -29,7 +30,7 @@ class UserController extends Controller
         if ($search) {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
@@ -137,6 +138,30 @@ class UserController extends Controller
             'type' => 'success',
             'message' => 'User updated successfully',
             'description' => "The user {$request->name} has been updated.",
+        ]);
+    }
+
+    /**
+     * Remove the specified user from storage.
+     */
+    public function destroy(User $user): RedirectResponse
+    {
+        if (request()->user()?->is($user)) {
+            return to_route('users.edit', $user)->with('toast', [
+                'type' => 'error',
+                'message' => 'Unable to delete user',
+                'description' => 'You cannot delete your own account from this screen.',
+            ]);
+        }
+
+        $userName = $user->name;
+
+        $user->delete();
+
+        return to_route('users.index')->with('toast', [
+            'type' => 'success',
+            'message' => 'User deleted successfully',
+            'description' => "The user {$userName} has been removed from the system.",
         ]);
     }
 }
