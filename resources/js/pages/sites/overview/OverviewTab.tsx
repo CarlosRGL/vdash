@@ -122,7 +122,7 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
             <HardDrive className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">
+            <div className="mb-5 text-lg font-bold">
               {site.contract?.contract_storage_usage && site.contract?.contract_storage_limit ? (
                 <div className="space-y-2">
                   <span>{getStoragePercentage().toFixed(1)}%</span>
@@ -142,11 +142,13 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
                 <span className="text-gray-500">Not available</span>
               )}
             </div>
-            <div className="text-sm">
+            <div className="mb-4 text-sm">
               <span className="font-medium">From</span> {site.contract?.contract_start_date ? formatDate(site.contract.contract_start_date) : 'N/A'}{' '}
               to {site.contract?.contract_end_date ? formatDate(site.contract.contract_end_date) : 'N/A'}
             </div>
-            {site.contract?.contract_end_date && <div className="text-sm">{getMonthsLeft(site.contract.contract_end_date)} left</div>}
+            <div className="">
+              {site.contract?.contract_end_date && <div className="text-sm">{getMonthsLeft(site.contract.contract_end_date)} left</div>}
+            </div>
           </CardContent>
         </Card>
 
