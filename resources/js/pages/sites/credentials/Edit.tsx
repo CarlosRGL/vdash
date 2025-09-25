@@ -3,12 +3,40 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 import { Check, Copy } from 'lucide-react';
-import { FormEvent } from 'react';
+import { ChangeEvent, FormEvent } from 'react';
+
+interface InputWithCopyProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  onCopy: () => void;
+  copied: boolean;
+  type?: string;
+  placeholder?: string;
+  error?: string | null;
+}
+
+function InputWithCopy({ id, label, value, onChange, onCopy, copied, type = 'text', placeholder = '', error = null }: InputWithCopyProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="flex">
+        <Input id={id} type={type} placeholder={placeholder} value={value} onChange={onChange} className="rounded-r-none" />
+        <Button type="button" variant="outline" size="icon" className="rounded-l-none border-l-0" onClick={onCopy} disabled={!value}>
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+      {error && <p className="text-sm text-red-500">{error}</p>}
+    </div>
+  );
+}
 
 interface EditSiteCredentialsProps {
   site: Site;
@@ -17,7 +45,7 @@ interface EditSiteCredentialsProps {
 
 export default function EditSiteCredentials({ site, credentials }: EditSiteCredentialsProps) {
   const [copy, isCopied] = useCopyToClipboard();
-  // const { toast } = useToast();
+  const { toast } = useToast();
 
   const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -54,42 +82,24 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
     put(route('sites.credentials.update', site.id));
   };
 
-  // Helper component for input fields with copy button
-  const InputWithCopy = ({
-    id,
-    label,
-    value,
-    onChange,
-    type = 'text',
-    placeholder = '',
-    error = null,
-  }: {
-    id: string;
-    label: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    type?: string;
-    placeholder?: string;
-    error?: string | null;
-  }) => (
-    <div className="flex flex-col gap-2">
-      <Label htmlFor={id}>{label}</Label>
-      <div className="flex">
-        <Input id={id} type={type} placeholder={placeholder} value={value} onChange={onChange} className="rounded-r-none" />
-        <Button
-          type="button"
-          variant="outline"
-          size="icon"
-          className="rounded-l-none border-l-0"
-          onClick={() => copy(value).then(() => toast.success('Copied to clipboard', { description: `${label} has been copied to clipboard.` }))}
-          disabled={!value}
-        >
-          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-        </Button>
-      </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-    </div>
-  );
+  const handleCopy = async (label: string, value: string) => {
+    if (!value) {
+      return;
+    }
+
+    const copied = await copy(value);
+
+    if (copied) {
+      toast.success('Copied to clipboard', {
+        description: `${label} has been copied to clipboard.`,
+      });
+      return;
+    }
+
+    toast.error('Unable to copy to clipboard', {
+      description: `We couldn't copy the value for ${label}.`,
+    });
+  };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -112,6 +122,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="ftp.example.com"
                     value={data.ftp_host}
                     onChange={(e) => setData('ftp_host', e.target.value)}
+                    onCopy={() => handleCopy('FTP Host', data.ftp_host)}
+                    copied={isCopied}
                     error={errors.ftp_host}
                   />
                   <InputWithCopy
@@ -120,6 +132,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="username"
                     value={data.ftp_username}
                     onChange={(e) => setData('ftp_username', e.target.value)}
+                    onCopy={() => handleCopy('FTP Username', data.ftp_username)}
+                    copied={isCopied}
                     error={errors.ftp_username}
                   />
                   <InputWithCopy
@@ -128,6 +142,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     type="password"
                     value={data.ftp_password}
                     onChange={(e) => setData('ftp_password', e.target.value)}
+                    onCopy={() => handleCopy('FTP Password', data.ftp_password)}
+                    copied={isCopied}
                     error={errors.ftp_password}
                   />
                 </div>
@@ -143,6 +159,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="localhost"
                     value={data.db_host}
                     onChange={(e) => setData('db_host', e.target.value)}
+                    onCopy={() => handleCopy('Database Host', data.db_host)}
+                    copied={isCopied}
                     error={errors.db_host}
                   />
                   <InputWithCopy
@@ -151,6 +169,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="database_name"
                     value={data.db_name}
                     onChange={(e) => setData('db_name', e.target.value)}
+                    onCopy={() => handleCopy('Database Name', data.db_name)}
+                    copied={isCopied}
                     error={errors.db_name}
                   />
                   <InputWithCopy
@@ -159,6 +179,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="db_user"
                     value={data.db_username}
                     onChange={(e) => setData('db_username', e.target.value)}
+                    onCopy={() => handleCopy('Database Username', data.db_username)}
+                    copied={isCopied}
                     error={errors.db_username}
                   />
                   <InputWithCopy
@@ -167,6 +189,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     type="password"
                     value={data.db_password}
                     onChange={(e) => setData('db_password', e.target.value)}
+                    onCopy={() => handleCopy('Database Password', data.db_password)}
+                    copied={isCopied}
                     error={errors.db_password}
                   />
                 </div>
@@ -182,6 +206,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="https://example.com/wp-admin"
                     value={data.login_url}
                     onChange={(e) => setData('login_url', e.target.value)}
+                    onCopy={() => handleCopy('Login URL', data.login_url)}
+                    copied={isCopied}
                     error={errors.login_url}
                   />
                   <InputWithCopy
@@ -190,6 +216,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     placeholder="admin"
                     value={data.login_username}
                     onChange={(e) => setData('login_username', e.target.value)}
+                    onCopy={() => handleCopy('Login Username', data.login_username)}
+                    copied={isCopied}
                     error={errors.login_username}
                   />
                   <InputWithCopy
@@ -198,6 +226,8 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
                     type="password"
                     value={data.login_password}
                     onChange={(e) => setData('login_password', e.target.value)}
+                    onCopy={() => handleCopy('Login Password', data.login_password)}
+                    copied={isCopied}
                     error={errors.login_password}
                   />
                 </div>
