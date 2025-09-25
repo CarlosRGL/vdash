@@ -1,6 +1,7 @@
 import { SiteCredentialsSheet, SiteSyncFilter, SiteTeamFilter, SiteTypeFilter, createSitesTableColumns, type SiteFilters } from '@/components/sites';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import { useToast } from '@/hooks/use-toast';
 
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site, type SiteCredential } from '@/types';
@@ -69,21 +70,7 @@ export default function SitesPage({ sites, filters }: SitesPageProps) {
   const [selectedSiteName, setSelectedSiteName] = useState<string>('');
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
-  // Define column groups for the sites table
-  const columnGroups = [
-    {
-      id: 'server',
-      label: 'Server',
-      columns: ['php_info', 'mysql_info', 'server_details'],
-    },
-    {
-      id: 'contract',
-      label: 'Contract',
-      columns: ['contract_info', 'storage_usage'],
-    },
-  ];
-
-  const alwaysVisibleColumns = ['name', 'type', 'clients', 'actions'];
+  useToast();
 
   // Debounce search input
   useEffect(() => {

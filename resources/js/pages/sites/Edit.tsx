@@ -1,5 +1,8 @@
+import HeadingSmall from '@/components/heading-small';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,7 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import SiteLayout from '@/layouts/sites/layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import { FormEvent, FormEventHandler, useRef } from 'react';
 
 interface EditSiteProps {
   site: Site;
@@ -33,20 +36,45 @@ export default function EditSite({ site }: EditSiteProps) {
       href: `/sites/${site.id}/edit`,
     },
   ];
-
-  const { setData, data, put, processing, errors } = useForm({
+  const passwordInput = useRef<HTMLInputElement>(null);
+  const closeModal = () => {
+    clearErrors();
+    reset();
+  };
+  const {
+    setData,
+    data,
+    put,
+    delete: destroy,
+    processing,
+    reset,
+    errors,
+    clearErrors,
+  } = useForm({
     name: site.name,
     url: site.url,
     description: site.description || '',
     type: site.type as SiteType,
     team: site.team as SiteTeam,
     sync_enabled: site.sync_enabled || false,
+    password: '',
     api_token: site.api_token || 'SEec1oWGvJWmpja4CnWId6ONRwyWFkSF',
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     put(route('sites.update', site.id));
+  };
+
+  const deleteUser: FormEventHandler = (e) => {
+    e.preventDefault();
+
+    destroy(route('sites.destroy', site.id), {
+      preserveScroll: true,
+      onSuccess: () => closeModal(),
+      onError: () => passwordInput.current?.focus(),
+      onFinish: () => reset(),
+    });
   };
 
   return (
@@ -135,19 +163,61 @@ export default function EditSite({ site }: EditSiteProps) {
             </form>
           </CardContent>
         </Card>
-        {/* card to delete the ite */}
-        <Card className="mt-6 border-red-600">
-          <CardHeader>
-            <CardTitle className="text-red-600">Delete Site</CardTitle>
-            <CardDescription>Delete this site permanently</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4 text-sm">Once you delete a site, there is no going back. Please be certain.</p>
-            <Button type="button" variant="destructive" onClick={() => alert('Delete functionality not implemented yet.')}>
-              Delete Site
-            </Button>
-          </CardContent>
-        </Card>
+        {/* card to delete the site */}
+        <div className="space-y-6">
+          <HeadingSmall title="Delete Site" description="Delete your site and all of its resources" />
+          <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
+            <div className="relative space-y-0.5 text-red-600 dark:text-red-100">
+              <p className="font-medium">Warning</p>
+              <p className="text-sm">Please proceed with caution, this cannot be undone.</p>
+            </div>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="destructive">Delete Site</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogTitle>Are you sure you want to delete the site {site.name}?</DialogTitle>
+                <DialogDescription>
+                  Once your site {site.name} is deleted, all of its resources and data will also be permanently deleted. Please enter your password to
+                  confirm you would like to permanently delete your site.
+                </DialogDescription>
+                <form className="space-y-6" onSubmit={deleteUser}>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password" className="sr-only">
+                      Password
+                    </Label>
+
+                    <Input
+                      id="password"
+                      type="password"
+                      name="password"
+                      ref={passwordInput}
+                      value={data.password}
+                      onChange={(e) => setData('password', e.target.value)}
+                      placeholder="Password"
+                      autoComplete="current-password"
+                    />
+
+                    <InputError message={errors.password} />
+                  </div>
+
+                  <DialogFooter className="gap-2">
+                    <DialogClose asChild>
+                      <Button variant="secondary" onClick={closeModal}>
+                        Cancel
+                      </Button>
+                    </DialogClose>
+
+                    <Button variant="destructive" disabled={processing} asChild>
+                      Delete account
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
       </SiteLayout>
     </AppLayout>
   );

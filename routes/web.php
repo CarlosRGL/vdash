@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Sites routes
     Route::resource('sites', SiteController::class);
-
+    Route::get('sites/{site}/destroy', [SiteController::class, 'destroy'])->name('sites.destroy');
     // Site sync routes
     Route::post('sites/{site}/sync', [SiteController::class, 'sync'])
         ->name('sites.sync');

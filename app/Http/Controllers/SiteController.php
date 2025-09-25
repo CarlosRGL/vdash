@@ -221,11 +221,32 @@ class SiteController extends Controller
         if (Gate::denies('delete', $site)) {
             abort(403);
         }
-
+        $sitename = $site->name;
         $site->delete();
+        // delete also the credentials and contract if exist
+        if ($site->credential) {
+            $site->credential->delete();
+        }
+        if ($site->contract) {
+            $site->contract->delete();
+        }
 
-        return Redirect::route('sites.index')
-            ->with('success', __('Site deleted successfully.'));
+        // flush the session to avoid issues with Inertia
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => 'Site deleted successfully',
+            'description' => "The site {$sitename} and all its related data have been deleted.",
+        ]);
+
+        return to_route('sites.index', [
+            'flash' => [
+                'toast' => [
+                    'type' => 'success',
+                    'message' => 'API & Sync settings updated successfully',
+                    'description' => "The API & Sync settings for {$site->name} have been updated.",
+                ],
+            ],
+        ]);
     }
 
     /**

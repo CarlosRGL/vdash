@@ -77,7 +77,7 @@ export function CredentialsTab({ site, showPasswords, togglePasswordVisibility }
           <h3 className="mb-2 text-base font-semibold">No credentials found</h3>
           <p className="text-muted-foreground mb-4 text-center text-sm">No credentials have been added for this site yet.</p>
           <Button asChild size="sm">
-            <Link href={`/sites/${site.id}/credentials/create`}>Add Credentials</Link>
+            <Link href={`/sites/${site.id}/credentials/edit`}>Add Credentials</Link>
           </Button>
         </CardContent>
       </Card>

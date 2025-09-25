@@ -86,6 +86,7 @@ class DashboardController extends Controller
             'siteTypeStats' => $siteTypeStats,
             'expiringContracts' => $expiringContracts,
             'storageUsage' => $storageUsage,
+            'preserveState' => false,
         ]);
     }
 }
