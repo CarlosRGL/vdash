@@ -20,8 +20,13 @@ class DatabaseSeeder extends Seeder
         // Create a specific user for testing
         User::factory()->create([
             'name' => 'carlosrgl',
-            'email' => 'contact@carlosrgl.com',
+            'email' => 'carlos@quai13.com',
             'password' => Hash::make('car13'),
+        ]);
+        User::factory()->create([
+            'name' => 'Ludovic',
+            'email' => 'ludovic@quai13.com',
+            'password' => Hash::make('ludovic13'),
         ]);
 
         // Seed roles and permissions
