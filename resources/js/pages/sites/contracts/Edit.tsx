@@ -19,7 +19,6 @@ export default function EditSiteContract({ site, contract }: EditSiteContractPro
   // Format date string to YYYY-MM-DD for date input
   const formatDateForInput = (dateString: string | null): string => {
     if (!dateString) return '';
-    console.log(dateString);
 
     try {
       const date = new Date(dateString);

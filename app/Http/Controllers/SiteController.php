@@ -216,11 +216,14 @@ class SiteController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Site $site)
+    public function destroy(Request $request, Site $site)
     {
         if (Gate::denies('delete', $site)) {
             abort(403);
         }
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
         $sitename = $site->name;
         $site->delete();
         // delete also the credentials and contract if exist
