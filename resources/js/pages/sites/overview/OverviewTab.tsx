@@ -142,7 +142,7 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
                 <span className="text-gray-500">Not available</span>
               )}
             </div>
-            <div className="mb-4 text-sm">
+            <div className="mb-5 text-sm">
               <span className="font-medium">From</span> {site.contract?.contract_start_date ? formatDate(site.contract.contract_start_date) : 'N/A'}{' '}
               to {site.contract?.contract_end_date ? formatDate(site.contract.contract_end_date) : 'N/A'}
             </div>
