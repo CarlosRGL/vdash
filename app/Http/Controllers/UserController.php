@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -73,6 +74,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'roles' => 'nullable|array',
+            'roles.*' => 'integer|exists:roles,id',
         ]);
 
         $user = User::create([
@@ -82,7 +84,9 @@ class UserController extends Controller
         ]);
 
         if ($request->has('roles')) {
-            $user->syncRoles($request->roles);
+            $roles = $this->resolveRoles($request->input('roles', []));
+
+            $user->syncRoles($roles);
         }
 
         return to_route('users.index')->with('toast', [
@@ -116,6 +120,7 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'password' => $request->filled('password') ? ['confirmed', Rules\Password::defaults()] : '',
             'roles' => 'nullable|array',
+            'roles.*' => 'integer|exists:roles,id',
         ]);
 
         $userData = [
@@ -131,7 +136,9 @@ class UserController extends Controller
         $user->update($userData);
 
         if ($request->has('roles')) {
-            $user->syncRoles($request->roles);
+            $roles = $this->resolveRoles($request->input('roles', []));
+
+            $user->syncRoles($roles);
         }
 
         return to_route('users.index')->with('toast', [
@@ -139,6 +146,44 @@ class UserController extends Controller
             'message' => 'User updated successfully',
             'description' => "The user {$request->name} has been updated.",
         ]);
+    }
+
+    /**
+     * Resolve the role identifiers into Role models.
+     *
+     * @param  array<int|string, int|string>  $roleIdentifiers
+     * @return \Illuminate\Support\Collection<int, Role>
+     */
+    private function resolveRoles(array $roleIdentifiers): Collection
+    {
+        $identifiers = collect($roleIdentifiers)
+            ->filter(fn ($identifier) => $identifier !== null && $identifier !== '')
+            ->values();
+
+        if ($identifiers->isEmpty()) {
+            return collect();
+        }
+
+        $ids = $identifiers
+            ->filter(fn ($identifier) => is_numeric($identifier))
+            ->map(fn ($identifier) => (int) $identifier)
+            ->values();
+
+        $names = $identifiers
+            ->reject(fn ($identifier) => is_numeric($identifier))
+            ->map(fn ($identifier) => (string) $identifier)
+            ->values();
+
+        return Role::query()
+            ->when($ids->isNotEmpty() && $names->isNotEmpty(), function ($query) use ($ids, $names) {
+                $query->where(function ($innerQuery) use ($ids, $names) {
+                    $innerQuery->whereIn('id', $ids)
+                        ->orWhereIn('name', $names);
+                });
+            })
+            ->when($ids->isNotEmpty() && $names->isEmpty(), fn ($query) => $query->whereIn('id', $ids))
+            ->when($names->isNotEmpty() && $ids->isEmpty(), fn ($query) => $query->whereIn('name', $names))
+            ->get();
     }
 
     /**
