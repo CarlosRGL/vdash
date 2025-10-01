@@ -1,11 +1,16 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import AppLayout from '@/layouts/app-layout';
+import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
-import { Form, Head, Link } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -32,17 +37,109 @@ interface CreateResourcePageProps {
 }
 
 export default function Create({ categories }: CreateResourcePageProps) {
-  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+  const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryDescription, setNewCategoryDescription] = useState('');
+  const [newCategoryColor, setNewCategoryColor] = useState('#6366f1');
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [categoryError, setCategoryError] = useState('');
 
-  const handleCategoryToggle = (categoryId: number) => {
-    setSelectedCategories((prev) => (prev.includes(categoryId) ? prev.filter((id) => id !== categoryId) : [...prev, categoryId]));
+  const { data, setData, post, processing, errors } = useForm({
+    title: '',
+    description: '',
+    image: '',
+    url: '',
+    login: '',
+    password: '',
+    api_key: '',
+    categories: [] as number[],
+    media: [] as File[],
+  });
+
+  const handleCategorySelect = (category: Category) => {
+    if (!selectedCategories.find((c) => c.id === category.id)) {
+      const newSelected = [...selectedCategories, category];
+      setSelectedCategories(newSelected);
+      setData(
+        'categories',
+        newSelected.map((c) => c.id),
+      );
+    }
+    setOpen(false);
+  };
+
+  const handleCategoryRemove = (categoryId: number) => {
+    const newSelected = selectedCategories.filter((c) => c.id !== categoryId);
+    setSelectedCategories(newSelected);
+    setData(
+      'categories',
+      newSelected.map((c) => c.id),
+    );
+  };
+
+  const handleCreateCategory = async () => {
+    if (!newCategoryName.trim()) {
+      return;
+    }
+
+    setIsCreatingCategory(true);
+    setCategoryError('');
+
+    try {
+      const response = await fetch(route('categories.store'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify({
+          name: newCategoryName,
+          description: newCategoryDescription || null,
+          color: newCategoryColor,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create category');
+      }
+
+      const { category: newCategory } = await response.json();
+
+      // Add the new category to the selected categories
+      const newSelected = [...selectedCategories, newCategory];
+      setSelectedCategories(newSelected);
+      setData(
+        'categories',
+        newSelected.map((c) => c.id),
+      );
+
+      // Reset form and close dialog
+      setDialogOpen(false);
+      setNewCategoryName('');
+      setNewCategoryDescription('');
+      setNewCategoryColor('#6366f1');
+    } catch (error) {
+      setCategoryError(error instanceof Error ? error.message : 'Failed to create category');
+    } finally {
+      setIsCreatingCategory(false);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setMediaFiles(Array.from(e.target.files));
+      const files = Array.from(e.target.files);
+      setData('media', files);
     }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    post(route('resources.store'), {
+      forceFormData: true,
+    });
   };
 
   return (
@@ -59,145 +156,287 @@ export default function Create({ categories }: CreateResourcePageProps) {
           </div>
 
           {/* Form */}
-          <Form action="/resources" method="post" encType="multipart/form-data">
-            {({ errors, processing }) => (
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Basic Information</CardTitle>
-                    <CardDescription>Enter the basic details for your resource</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="title">Title *</Label>
-                      <Input id="title" name="title" placeholder="Enter resource title" required />
-                      {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
-                    </div>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Basic Information</CardTitle>
+                  <CardDescription>Enter the basic details for your resource</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title *</Label>
+                    <Input
+                      id="title"
+                      name="title"
+                      value={data.title}
+                      onChange={(e) => setData('title', e.target.value)}
+                      placeholder="Enter resource title"
+                      required
+                    />
+                    {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="description">Description</Label>
-                      <textarea
-                        id="description"
-                        name="description"
-                        placeholder="Enter resource description"
-                        rows={4}
-                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      />
-                      {errors.description && <p className="text-destructive text-sm">{errors.description}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="description">Description</Label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      value={data.description}
+                      onChange={(e) => setData('description', e.target.value)}
+                      placeholder="Enter resource description"
+                      rows={4}
+                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    />
+                    {errors.description && <p className="text-destructive text-sm">{errors.description}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="image">Image URL</Label>
-                      <Input id="image" name="image" type="url" placeholder="https://example.com/image.jpg" />
-                      {errors.image && <p className="text-destructive text-sm">{errors.image}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="image">Image URL</Label>
+                    <Input
+                      id="image"
+                      name="image"
+                      type="url"
+                      value={data.image}
+                      onChange={(e) => setData('image', e.target.value)}
+                      placeholder="https://example.com/image.jpg"
+                    />
+                    {errors.image && <p className="text-destructive text-sm">{errors.image}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="url">URL</Label>
-                      <Input id="url" name="url" type="url" placeholder="https://example.com" />
-                      {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="url">URL</Label>
+                    <Input
+                      id="url"
+                      name="url"
+                      type="url"
+                      value={data.url}
+                      onChange={(e) => setData('url', e.target.value)}
+                      placeholder="https://example.com"
+                    />
+                    {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Credentials</CardTitle>
-                    <CardDescription>Store login credentials and API keys securely</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="login">Login / Username</Label>
-                      <Input id="login" name="login" placeholder="Enter login or username" />
-                      {errors.login && <p className="text-destructive text-sm">{errors.login}</p>}
-                    </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Credentials</CardTitle>
+                  <CardDescription>Store login credentials and API keys securely</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="login">Login / Username</Label>
+                    <Input
+                      id="login"
+                      name="login"
+                      value={data.login}
+                      onChange={(e) => setData('login', e.target.value)}
+                      placeholder="Enter login or username"
+                    />
+                    {errors.login && <p className="text-destructive text-sm">{errors.login}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <Input id="password" name="password" type="password" placeholder="Enter password" />
-                      {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={data.password}
+                      onChange={(e) => setData('password', e.target.value)}
+                      placeholder="Enter password"
+                    />
+                    {errors.password && <p className="text-destructive text-sm">{errors.password}</p>}
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="api_key">API Key</Label>
-                      <textarea
-                        id="api_key"
-                        name="api_key"
-                        placeholder="Enter API key"
-                        rows={3}
-                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                      />
-                      {errors.api_key && <p className="text-destructive text-sm">{errors.api_key}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+                  <div className="space-y-2">
+                    <Label htmlFor="api_key">API Key</Label>
+                    <textarea
+                      id="api_key"
+                      name="api_key"
+                      value={data.api_key}
+                      onChange={(e) => setData('api_key', e.target.value)}
+                      placeholder="Enter API key"
+                      rows={3}
+                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    />
+                    {errors.api_key && <p className="text-destructive text-sm">{errors.api_key}</p>}
+                  </div>
+                </CardContent>
+              </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Categories</CardTitle>
-                    <CardDescription>Select one or more categories for this resource</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      {categories.map((category) => (
-                        <div key={category.id} className="flex items-start space-x-3">
-                          <Checkbox
-                            id={`category-${category.id}`}
-                            name="categories[]"
-                            value={category.id}
-                            checked={selectedCategories.includes(category.id)}
-                            onCheckedChange={() => handleCategoryToggle(category.id)}
-                          />
-                          <div className="grid gap-1.5 leading-none">
-                            <label
-                              htmlFor={`category-${category.id}`}
-                              className="flex items-center text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                              <span className="mr-2 h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
-                              {category.name}
-                            </label>
-                            {category.description && <p className="text-muted-foreground text-sm">{category.description}</p>}
-                          </div>
-                        </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Categories</CardTitle>
+                  <CardDescription>Select categories or create new ones for this resource</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Selected Categories */}
+                  {selectedCategories.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCategories.map((category) => (
+                        <Badge
+                          key={category.id}
+                          variant="secondary"
+                          className="text-sm"
+                          style={{ backgroundColor: `${category.color}20`, color: category.color }}
+                        >
+                          <span className="mr-1 h-2 w-2 rounded-full" style={{ backgroundColor: category.color }} />
+                          {category.name}
+                          <button type="button" onClick={() => handleCategoryRemove(category.id)} className="hover:text-destructive ml-1">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
                       ))}
                     </div>
-                    {errors.categories && <p className="text-destructive mt-2 text-sm">{errors.categories}</p>}
-                  </CardContent>
-                </Card>
+                  )}
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Attachments</CardTitle>
-                    <CardDescription>Upload files related to this resource (max 10MB per file)</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <Input id="media" name="media[]" type="file" multiple onChange={handleFileChange} />
-                      {mediaFiles.length > 0 && (
-                        <div className="mt-2">
-                          <p className="text-muted-foreground text-sm">
-                            {mediaFiles.length} file{mediaFiles.length !== 1 ? 's' : ''} selected
-                          </p>
+                  {/* Combobox for selecting categories */}
+                  <div className="flex gap-2">
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" role="combobox" aria-expanded={open} className="flex-1 justify-between">
+                          Select categories...
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[400px] p-0">
+                        <Command>
+                          <CommandInput placeholder="Search categories..." />
+                          <CommandList>
+                            <CommandEmpty>No category found.</CommandEmpty>
+                            <CommandGroup>
+                              {categories
+                                .filter((cat) => !selectedCategories.find((sc) => sc.id === cat.id))
+                                .map((category) => (
+                                  <CommandItem key={category.id} value={category.name} onSelect={() => handleCategorySelect(category)}>
+                                    <Check
+                                      className={cn(
+                                        'mr-2 h-4 w-4',
+                                        selectedCategories.find((c) => c.id === category.id) ? 'opacity-100' : 'opacity-0',
+                                      )}
+                                    />
+                                    <span className="mr-2 h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
+                                    <div className="flex flex-col">
+                                      <span>{category.name}</span>
+                                      {category.description && <span className="text-muted-foreground text-xs">{category.description}</span>}
+                                    </div>
+                                  </CommandItem>
+                                ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+
+                    {/* Dialog for creating new category */}
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Create New Category</DialogTitle>
+                          <DialogDescription>Add a new category to organize your resources</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="new-category-name">Category Name *</Label>
+                            <Input
+                              id="new-category-name"
+                              value={newCategoryName}
+                              onChange={(e) => setNewCategoryName(e.target.value)}
+                              placeholder="Enter category name"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-category-description">Description</Label>
+                            <textarea
+                              id="new-category-description"
+                              value={newCategoryDescription}
+                              onChange={(e) => setNewCategoryDescription(e.target.value)}
+                              placeholder="Enter category description"
+                              rows={3}
+                              className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="new-category-color">Color</Label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                id="new-category-color"
+                                type="color"
+                                value={newCategoryColor}
+                                onChange={(e) => setNewCategoryColor(e.target.value)}
+                                className="h-10 w-20"
+                              />
+                              <Input
+                                type="text"
+                                value={newCategoryColor}
+                                onChange={(e) => setNewCategoryColor(e.target.value)}
+                                placeholder="#6366f1"
+                                className="flex-1"
+                              />
+                            </div>
+                          </div>
+                          {categoryError && <p className="text-destructive text-sm">{categoryError}</p>}
                         </div>
-                      )}
-                      {errors.media && <p className="text-destructive text-sm">{errors.media}</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+                        <DialogFooter>
+                          <Button type="button" variant="outline" onClick={() => setDialogOpen(false)} disabled={isCreatingCategory}>
+                            Cancel
+                          </Button>
+                          <Button type="button" onClick={handleCreateCategory} disabled={!newCategoryName.trim() || isCreatingCategory}>
+                            {isCreatingCategory ? 'Creating...' : 'Create Category'}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
 
-                <div className="flex justify-end gap-4">
-                  <Link href="/resources">
-                    <Button type="button" variant="outline" disabled={processing}>
-                      Cancel
-                    </Button>
-                  </Link>
-                  <Button type="submit" disabled={processing}>
-                    {processing ? 'Creating...' : 'Create Resource'}
+                  {/* Hidden inputs for form submission */}
+                  {selectedCategories.map((category) => (
+                    <input key={category.id} type="hidden" name="categories[]" value={category.id} />
+                  ))}
+
+                  {errors.categories && <p className="text-destructive text-sm">{errors.categories}</p>}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Attachments</CardTitle>
+                  <CardDescription>Upload files related to this resource (max 10MB per file)</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <Input id="media" name="media[]" type="file" multiple onChange={handleFileChange} />
+                    {data.media.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-muted-foreground text-sm">
+                          {data.media.length} file{data.media.length !== 1 ? 's' : ''} selected
+                        </p>
+                      </div>
+                    )}
+                    {errors.media && <p className="text-destructive text-sm">{errors.media}</p>}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="flex justify-end gap-4">
+                <Link href="/resources">
+                  <Button type="button" variant="outline" disabled={processing}>
+                    Cancel
                   </Button>
-                </div>
+                </Link>
+                <Button type="submit" disabled={processing}>
+                  {processing ? 'Creating...' : 'Create Resource'}
+                </Button>
               </div>
-            )}
-          </Form>
+            </div>
+          </form>
         </div>
       </div>
     </AppLayout>

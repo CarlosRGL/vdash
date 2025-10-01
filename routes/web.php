@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SiteContractController;
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('resources', ResourceController::class);
     Route::post('resources/{resource}/favorite', [ResourceController::class, 'toggleFavorite'])
         ->name('resources.favorite');
+
+    // Categories routes
+    Route::post('categories', [CategoryController::class, 'store'])
+        ->name('categories.store');
 });
 
 require __DIR__ . '/settings.php';

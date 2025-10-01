@@ -26,7 +26,7 @@ it('displays resources index page', function () {
     get(route('resources.index'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('Resources/Index')
+            ->component('resources/Index')
             ->has('resources.data', 3)
             ->has('categories', 2));
 });
@@ -75,7 +75,7 @@ it('displays create resource page', function () {
     get(route('resources.create'))
         ->assertSuccessful()
         ->assertInertia(fn ($page) => $page
-            ->component('Resources/Create')
+            ->component('resources/Create')
             ->has('categories', 3));
 });
 
