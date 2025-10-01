@@ -172,6 +172,16 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
                 )}
               </div>
               <div className="text-xs text-gray-500">{site.api_token ? 'API token configured' : 'No API token set'}</div>
+              <div className="text-sm text-gray-500">
+                {' '}
+                {site.last_sync ? (
+                  <span className="font-mono text-xs text-gray-500">
+                    Last Sync: {formatDate(site.last_sync, { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                ) : (
+                  <span className="text-gray-500">No syncs yet</span>
+                )}
+              </div>
               {site.sync_enabled && (
                 <div className="pt-2">
                   <SyncButton site={site} />

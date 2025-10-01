@@ -39,4 +39,8 @@ return [
         'api_key' => env('WORDPRESS_API_KEY', 'SEec1oWGvJWmpja4CnWId6ONRwyWFkSF'),
     ],
 
+    'google_pagespeed' => [
+        'api_key' => env('GOOGLE_PAGESPEED_API_KEY'),
+    ],
+
 ];

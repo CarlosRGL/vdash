@@ -5,7 +5,7 @@ import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ExternalLink, Globe } from 'lucide-react';
 import { useState } from 'react';
-import { CredentialsTab, OverviewTab } from './overview';
+import { CredentialsTab, OverviewTab, PageSpeedTab } from './overview';
 
 interface Props {
   site: Site;
@@ -13,11 +13,12 @@ interface Props {
 
 function Show({ site }: Props) {
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      ...options,
     });
   };
 
@@ -103,6 +104,7 @@ function Show({ site }: Props) {
         </div>
 
         <OverviewTab site={site} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
+        <PageSpeedTab site={site} />
         <CredentialsTab site={site} showPasswords={showPasswords} togglePasswordVisibility={togglePasswordVisibility} />
       </div>
     </AppLayout>

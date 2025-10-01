@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatStorage, getContractStatus, getMonthsLeft, getStoragePercentage } from '@/lib/utils';
-import { type Site } from '@/types';
+import { type Site, type SitePageSpeedInsight } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, HardDrive, LockKeyhole, Pencil, RefreshCw, Server } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, Gauge, HardDrive, LockKeyhole, Pencil, RefreshCw, Server } from 'lucide-react';
 import { SiteTypeBadge } from './site-badges';
 interface SitesTableColumnsProps {
   sorting: {
@@ -178,6 +178,40 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
               </div>
             )}
           </div>
+        );
+      },
+    },
+
+    {
+      id: 'pagespeed',
+      header: () => (
+        <div className="flex items-center">
+          <Gauge className="mr-2 h-4 w-4" />
+          PageSpeed
+        </div>
+      ),
+      cell: ({ row }) => {
+        const pageSpeedInsights = row.original.page_speed_insights as SitePageSpeedInsight[] | undefined;
+        const mobileInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'mobile');
+
+        if (!mobileInsight || !mobileInsight.performance_score) {
+          return <div className="text-muted-foreground text-sm">N/A</div>;
+        }
+
+        const score = parseFloat(mobileInsight.performance_score) * 100;
+        const getScoreColor = (score: number) => {
+          if (score >= 90) return 'text-green-600 dark:text-green-400';
+          if (score >= 50) return 'text-orange-600 dark:text-orange-400';
+          return 'text-red-600 dark:text-red-400';
+        };
+
+        return (
+          <Badge variant="outline" className="px-3 py-1">
+            <div className="flex items-center gap-2">
+              <div className={`font-bold ${getScoreColor(score)}`}>{Math.round(score)}</div>
+              <div className="text-muted-foreground text-xs">Mobile</div>
+            </div>
+          </Badge>
         );
       },
     },

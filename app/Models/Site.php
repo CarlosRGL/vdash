@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -28,6 +29,7 @@ class Site extends Model
         'is_multisite',
         'sync_enabled',
         'api_token',
+        'last_sync',
     ];
 
     /**
@@ -40,6 +42,7 @@ class Site extends Model
         return [
             'is_multisite' => 'boolean',
             'sync_enabled' => 'boolean',
+            'last_sync' => 'datetime',
         ];
     }
 
@@ -73,5 +76,13 @@ class Site extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)->withTimestamps();
+    }
+
+    /**
+     * Get the PageSpeed Insights records for the site.
+     */
+    public function pageSpeedInsights(): HasMany
+    {
+        return $this->hasMany(SitePageSpeedInsight::class);
     }
 }

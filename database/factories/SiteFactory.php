@@ -29,6 +29,7 @@ class SiteFactory extends Factory
             'team' => fake()->randomElement($teams),
             'wordpress_version' => null,
             'is_multisite' => false,
+            'last_sync' => null,
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], 'now');

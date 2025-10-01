@@ -62,8 +62,10 @@ export interface Site {
   credential?: SiteCredential;
   contract?: SiteContract;
   server_info?: SiteServerInfo;
+  latest_pagespeed_mobile?: SitePageSpeedInsight;
+  latest_pagespeed_desktop?: SitePageSpeedInsight;
   php_version?: string | null;
-  last_check?: string | null;
+  last_sync?: string | null;
   sync_enabled: boolean;
   api_token: string;
   created_at: string;
@@ -113,6 +115,25 @@ export interface SiteServerInfo {
   mysql_server_info: string | null;
   server_ip: string | null;
   server_hostname: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SitePageSpeedInsight {
+  id: number;
+  site_id: number;
+  strategy: 'mobile' | 'desktop';
+  performance_score: string | null;
+  accessibility_score: string | null;
+  best_practices_score: string | null;
+  seo_score: string | null;
+  first_contentful_paint: number | null;
+  speed_index: number | null;
+  largest_contentful_paint: number | null;
+  time_to_interactive: number | null;
+  total_blocking_time: number | null;
+  cumulative_layout_shift: number | null;
+  full_response: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
