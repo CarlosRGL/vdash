@@ -21,18 +21,18 @@ class SiteCredentialFactory extends Factory
             'site_id' => Site::factory(),
 
             // FTP credentials
-            'ftp_host' => 'ftp.' . fake()->domainName(),
+            'ftp_host' => 'ftp.'.fake()->domainName(),
             'ftp_username' => fake()->userName(),
             'ftp_password' => fake()->password(12, 16),
 
             // Database credentials
-            'db_host' => fake()->randomElement(['localhost', '127.0.0.1', 'db.' . fake()->domainName()]),
-            'db_name' => fake()->word() . '_db',
+            'db_host' => fake()->randomElement(['localhost', '127.0.0.1', 'db.'.fake()->domainName()]),
+            'db_name' => fake()->word().'_db',
             'db_username' => fake()->userName(),
             'db_password' => fake()->password(12, 16),
 
             // Login credentials
-            'login_url' => fake()->url() . '/wp-admin',
+            'login_url' => fake()->url().'/wp-admin',
             'login_username' => fake()->userName(),
             'login_password' => fake()->password(12, 16),
 

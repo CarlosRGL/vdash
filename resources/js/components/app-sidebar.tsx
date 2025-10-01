@@ -13,11 +13,6 @@ const mainNavItems: NavItem[] = [
     icon: LayoutGrid,
   },
   {
-    title: 'Users',
-    url: '/users',
-    icon: Users,
-  },
-  {
     title: 'Sites',
     url: '/sites',
     icon: Globe,
@@ -26,6 +21,11 @@ const mainNavItems: NavItem[] = [
     title: 'Tools',
     url: '/tools',
     icon: Pickaxe,
+  },
+  {
+    title: 'Users',
+    url: '/users',
+    icon: Users,
   },
 ];
 

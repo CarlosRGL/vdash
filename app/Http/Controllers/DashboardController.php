@@ -23,7 +23,7 @@ class DashboardController extends Controller
                 return [
                     'type' => $item->type,
                     'count' => $item->count,
-                    'fill' => 'var(--chart-' . ($index + 1) . ')',
+                    'fill' => 'var(--chart-'.($index + 1).')',
                 ];
             });
 

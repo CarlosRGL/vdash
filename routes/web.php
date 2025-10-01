@@ -65,11 +65,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('tools', ToolController::class);
     Route::post('tools/{tool}/favorite', [ToolController::class, 'toggleFavorite'])
         ->name('tools.favorite');
+    Route::post('tools/fetch-metadata', [ToolController::class, 'fetchMetadata'])
+        ->name('tools.fetch-metadata');
 
     // Categories routes
     Route::post('categories', [CategoryController::class, 'store'])
         ->name('categories.store');
 });
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';

@@ -114,7 +114,7 @@ class ToolController extends Controller
     {
         $tool->load(['categories', 'media', 'favoritedBy']);
 
-        return Inertia::render('Tools/Show', [
+        return Inertia::render('tools/Show', [
             'tool' => [
                 'id' => $tool->id,
                 'title' => $tool->title,
@@ -218,5 +218,69 @@ class ToolController extends Controller
         }
 
         return back()->with('success', $message);
+    }
+
+    /**
+     * Fetch OpenGraph metadata from a URL.
+     */
+    public function fetchMetadata(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url',
+        ]);
+
+        try {
+            $client = new \GuzzleHttp\Client([
+                'timeout' => 10,
+                'verify' => false,
+                'headers' => [
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                ],
+            ]);
+
+            $response = $client->get($request->input('url'));
+            $html = (string) $response->getBody();
+
+            $metadata = [
+                'title' => null,
+                'description' => null,
+                'image' => null,
+            ];
+
+            // Parse OpenGraph tags
+            if (preg_match('/<meta\s+property=["\']og:title["\']\s+content=["\'](.*?)["\']/i', $html, $matches)) {
+                $metadata['title'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+            }
+
+            if (preg_match('/<meta\s+property=["\']og:description["\']\s+content=["\'](.*?)["\']/i', $html, $matches)) {
+                $metadata['description'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+            }
+
+            if (preg_match('/<meta\s+property=["\']og:image["\']\s+content=["\'](.*?)["\']/i', $html, $matches)) {
+                $metadata['image'] = $matches[1];
+            }
+
+            // Fallback to standard meta tags if OG tags are not found
+            if (! $metadata['title'] && preg_match('/<title>(.*?)<\/title>/i', $html, $matches)) {
+                $metadata['title'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+            }
+
+            if (! $metadata['description']) {
+                $pattern = '/<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']/i';
+                if (preg_match($pattern, $html, $matches)) {
+                    $metadata['description'] = html_entity_decode($matches[1], ENT_QUOTES, 'UTF-8');
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'metadata' => $metadata,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch metadata from the URL. Please check the URL and try again.',
+            ], 422);
+        }
     }
 }

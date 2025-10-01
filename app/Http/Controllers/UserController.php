@@ -124,7 +124,7 @@ class UserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
             'password' => $request->filled('password') ? ['confirmed', Rules\Password::defaults()] : '',
             'roles' => 'nullable|array',
             'roles.*' => 'integer|exists:roles,id',

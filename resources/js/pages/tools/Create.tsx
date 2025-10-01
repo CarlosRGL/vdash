@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -10,7 +11,7 @@ import AppLayout from '@/layouts/app-layout';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
+import { Check, ChevronsUpDown, Loader2, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -45,6 +46,9 @@ export default function Create({ categories }: CreatetoolPageProps) {
   const [newCategoryColor, setNewCategoryColor] = useState('#6366f1');
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [categoryError, setCategoryError] = useState('');
+  const [autoFetchMetadata, setAutoFetchMetadata] = useState(false);
+  const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
+  const [metadataError, setMetadataError] = useState('');
 
   const { data, setData, post, processing, errors } = useForm({
     title: '',
@@ -77,6 +81,50 @@ export default function Create({ categories }: CreatetoolPageProps) {
       'categories',
       newSelected.map((c) => c.id),
     );
+  };
+
+  const handleFetchMetadata = async () => {
+    if (!data.url) {
+      setMetadataError('Please enter a URL first');
+      return;
+    }
+
+    setIsFetchingMetadata(true);
+    setMetadataError('');
+
+    try {
+      const response = await fetch(route('tools.fetch-metadata'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        },
+        body: JSON.stringify({
+          url: data.url,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || 'Failed to fetch metadata');
+      }
+
+      // Update form with fetched metadata
+      if (result.metadata.title) {
+        setData('title', result.metadata.title);
+      }
+      if (result.metadata.description) {
+        setData('description', result.metadata.description);
+      }
+      if (result.metadata.image) {
+        setData('image', result.metadata.image);
+      }
+    } catch (error) {
+      setMetadataError(error instanceof Error ? error.message : 'Failed to fetch metadata');
+    } finally {
+      setIsFetchingMetadata(false);
+    }
   };
 
   const handleCreateCategory = async () => {
@@ -160,52 +208,12 @@ export default function Create({ categories }: CreatetoolPageProps) {
             <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>Enter the basic details for your tool</CardDescription>
+                  <CardTitle>URL & Auto-Fill</CardTitle>
+                  <CardDescription>Enter the tool URL and optionally fetch metadata automatically</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
-                    <Input
-                      id="title"
-                      name="title"
-                      value={data.title}
-                      onChange={(e) => setData('title', e.target.value)}
-                      placeholder="Enter tool title"
-                      required
-                    />
-                    {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="description">Description</Label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      value={data.description}
-                      onChange={(e) => setData('description', e.target.value)}
-                      placeholder="Enter tool description"
-                      rows={4}
-                      className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    />
-                    {errors.description && <p className="text-destructive text-sm">{errors.description}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="image">Image URL</Label>
-                    <Input
-                      id="image"
-                      name="image"
-                      type="url"
-                      value={data.image}
-                      onChange={(e) => setData('image', e.target.value)}
-                      placeholder="https://example.com/image.jpg"
-                    />
-                    {errors.image && <p className="text-destructive text-sm">{errors.image}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="url">URL</Label>
+                    <Label htmlFor="url">URL *</Label>
                     <Input
                       id="url"
                       name="url"
@@ -213,11 +221,138 @@ export default function Create({ categories }: CreatetoolPageProps) {
                       value={data.url}
                       onChange={(e) => setData('url', e.target.value)}
                       placeholder="https://example.com"
+                      required
                     />
                     {errors.url && <p className="text-destructive text-sm">{errors.url}</p>}
                   </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="auto-fetch"
+                      checked={autoFetchMetadata}
+                      onCheckedChange={(checked) => {
+                        setAutoFetchMetadata(checked === true);
+                        if (checked) {
+                          handleFetchMetadata();
+                        }
+                      }}
+                      disabled={!data.url || isFetchingMetadata}
+                    />
+                    <Label htmlFor="auto-fetch" className="cursor-pointer text-sm font-normal">
+                      Automatically fetch title, description, and image from URL
+                    </Label>
+                  </div>
+
+                  {isFetchingMetadata && (
+                    <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Fetching metadata...</span>
+                    </div>
+                  )}
+
+                  {metadataError && <p className="text-destructive text-sm">{metadataError}</p>}
                 </CardContent>
               </Card>
+
+              {!autoFetchMetadata && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Basic Information</CardTitle>
+                    <CardDescription>Enter the basic details for your tool</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={data.title}
+                        onChange={(e) => setData('title', e.target.value)}
+                        placeholder="Enter tool title"
+                        required
+                      />
+                      {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e.target.value)}
+                        placeholder="Enter tool description"
+                        rows={4}
+                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      />
+                      {errors.description && <p className="text-destructive text-sm">{errors.description}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Image URL</Label>
+                      <Input
+                        id="image"
+                        name="image"
+                        type="url"
+                        value={data.image}
+                        onChange={(e) => setData('image', e.target.value)}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                      {errors.image && <p className="text-destructive text-sm">{errors.image}</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {autoFetchMetadata && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Auto-Filled Information</CardTitle>
+                    <CardDescription>Information fetched from the URL (you can edit these fields)</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        name="title"
+                        value={data.title}
+                        onChange={(e) => setData('title', e.target.value)}
+                        placeholder="Enter tool title"
+                        required
+                      />
+                      {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <textarea
+                        id="description"
+                        name="description"
+                        value={data.description}
+                        onChange={(e) => setData('description', e.target.value)}
+                        placeholder="Enter tool description"
+                        rows={4}
+                        className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                      />
+                      {errors.description && <p className="text-destructive text-sm">{errors.description}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Image URL</Label>
+                      <Input
+                        id="image"
+                        name="image"
+                        type="url"
+                        value={data.image}
+                        onChange={(e) => setData('image', e.target.value)}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                      {errors.image && <p className="text-destructive text-sm">{errors.image}</p>}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardHeader>

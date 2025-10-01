@@ -63,7 +63,7 @@ test('site sync service can update site data', function () {
         ], 200),
     ]);
 
-    $syncService = new SiteSyncService();
+    $syncService = new SiteSyncService;
     $result = $syncService->syncSiteData($this->site);
 
     expect($result)->toBeTrue();
