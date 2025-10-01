@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Resource extends Model implements HasMedia
+class Tool extends Model implements HasMedia
 {
     use HasFactory;
     use InteractsWithMedia;
@@ -44,24 +44,24 @@ class Resource extends Model implements HasMedia
     }
 
     /**
-     * The categories that belong to the resource.
+     * The categories that belong to the tool.
      */
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(ResourceCategory::class, 'resource_category_resource')->withTimestamps();
+        return $this->belongsToMany(ToolCategory::class, 'tool_category_tool')->withTimestamps();
     }
 
     /**
-     * The users who have favorited this resource.
+     * The users who have favorited this tool.
      */
     public function favoritedBy(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'resource_user_favorites')
+        return $this->belongsToMany(User::class, 'tool_user_favorites')
             ->withTimestamps();
     }
 
     /**
-     * Check if the resource is favorited by a user.
+     * Check if the tool is favorited by a user.
      */
     public function isFavoritedBy(User $user): bool
     {

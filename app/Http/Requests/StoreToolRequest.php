@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreResourceRequest extends FormRequest
+class StoreToolRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -30,7 +30,7 @@ class StoreResourceRequest extends FormRequest
             'api_key' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'categories' => ['nullable', 'array'],
-            'categories.*' => ['exists:resource_categories,id'],
+            'categories.*' => ['exists:tool_categories,id'],
             'media' => ['nullable', 'array'],
             'media.*' => ['file', 'max:10240'], // 10MB max per file
         ];
@@ -44,7 +44,7 @@ class StoreResourceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'The resource title is required.',
+            'title.required' => 'The tool title is required.',
             'title.max' => 'The title cannot exceed 255 characters.',
             'image.url' => 'The image must be a valid URL.',
             'url.url' => 'The URL must be valid.',

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\ResourceCategory;
+use App\Models\ToolCategory;
 use App\Models\User;
 
 beforeEach(function () {
@@ -27,7 +27,7 @@ it('can create a new category', function () {
             ],
         ]);
 
-    $this->assertDatabaseHas('resource_categories', [
+    $this->assertDatabaseHas('tool_categories', [
         'name' => 'Test Category',
         'slug' => 'test-category',
         'description' => 'A test category description',
@@ -70,7 +70,7 @@ it('validates color format', function () {
 });
 
 it('ensures category name is unique', function () {
-    ResourceCategory::factory()->create(['name' => 'Existing Category']);
+    ToolCategory::factory()->create(['name' => 'Existing Category']);
 
     $response = $this->actingAs($this->user)
         ->postJson(route('categories.store'), [

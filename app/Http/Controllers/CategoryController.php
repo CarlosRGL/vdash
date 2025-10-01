@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCategoryRequest;
-use App\Models\ResourceCategory;
+use App\Models\ToolCategory;
 use Illuminate\Http\JsonResponse;
 
 class CategoryController extends Controller
@@ -13,7 +13,7 @@ class CategoryController extends Controller
      */
     public function store(StoreCategoryRequest $request): JsonResponse
     {
-        $category = ResourceCategory::create($request->validated());
+        $category = ToolCategory::create($request->validated());
 
         return response()->json([
             'category' => [

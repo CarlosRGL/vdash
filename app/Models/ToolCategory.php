@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 
-class ResourceCategory extends Model
+class ToolCategory extends Model
 {
     use HasFactory;
 
@@ -16,7 +16,7 @@ class ResourceCategory extends Model
      *
      * @var string
      */
-    protected $table = 'resource_categories';
+    protected $table = 'tool_categories';
 
     /**
      * The attributes that are mass assignable.
@@ -45,10 +45,10 @@ class ResourceCategory extends Model
     }
 
     /**
-     * The resources that belong to the category.
+     * The tools that belong to the category.
      */
-    public function resources(): BelongsToMany
+    public function tools(): BelongsToMany
     {
-        return $this->belongsToMany(Resource::class, 'resource_category_resource')->withTimestamps();
+        return $this->belongsToMany(Tool::class, 'tool_category_tool')->withTimestamps();
     }
 }

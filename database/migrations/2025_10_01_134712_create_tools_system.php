@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Resource Categories table
-        Schema::create('resource_categories', function (Blueprint $table) {
+        // Tool Categories table
+        Schema::create('tool_categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
             $table->string('slug')->unique();
@@ -21,8 +21,8 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Resources table
-        Schema::create('resources', function (Blueprint $table) {
+        // Tools table
+        Schema::create('tools', function (Blueprint $table) {
             $table->id();
             $table->string('title');
             $table->string('image')->nullable();
@@ -35,24 +35,24 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        // Pivot table for categories and resources (many-to-many)
-        Schema::create('resource_category_resource', function (Blueprint $table) {
+        // Pivot table for categories and tools (many-to-many)
+        Schema::create('tool_category_tool', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('resource_category_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('resource_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tool_category_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tool_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['resource_category_id', 'resource_id'], 'resource_category_unique');
+            $table->unique(['tool_category_id', 'tool_id'], 'tool_category_unique');
         });
 
         // Pivot table for user favorites
-        Schema::create('resource_user_favorites', function (Blueprint $table) {
+        Schema::create('tool_user_favorites', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('resource_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('tool_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
 
-            $table->unique(['user_id', 'resource_id']);
+            $table->unique(['user_id', 'tool_id']);
         });
     }
 
@@ -61,9 +61,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resource_user_favorites');
-        Schema::dropIfExists('resource_category_resource');
-        Schema::dropIfExists('resources');
-        Schema::dropIfExists('resource_categories');
+        Schema::dropIfExists('tool_user_favorites');
+        Schema::dropIfExists('tool_category_tool');
+        Schema::dropIfExists('tools');
+        Schema::dropIfExists('tool_categories');
     }
 };

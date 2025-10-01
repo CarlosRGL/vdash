@@ -2,7 +2,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -11,18 +20,7 @@ import { cn } from '@/lib/utils';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Check, ChevronsUpDown, Plus, X } from 'lucide-react';
-import { useState } from 'react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: 'Resources',
-    href: '/resources',
-  },
-  {
-    title: 'Create',
-    href: '/resources/create',
-  },
-];
+import { useState, type FormEvent } from 'react';
 
 interface Category {
   id: number;
@@ -32,31 +30,68 @@ interface Category {
   color: string;
 }
 
-interface CreateResourcePageProps {
+interface MediaFile {
+  id: number;
+  name: string;
+  url: string;
+}
+
+interface Tool {
+  id: number;
+  title: string;
+  image: string;
+  url: string;
+  login: string;
+  password: string;
+  api_key: string;
+  description: string;
+  categories: number[];
+  media: MediaFile[];
+}
+
+interface EditToolPageProps {
+  tool: Tool;
   categories: Category[];
 }
 
-export default function Create({ categories }: CreateResourcePageProps) {
-  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
+export default function Edit({ tool, categories }: EditToolPageProps) {
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>(categories.filter((cat) => tool.categories.includes(cat.id)));
+  const [existingMedia] = useState<MediaFile[]>(tool.media);
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [newCategoryDescription, setNewCategoryDescription] = useState('');
   const [newCategoryColor, setNewCategoryColor] = useState('#6366f1');
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [categoryError, setCategoryError] = useState('');
+  const [confirmTitle, setConfirmTitle] = useState('');
+
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: 'tools',
+      href: '/tools',
+    },
+    {
+      title: `Edit: ${tool.title}`,
+      href: `/tools/${tool.id}/edit`,
+    },
+  ];
 
   const { data, setData, post, processing, errors } = useForm({
-    title: '',
-    description: '',
-    image: '',
-    url: '',
-    login: '',
-    password: '',
-    api_key: '',
-    categories: [] as number[],
+    title: tool.title,
+    description: tool.description,
+    image: tool.image,
+    url: tool.url,
+    login: tool.login,
+    password: tool.password,
+    api_key: tool.api_key,
+    categories: tool.categories,
     media: [] as File[],
+    _method: 'put',
   });
+
+  const { delete: destroy, processing: deleteProcessing } = useForm({});
 
   const handleCategorySelect = (category: Category) => {
     if (!selectedCategories.find((c) => c.id === category.id)) {
@@ -137,21 +172,34 @@ export default function Create({ categories }: CreateResourcePageProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('resources.store'), {
+    post(route('tools.update', { tool: tool.id }), {
       forceFormData: true,
+    });
+  };
+
+  const handleDeletetool = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (confirmTitle !== tool.title) {
+      return;
+    }
+
+    destroy(route('tools.destroy', { tool: tool.id }), {
+      preserveScroll: true,
+      onFinish: () => setConfirmTitle(''),
     });
   };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Create Resource" />
+      <Head title={`Edit Tool: ${tool.title}`} />
       <div className="mx-auto flex h-full w-full max-w-[1920px] flex-1 flex-col gap-4 p-4">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold">Create Resource</h1>
-              <p className="text-muted-foreground mt-1">Add a new resource with credentials and documentation</p>
+              <h1 className="text-3xl font-bold">Edit Tool</h1>
+              <p className="text-muted-foreground mt-1">Update tool details, credentials and documentation</p>
             </div>
           </div>
 
@@ -161,7 +209,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Basic Information</CardTitle>
-                  <CardDescription>Enter the basic details for your resource</CardDescription>
+                  <CardDescription>Update the basic details for your tool</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -171,7 +219,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
                       name="title"
                       value={data.title}
                       onChange={(e) => setData('title', e.target.value)}
-                      placeholder="Enter resource title"
+                      placeholder="Enter tool title"
                       required
                     />
                     {errors.title && <p className="text-destructive text-sm">{errors.title}</p>}
@@ -184,7 +232,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
                       name="description"
                       value={data.description}
                       onChange={(e) => setData('description', e.target.value)}
-                      placeholder="Enter resource description"
+                      placeholder="Enter tool description"
                       rows={4}
                       className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex min-h-[80px] w-full rounded-md border px-3 py-2 text-base focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                     />
@@ -222,7 +270,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Credentials</CardTitle>
-                  <CardDescription>Store login credentials and API keys securely</CardDescription>
+                  <CardDescription>Update login credentials and API keys</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -269,7 +317,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Categories</CardTitle>
-                  <CardDescription>Select categories or create new ones for this resource</CardDescription>
+                  <CardDescription>Update categories or create new ones for this tool</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {/* Selected Categories */}
@@ -340,7 +388,7 @@ export default function Create({ categories }: CreateResourcePageProps) {
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Create New Category</DialogTitle>
-                          <DialogDescription>Add a new category to organize your resources</DialogDescription>
+                          <DialogDescription>Add a new category to organize your tools</DialogDescription>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           <div className="space-y-2">
@@ -408,15 +456,33 @@ export default function Create({ categories }: CreateResourcePageProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Attachments</CardTitle>
-                  <CardDescription>Upload files related to this resource (max 10MB per file)</CardDescription>
+                  <CardDescription>Upload additional files or manage existing attachments</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Existing Media */}
+                  {existingMedia.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Existing Files</Label>
+                      <div className="space-y-2">
+                        {existingMedia.map((media) => (
+                          <div key={media.id} className="flex items-center justify-between rounded-md border p-3">
+                            <a href={media.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                              {media.name}
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* New Media Upload */}
                   <div className="space-y-2">
+                    <Label htmlFor="media">Add New Files</Label>
                     <Input id="media" name="media[]" type="file" multiple onChange={handleFileChange} />
                     {data.media.length > 0 && (
                       <div className="mt-2">
                         <p className="text-muted-foreground text-sm">
-                          {data.media.length} file{data.media.length !== 1 ? 's' : ''} selected
+                          {data.media.length} new file{data.media.length !== 1 ? 's' : ''} selected
                         </p>
                       </div>
                     )}
@@ -426,17 +492,75 @@ export default function Create({ categories }: CreateResourcePageProps) {
               </Card>
 
               <div className="flex justify-end gap-4">
-                <Link href="/resources">
+                <Link href="/tools">
                   <Button type="button" variant="outline" disabled={processing}>
                     Cancel
                   </Button>
                 </Link>
                 <Button type="submit" disabled={processing}>
-                  {processing ? 'Creating...' : 'Create Resource'}
+                  {processing ? 'Updating...' : 'Update tool'}
                 </Button>
               </div>
             </div>
           </form>
+
+          {/* Delete Tool Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Delete Tool</CardTitle>
+              <CardDescription>Permanently remove this tool and all of its data.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10">
+                <div className="space-y-0.5 text-red-600 dark:text-red-100">
+                  <p className="font-medium">Warning</p>
+                  <p className="text-sm">This action cannot be undone.</p>
+                </div>
+
+                <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="destructive">Delete Tool</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogTitle>Delete {tool.title}</DialogTitle>
+                    <DialogDescription>
+                      Once this tool is deleted, all of its associated data will be permanently removed. Please confirm by typing the tool title.
+                    </DialogDescription>
+                    <form className="space-y-6" onSubmit={handleDeletetool}>
+                      <div className="grid gap-2">
+                        <Label htmlFor="confirm-title">tool title confirmation</Label>
+                        <Input
+                          id="confirm-title"
+                          type="text"
+                          value={confirmTitle}
+                          onChange={(event) => setConfirmTitle(event.target.value)}
+                          placeholder={tool.title}
+                          autoFocus
+                        />
+                        <p className="text-muted-foreground text-sm">
+                          Type <span className="font-semibold">{tool.title}</span> to confirm.
+                        </p>
+                        {confirmTitle && confirmTitle !== tool.title && (
+                          <p className="text-sm text-red-500">The title you entered does not match this tool.</p>
+                        )}
+                      </div>
+
+                      <DialogFooter className="gap-2">
+                        <DialogClose asChild>
+                          <Button variant="secondary" type="button">
+                            Cancel
+                          </Button>
+                        </DialogClose>
+                        <Button variant="destructive" type="submit" disabled={deleteProcessing || confirmTitle !== tool.title}>
+                          {deleteProcessing ? 'Deleting...' : 'Delete Tool'}
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AppLayout>

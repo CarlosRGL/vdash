@@ -42,6 +42,6 @@ class Category extends Model
      */
     public function resources(): BelongsToMany
     {
-        return $this->belongsToMany(Resource::class)->withTimestamps();
+        return $this->belongsToMany(Tool::class)->withTimestamps();
     }
 }

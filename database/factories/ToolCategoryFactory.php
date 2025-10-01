@@ -2,21 +2,21 @@
 
 namespace Database\Factories;
 
-use App\Models\ResourceCategory;
+use App\Models\ToolCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ResourceCategory>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ToolCategory>
  */
-class ResourceCategoryFactory extends Factory
+class ToolCategoryFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var class-string<\Illuminate\Database\Eloquent\Model>
      */
-    protected $model = ResourceCategory::class;
+    protected $model = ToolCategory::class;
 
     /**
      * Define the model's default state.

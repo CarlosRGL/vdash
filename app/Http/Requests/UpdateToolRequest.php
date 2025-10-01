@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateResourceRequest extends FormRequest
+class UpdateToolRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,7 +22,7 @@ class UpdateResourceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'image' => ['nullable', 'string', 'url', 'max:255'],
             'url' => ['nullable', 'string', 'url', 'max:255'],
             'login' => ['nullable', 'string', 'max:255'],
@@ -30,7 +30,7 @@ class UpdateResourceRequest extends FormRequest
             'api_key' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'categories' => ['nullable', 'array'],
-            'categories.*' => ['exists:resource_categories,id'],
+            'categories.*' => ['exists:tool_categories,id'],
             'media' => ['nullable', 'array'],
             'media.*' => ['file', 'max:10240'], // 10MB max per file
         ];
@@ -44,7 +44,7 @@ class UpdateResourceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required' => 'The resource title is required.',
+            'title.required' => 'The tool title is required.',
             'title.max' => 'The title cannot exceed 255 characters.',
             'image.url' => 'The image must be a valid URL.',
             'url.url' => 'The URL must be valid.',
