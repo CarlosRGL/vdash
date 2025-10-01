@@ -13,11 +13,12 @@ interface Props {
 
 function Show({ site }: Props) {
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+  const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      ...options,
     });
   };
 

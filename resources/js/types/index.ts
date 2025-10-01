@@ -63,7 +63,7 @@ export interface Site {
   contract?: SiteContract;
   server_info?: SiteServerInfo;
   php_version?: string | null;
-  last_check?: string | null;
+  last_sync?: string | null;
   sync_enabled: boolean;
   api_token: string;
   created_at: string;

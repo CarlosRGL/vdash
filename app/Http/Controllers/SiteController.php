@@ -314,7 +314,7 @@ class SiteController extends Controller
         }
 
         $success = $syncService->syncSiteData($site);
-
+        $site->update(['last_sync' => now()]);
         if ($success) {
             return Redirect::back()
                 ->with('toast', [

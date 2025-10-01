@@ -28,6 +28,7 @@ class Site extends Model
         'is_multisite',
         'sync_enabled',
         'api_token',
+        'last_sync',
     ];
 
     /**
@@ -40,6 +41,7 @@ class Site extends Model
         return [
             'is_multisite' => 'boolean',
             'sync_enabled' => 'boolean',
+            'last_sync' => 'datetime',
         ];
     }
 

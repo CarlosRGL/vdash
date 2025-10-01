@@ -22,13 +22,14 @@ class SiteFactory extends Factory
         $teams = ['quai13', 'vernalis'];
 
         return [
-            'name' => fake()->company().' '.fake()->word(),
+            'name' => fake()->company() . ' ' . fake()->word(),
             'url' => fake()->domainName(),
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
             'team' => fake()->randomElement($teams),
             'wordpress_version' => null,
             'is_multisite' => false,
+            'last_sync' => null,
             'created_at' => fake()->dateTimeBetween('-1 year', 'now'),
             'updated_at' => function (array $attributes) {
                 return fake()->dateTimeBetween($attributes['created_at'], 'now');
