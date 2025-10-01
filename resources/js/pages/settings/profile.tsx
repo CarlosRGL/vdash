@@ -34,6 +34,8 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     _method: 'patch',
   });
 
+  const { delete: deleteAvatar, processing: deletingAvatar } = useForm({});
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -47,8 +49,13 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
   };
 
   const removeAvatar = () => {
-    setData('avatar', null);
-    setAvatarPreview(null);
+    deleteAvatar(route('profile.avatar.delete'), {
+      preserveScroll: true,
+      onSuccess: () => {
+        setAvatarPreview(null);
+        setData('avatar', null);
+      },
+    });
   };
 
   const submit: FormEventHandler = (e) => {
@@ -57,6 +64,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     post(route('profile.update'), {
       preserveScroll: true,
       forceFormData: true,
+      onSuccess: () => {
+        setAvatarPreview(auth.user.avatar || null);
+      },
     });
   };
 
@@ -85,9 +95,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                       Upload Photo
                     </Button>
                     {avatarPreview && (
-                      <Button type="button" variant="outline" size="sm" onClick={removeAvatar}>
+                      <Button type="button" variant="outline" size="sm" onClick={removeAvatar} disabled={deletingAvatar}>
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Remove
+                        {deletingAvatar ? 'Removing...' : 'Remove'}
                       </Button>
                     )}
                   </div>

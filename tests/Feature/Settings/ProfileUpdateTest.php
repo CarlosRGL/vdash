@@ -2,7 +2,6 @@
 
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -89,8 +88,6 @@ test('correct password must be provided to delete account', function () {
 });
 
 test('user can upload an avatar', function () {
-    Storage::fake('public');
-
     $user = User::factory()->create();
     $file = UploadedFile::fake()->image('avatar.jpg');
 
@@ -109,13 +106,11 @@ test('user can upload an avatar', function () {
 
     $user->refresh();
 
-    expect($user->getRawOriginal('avatar'))->not->toBeNull();
-    Storage::disk('public')->assertExists($user->getRawOriginal('avatar'));
+    expect($user->getFirstMedia('avatar'))->not->toBeNull();
+    expect($user->avatar)->not->toBeEmpty();
 });
 
 test('user can update their avatar', function () {
-    Storage::fake('public');
-
     $user = User::factory()->create();
     $oldFile = UploadedFile::fake()->image('old-avatar.jpg');
 
@@ -130,7 +125,7 @@ test('user can update their avatar', function () {
         ]);
 
     $user->refresh();
-    $oldAvatar = $user->getRawOriginal('avatar');
+    $oldMedia = $user->getFirstMedia('avatar');
 
     // Upload new avatar
     $newFile = UploadedFile::fake()->image('new-avatar.jpg');
@@ -149,15 +144,13 @@ test('user can update their avatar', function () {
         ->assertRedirect('/settings/profile');
 
     $user->refresh();
+    $newMedia = $user->getFirstMedia('avatar');
 
-    expect($user->getRawOriginal('avatar'))->not->toBe($oldAvatar);
-    Storage::disk('public')->assertExists($user->getRawOriginal('avatar'));
-    Storage::disk('public')->assertMissing($oldAvatar);
+    expect($newMedia->id)->not->toBe($oldMedia->id);
+    expect($user->getMedia('avatar')->count())->toBe(1);
 });
 
 test('avatar must be an image', function () {
-    Storage::fake('public');
-
     $user = User::factory()->create();
     $file = UploadedFile::fake()->create('document.pdf', 100);
 
@@ -174,8 +167,6 @@ test('avatar must be an image', function () {
 });
 
 test('avatar must not exceed 2MB', function () {
-    Storage::fake('public');
-
     $user = User::factory()->create();
     $file = UploadedFile::fake()->image('large-avatar.jpg')->size(3000);
 
@@ -189,4 +180,34 @@ test('avatar must not exceed 2MB', function () {
         ]);
 
     $response->assertSessionHasErrors('avatar');
+});
+
+test('user can delete their avatar', function () {
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->image('avatar.jpg');
+
+    // Upload avatar first
+    $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+            '_method' => 'patch',
+        ]);
+
+    $user->refresh();
+    expect($user->getFirstMedia('avatar'))->not->toBeNull();
+
+    // Delete avatar
+    $response = $this
+        ->actingAs($user)
+        ->delete('/settings/profile/avatar');
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/settings/profile');
+
+    $user->refresh();
+    expect($user->getFirstMedia('avatar'))->toBeNull();
 });

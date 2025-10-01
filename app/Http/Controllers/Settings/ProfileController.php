@@ -8,7 +8,6 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,17 +32,13 @@ class ProfileController extends Controller
         $user = $request->user();
         $validated = $request->validated();
 
-        // Handle avatar upload
+        // Handle avatar upload with Media Library
         if ($request->hasFile('avatar')) {
-            // Delete old avatar if exists
-            $oldAvatar = $user->getRawOriginal('avatar');
-            if ($oldAvatar && ! filter_var($oldAvatar, FILTER_VALIDATE_URL)) {
-                Storage::disk('public')->delete($oldAvatar);
-            }
+            $user->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
 
-            // Store new avatar
-            $path = $request->file('avatar')->store('avatars', 'public');
-            $validated['avatar'] = $path;
+            // Remove avatar from validated data as it's handled by Media Library
+            unset($validated['avatar']);
         }
 
         $user->fill($validated);
@@ -53,6 +48,18 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        return to_route('profile.edit');
+    }
+
+    /**
+     * Delete the user's avatar.
+     */
+    public function deleteAvatar(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $user->clearMediaCollection('avatar');
 
         return to_route('profile.edit');
     }

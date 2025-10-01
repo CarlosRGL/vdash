@@ -75,6 +75,7 @@ class UserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'roles' => 'nullable|array',
             'roles.*' => 'integer|exists:roles,id',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
         ]);
 
         $user = User::create([
@@ -82,6 +83,12 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $user->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
+        }
 
         if ($request->has('roles')) {
             $roles = $this->resolveRoles($request->input('roles', []));
@@ -121,6 +128,7 @@ class UserController extends Controller
             'password' => $request->filled('password') ? ['confirmed', Rules\Password::defaults()] : '',
             'roles' => 'nullable|array',
             'roles.*' => 'integer|exists:roles,id',
+            'avatar' => 'nullable|image|mimes:jpeg,jpg,png,gif|max:2048',
         ]);
 
         $userData = [
@@ -134,6 +142,12 @@ class UserController extends Controller
         }
 
         $user->update($userData);
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $user->addMediaFromRequest('avatar')
+                ->toMediaCollection('avatar');
+        }
 
         if ($request->has('roles')) {
             $roles = $this->resolveRoles($request->input('roles', []));
