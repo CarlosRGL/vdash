@@ -253,12 +253,12 @@ export default function Index({ tools, categories, filters }: ToolsPageProps) {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {tools.data.map((tool) => (
                 <Card key={tool.id} className="flex flex-col">
                   {tool.image && (
                     <div className="aspect-video overflow-hidden rounded-t-lg">
-                      <img src={tool.image} alt={tool.title} className="h-full w-full object-cover" />
+                      <img src={tool.image} alt={tool.title} className="h-full w-full object-cover object-center" />
                     </div>
                   )}
                   <CardHeader>
@@ -314,14 +314,9 @@ export default function Index({ tools, categories, filters }: ToolsPageProps) {
                         <Heart className="mr-1 h-3 w-3" />
                         {tool.favorited_count}
                       </div>
-                      <CredentialsDialog tool={tool} />
                     </div>
                     <div className="flex gap-2">
-                      <Link href={`/tools/${tool.id}`}>
-                        <Button variant="outline" size="sm">
-                          View
-                        </Button>
-                      </Link>
+                      <CredentialsDialog tool={tool} />
                       <Link href={`/tools/${tool.id}/edit`}>
                         <Button variant="default" size="sm">
                           Edit
