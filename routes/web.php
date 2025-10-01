@@ -61,6 +61,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('sites/{site}/api-sync', [SiteController::class, 'updateApiSync'])
         ->name('sites.api-sync.update');
 
+    // Site PageSpeed routes
+    Route::post('sites/{site}/pagespeed', [SiteController::class, 'runPageSpeedTest'])
+        ->name('sites.pagespeed.run');
+
     // Tools routes
     Route::resource('tools', ToolController::class);
     Route::post('tools/{tool}/favorite', [ToolController::class, 'toggleFavorite'])

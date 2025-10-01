@@ -5,7 +5,7 @@ import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link } from '@inertiajs/react';
 import { ExternalLink, Globe } from 'lucide-react';
 import { useState } from 'react';
-import { CredentialsTab, OverviewTab } from './overview';
+import { CredentialsTab, OverviewTab, PageSpeedTab } from './overview';
 
 interface Props {
   site: Site;
@@ -104,6 +104,7 @@ function Show({ site }: Props) {
         </div>
 
         <OverviewTab site={site} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
+        <PageSpeedTab site={site} />
         <CredentialsTab site={site} showPasswords={showPasswords} togglePasswordVisibility={togglePasswordVisibility} />
       </div>
     </AppLayout>

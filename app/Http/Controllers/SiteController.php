@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\RunPageSpeedInsightJob;
 use App\Models\Site;
 use App\Models\User;
 use App\Services\SiteSyncService;
@@ -18,7 +19,15 @@ class SiteController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Site::with(['users', 'credential', 'contract', 'serverInfo'])
+        $query = Site::with([
+            'users',
+            'credential',
+            'contract',
+            'serverInfo',
+            'pageSpeedInsights' => function ($query) {
+                $query->where('strategy', 'mobile')->latest()->limit(1);
+            },
+        ])
             ->when(! Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->whereHas('users', function ($q) {
                     $q->where('user_id', Auth::id());
@@ -152,6 +161,9 @@ class SiteController extends Controller
             'credential',
             'contract',
             'serverInfo',
+            'pageSpeedInsights' => function ($query) {
+                $query->latest()->limit(2);
+            },
         ]);
 
         return Inertia::render('sites/Show', [
@@ -372,5 +384,29 @@ class SiteController extends Controller
                 ],
             ],
         ]);
+    }
+
+    /**
+     * Run PageSpeed Insights test for a site.
+     */
+    public function runPageSpeedTest(Request $request, Site $site)
+    {
+        if (Gate::denies('view', $site)) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'strategy' => 'required|in:mobile,desktop',
+        ]);
+
+        RunPageSpeedInsightJob::dispatch($site, $validated['strategy']);
+
+        return Redirect::back()
+            ->with('toast', [
+                'type' => 'success',
+                'message' => 'PageSpeed test queued',
+                'description' => "A {$validated['strategy']} PageSpeed test has been queued for {$site->name}. "
+                    . 'Results will be available shortly.',
+            ]);
     }
 }

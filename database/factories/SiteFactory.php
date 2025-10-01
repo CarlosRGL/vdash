@@ -22,7 +22,7 @@ class SiteFactory extends Factory
         $teams = ['quai13', 'vernalis'];
 
         return [
-            'name' => fake()->company() . ' ' . fake()->word(),
+            'name' => fake()->company().' '.fake()->word(),
             'url' => fake()->domainName(),
             'description' => fake()->paragraph(),
             'type' => fake()->randomElement($siteTypes),
