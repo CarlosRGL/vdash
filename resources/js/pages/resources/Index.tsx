@@ -1,11 +1,13 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
-import { ExternalLink, Heart, Paperclip, Plus, Search } from 'lucide-react';
+import { Check, Copy, ExternalLink, Eye, EyeOff, Heart, KeyRound, Paperclip, Plus, Search, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -35,6 +37,9 @@ interface Resource {
   title: string;
   image: string | null;
   url: string | null;
+  login: string | null;
+  password: string | null;
+  api_key: string | null;
   description: string | null;
   categories: Category[];
   media: Media[];
@@ -57,6 +62,76 @@ interface ResourcesPageProps {
     category?: number;
     favorites?: boolean;
   };
+}
+
+interface CredentialFieldProps {
+  label: string;
+  value: string | null;
+  icon: React.ReactNode;
+  type?: 'text' | 'password';
+}
+
+function CredentialField({ label, value, icon, type = 'text' }: CredentialFieldProps) {
+  const [copy, isCopied] = useCopyToClipboard();
+  const [isRevealed, setIsRevealed] = useState(false);
+
+  if (!value) return null;
+
+  const displayValue = type === 'password' && !isRevealed ? '••••••••' : value;
+
+  return (
+    <div className="flex items-center justify-between gap-2 rounded-md border p-3">
+      <div className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="text-muted-foreground flex-shrink-0">{icon}</div>
+        <div className="min-w-0 flex-1">
+          <p className="text-muted-foreground mb-1 text-xs font-medium">{label}</p>
+          <p className="font-mono text-sm break-all">{displayValue}</p>
+        </div>
+      </div>
+      <div className="flex flex-shrink-0 gap-1">
+        {type === 'password' && (
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setIsRevealed(!isRevealed)} title={isRevealed ? 'Hide' : 'Show'}>
+            {isRevealed ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+        )}
+        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => copy(value)} title={isCopied ? 'Copied!' : 'Copy to clipboard'}>
+          {isCopied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface CredentialsDialogProps {
+  resource: Resource;
+}
+
+function CredentialsDialog({ resource }: CredentialsDialogProps) {
+  const hasCredentials = resource.login || resource.password || resource.api_key;
+
+  if (!hasCredentials) return null;
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <ShieldCheck className="mr-2 h-4 w-4" />
+          Credentials
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Credentials for {resource.title}</DialogTitle>
+          <DialogDescription>Copy credentials to your clipboard. Click the eye icon to reveal masked fields.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3 py-4">
+          <CredentialField label="Login / Username" value={resource.login} icon={<ShieldCheck className="h-4 w-4" />} />
+          <CredentialField label="Password" value={resource.password} icon={<KeyRound className="h-4 w-4" />} type="password" />
+          <CredentialField label="API Key" value={resource.api_key} icon={<KeyRound className="h-4 w-4" />} type="password" />
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export default function Index({ resources, categories, filters }: ResourcesPageProps) {
@@ -239,9 +314,12 @@ export default function Index({ resources, categories, filters }: ResourcesPageP
                   </CardContent>
 
                   <CardFooter className="flex justify-between">
-                    <div className="text-muted-foreground flex items-center text-sm">
-                      <Heart className="mr-1 h-3 w-3" />
-                      {resource.favorited_count}
+                    <div className="flex items-center gap-2">
+                      <div className="text-muted-foreground flex items-center text-sm">
+                        <Heart className="mr-1 h-3 w-3" />
+                        {resource.favorited_count}
+                      </div>
+                      <CredentialsDialog resource={resource} />
                     </div>
                     <div className="flex gap-2">
                       <Link href={`/resources/${resource.id}`}>

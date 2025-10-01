@@ -50,6 +50,9 @@ class ResourceController extends Controller
                 'title' => $resource->title,
                 'image' => $resource->image,
                 'url' => $resource->url,
+                'login' => $resource->login,
+                'password' => $resource->password,
+                'api_key' => $resource->api_key,
                 'description' => $resource->description,
                 'categories' => $resource->categories,
                 'media' => $resource->getMedia('attachments')->map(fn ($media) => [
@@ -144,7 +147,7 @@ class ResourceController extends Controller
     {
         $resource->load(['categories', 'media']);
 
-        return Inertia::render('Resources/Edit', [
+        return Inertia::render('resources/Edit', [
             'resource' => [
                 'id' => $resource->id,
                 'title' => $resource->title,

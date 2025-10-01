@@ -28,7 +28,10 @@ it('displays resources index page', function () {
         ->assertInertia(fn ($page) => $page
             ->component('resources/Index')
             ->has('resources.data', 3)
-            ->has('categories', 2));
+            ->has('categories', 2)
+            ->has('resources.data.0.login')
+            ->has('resources.data.0.password')
+            ->has('resources.data.0.api_key'));
 });
 
 it('can search resources', function () {
