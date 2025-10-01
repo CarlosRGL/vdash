@@ -1,16 +1,19 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useInitials } from '@/hooks/use-initials';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import { Trash2, Upload } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -21,17 +24,39 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
   const { auth } = usePage<SharedData>().props;
+  const getInitials = useInitials();
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(auth.user.avatar || null);
 
-  const { data, setData, patch, errors, processing, recentlySuccessful } = useForm({
+  const { data, setData, post, errors, processing, recentlySuccessful } = useForm({
     name: auth.user.name,
     email: auth.user.email,
+    avatar: null as File | null,
+    _method: 'patch',
   });
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setData('avatar', file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeAvatar = () => {
+    setData('avatar', null);
+    setAvatarPreview(null);
+  };
 
   const submit: FormEventHandler = (e) => {
     e.preventDefault();
 
-    patch(route('profile.update'), {
+    post(route('profile.update'), {
       preserveScroll: true,
+      forceFormData: true,
     });
   };
 
@@ -44,6 +69,41 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
           <HeadingSmall title="Profile information" description="Update your name and email address" />
 
           <form onSubmit={submit} className="space-y-6">
+            <div className="grid gap-4">
+              <Label>Profile Photo</Label>
+              <div className="flex items-center gap-6">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={avatarPreview || undefined} alt={auth.user.name} />
+                  <AvatarFallback className="bg-neutral-200 text-2xl text-black dark:bg-neutral-700 dark:text-white">
+                    {getInitials(auth.user.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById('avatar-upload')?.click()}>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload Photo
+                    </Button>
+                    {avatarPreview && (
+                      <Button type="button" variant="outline" size="sm" onClick={removeAvatar}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-muted-foreground text-xs">JPG, PNG or GIF. Max size 2MB.</p>
+                  <Input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif"
+                    className="hidden"
+                    onChange={handleAvatarChange}
+                  />
+                  <InputError className="mt-1" message={errors.avatar} />
+                </div>
+              </div>
+            </div>
+
             <div className="grid gap-2">
               <Label htmlFor="name">Name</Label>
 

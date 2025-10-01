@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
 
@@ -84,4 +86,107 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/settings/profile');
 
     expect($user->fresh())->not->toBeNull();
+});
+
+test('user can upload an avatar', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->image('avatar.jpg');
+
+    $response = $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+            '_method' => 'patch',
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/settings/profile');
+
+    $user->refresh();
+
+    expect($user->getRawOriginal('avatar'))->not->toBeNull();
+    Storage::disk('public')->assertExists($user->getRawOriginal('avatar'));
+});
+
+test('user can update their avatar', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $oldFile = UploadedFile::fake()->image('old-avatar.jpg');
+
+    // Upload initial avatar
+    $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $oldFile,
+            '_method' => 'patch',
+        ]);
+
+    $user->refresh();
+    $oldAvatar = $user->getRawOriginal('avatar');
+
+    // Upload new avatar
+    $newFile = UploadedFile::fake()->image('new-avatar.jpg');
+
+    $response = $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $newFile,
+            '_method' => 'patch',
+        ]);
+
+    $response
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/settings/profile');
+
+    $user->refresh();
+
+    expect($user->getRawOriginal('avatar'))->not->toBe($oldAvatar);
+    Storage::disk('public')->assertExists($user->getRawOriginal('avatar'));
+    Storage::disk('public')->assertMissing($oldAvatar);
+});
+
+test('avatar must be an image', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->create('document.pdf', 100);
+
+    $response = $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+            '_method' => 'patch',
+        ]);
+
+    $response->assertSessionHasErrors('avatar');
+});
+
+test('avatar must not exceed 2MB', function () {
+    Storage::fake('public');
+
+    $user = User::factory()->create();
+    $file = UploadedFile::fake()->image('large-avatar.jpg')->size(3000);
+
+    $response = $this
+        ->actingAs($user)
+        ->post('/settings/profile', [
+            'name' => $user->name,
+            'email' => $user->email,
+            'avatar' => $file,
+            '_method' => 'patch',
+        ]);
+
+    $response->assertSessionHasErrors('avatar');
 });
