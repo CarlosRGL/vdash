@@ -94,4 +94,13 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsToMany(Site::class)->withTimestamps();
     }
+
+    /**
+     * Get the resources favorited by the user.
+     */
+    public function favoriteResources(): BelongsToMany
+    {
+        return $this->belongsToMany(Resource::class, 'resource_user_favorites')
+            ->withTimestamps();
+    }
 }

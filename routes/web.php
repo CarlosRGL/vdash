@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\SiteContractController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteCredentialController;
@@ -58,6 +59,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('sites.api-sync.edit');
     Route::put('sites/{site}/api-sync', [SiteController::class, 'updateApiSync'])
         ->name('sites.api-sync.update');
+
+    // Resources routes
+    Route::resource('resources', ResourceController::class);
+    Route::post('resources/{resource}/favorite', [ResourceController::class, 'toggleFavorite'])
+        ->name('resources.favorite');
 });
 
 require __DIR__ . '/settings.php';

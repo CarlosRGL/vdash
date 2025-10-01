@@ -23,8 +23,8 @@ const mainNavItems: NavItem[] = [
     icon: Globe,
   },
   {
-    title: 'Tickets',
-    url: '/tickets',
+    title: 'Resources',
+    url: '/resources',
     icon: Ticket,
   },
 ];
