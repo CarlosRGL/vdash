@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('url');
             $table->text('description')->nullable();
             $table->enum('type', [
-                'WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other'
+                'WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other',
             ])->default('other');
             $table->enum('team', ['quai13', 'vernalis'])->default('quai13');
             $table->timestamps();

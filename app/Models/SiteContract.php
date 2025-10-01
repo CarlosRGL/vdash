@@ -48,6 +48,7 @@ class SiteContract extends Model
     public function isActive(): bool
     {
         $now = now();
+
         return $this->contract_start_date <= $now &&
                ($this->contract_end_date === null || $this->contract_end_date >= $now);
     }

@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, Globe, LayoutGrid, Ticket, Users } from 'lucide-react';
+import { BookOpen, Folder, Globe, LayoutGrid, Pickaxe, Users } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -13,19 +13,19 @@ const mainNavItems: NavItem[] = [
     icon: LayoutGrid,
   },
   {
-    title: 'Users',
-    url: '/users',
-    icon: Users,
-  },
-  {
     title: 'Sites',
     url: '/sites',
     icon: Globe,
   },
   {
-    title: 'Tickets',
-    url: '/tickets',
-    icon: Ticket,
+    title: 'Tools',
+    url: '/tools',
+    icon: Pickaxe,
+  },
+  {
+    title: 'Users',
+    url: '/users',
+    icon: Users,
   },
 ];
 

@@ -53,7 +53,7 @@ class SiteCredential extends Model
      */
     public function setFtpPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             $this->attributes['ftp_password'] = Crypt::encryptString($value);
         }
     }
@@ -63,9 +63,10 @@ class SiteCredential extends Model
      */
     public function getFtpPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             return Crypt::decryptString($value);
         }
+
         return null;
     }
 
@@ -74,7 +75,7 @@ class SiteCredential extends Model
      */
     public function setDbPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             $this->attributes['db_password'] = Crypt::encryptString($value);
         }
     }
@@ -84,9 +85,10 @@ class SiteCredential extends Model
      */
     public function getDbPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             return Crypt::decryptString($value);
         }
+
         return null;
     }
 
@@ -95,7 +97,7 @@ class SiteCredential extends Model
      */
     public function setLoginPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             $this->attributes['login_password'] = Crypt::encryptString($value);
         }
     }
@@ -105,9 +107,10 @@ class SiteCredential extends Model
      */
     public function getLoginPasswordAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             return Crypt::decryptString($value);
         }
+
         return null;
     }
 
@@ -116,7 +119,7 @@ class SiteCredential extends Model
      */
     public function setApiKeysAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             $this->attributes['api_keys'] = Crypt::encryptString($value);
         }
     }
@@ -126,9 +129,10 @@ class SiteCredential extends Model
      */
     public function getApiKeysAttribute($value)
     {
-        if (!empty($value)) {
+        if (! empty($value)) {
             return Crypt::decryptString($value);
         }
+
         return null;
     }
 }

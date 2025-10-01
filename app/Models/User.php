@@ -94,4 +94,13 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsToMany(Site::class)->withTimestamps();
     }
+
+    /**
+     * Get the tools favorited by the user.
+     */
+    public function favoriteTools(): BelongsToMany
+    {
+        return $this->belongsToMany(Tool::class, 'tool_user_favorites')
+            ->withTimestamps();
+    }
 }

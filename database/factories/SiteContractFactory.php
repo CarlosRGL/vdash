@@ -23,8 +23,8 @@ class SiteContractFactory extends Factory
             'contract_start_date' => $startDate,
             'contract_end_date' => $this->faker->boolean(80) ? $endDate : null,
             'contract_capacity' => $this->faker->randomElement(['Basic', 'Standard', 'Premium', 'Enterprise']),
-            'contract_storage_usage' => $this->faker->numberBetween(1, 50) . 'GB',
-            'contract_storage_limit' => $this->faker->numberBetween(50, 500) . 'GB',
+            'contract_storage_usage' => $this->faker->numberBetween(1, 50).'GB',
+            'contract_storage_limit' => $this->faker->numberBetween(50, 500).'GB',
         ];
     }
 }

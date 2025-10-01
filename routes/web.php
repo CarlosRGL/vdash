@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SiteContractController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\SiteCredentialController;
+use App\Http\Controllers\ToolController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +60,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('sites.api-sync.edit');
     Route::put('sites/{site}/api-sync', [SiteController::class, 'updateApiSync'])
         ->name('sites.api-sync.update');
+
+    // Tools routes
+    Route::resource('tools', ToolController::class);
+    Route::post('tools/{tool}/favorite', [ToolController::class, 'toggleFavorite'])
+        ->name('tools.favorite');
+    Route::post('tools/fetch-metadata', [ToolController::class, 'fetchMetadata'])
+        ->name('tools.fetch-metadata');
+
+    // Categories routes
+    Route::post('categories', [CategoryController::class, 'store'])
+        ->name('categories.store');
 });
 
 require __DIR__ . '/settings.php';

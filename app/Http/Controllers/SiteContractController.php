@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-/** @package App\Http\Controllers */
 class SiteContractController extends Controller
 {
     /**
@@ -49,7 +48,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Show', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract(),
+            'contract' => $site->contract ?? new SiteContract,
         ]);
     }
 
@@ -66,7 +65,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Edit', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract(),
+            'contract' => $site->contract ?? new SiteContract,
         ]);
     }
 
@@ -93,10 +92,9 @@ class SiteContractController extends Controller
             $site->contract()->create($validated);
         }
 
-
         return Inertia::Render('sites/contracts/Edit', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract(),
+            'contract' => $site->contract ?? new SiteContract,
             'flash' => [
                 'toast' => [
                     'type' => 'success',

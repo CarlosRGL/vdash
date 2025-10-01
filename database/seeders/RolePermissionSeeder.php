@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolePermissionSeeder extends Seeder
 {
@@ -41,11 +41,11 @@ class RolePermissionSeeder extends Seeder
         // Assign permissions to roles
         $adminRole->givePermissionTo([
             $viewAnySites, $viewSite, $createSite, $updateSite, $deleteSite, $restoreSite, $forceDeleteSite,
-            $viewAnyUsers, $viewUser, $createUser, $updateUser, $deleteUser
+            $viewAnyUsers, $viewUser, $createUser, $updateUser, $deleteUser,
         ]);
 
         $clientRole->givePermissionTo([
-            $viewSite, $createSite, $updateSite, $deleteSite, $restoreSite
+            $viewSite, $createSite, $updateSite, $deleteSite, $restoreSite,
         ]);
 
         // Assign roles to users
