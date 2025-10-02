@@ -94,6 +94,7 @@ export function SiteCredentialsSheet({ open, onOpenChange, credentials, siteName
                 <CredentialField label="Login URL" value={credentials.login_url} fieldKey="login_url" />
                 <CredentialField label="Username" value={credentials.login_username} fieldKey="login_username" />
                 <CredentialField label="Password" value={credentials.login_password} fieldKey="login_password" isPassword={true} />
+                <CredentialField label="FTP Host" value={credentials.ftp_host} fieldKey="ftp_host" />
                 <CredentialField label="FTP Username" value={credentials.ftp_username} fieldKey="ftp_username" />
                 <CredentialField label="FTP Password" value={credentials.ftp_password} fieldKey="ftp_password" isPassword={true} />
                 <CredentialField label="Database Username" value={credentials.db_username} fieldKey="db_username" />
