@@ -36,7 +36,6 @@ class SitePageSpeedInsight extends Model
         'time_to_interactive',
         'total_blocking_time',
         'cumulative_layout_shift',
-        'full_response',
     ];
 
     /**
@@ -51,7 +50,6 @@ class SitePageSpeedInsight extends Model
             'accessibility_score' => 'decimal:2',
             'best_practices_score' => 'decimal:2',
             'seo_score' => 'decimal:2',
-            'full_response' => 'array',
         ];
     }
 

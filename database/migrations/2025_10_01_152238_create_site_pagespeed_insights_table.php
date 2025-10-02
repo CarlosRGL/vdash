@@ -25,7 +25,6 @@ return new class extends Migration
             $table->integer('time_to_interactive')->nullable();
             $table->integer('total_blocking_time')->nullable();
             $table->integer('cumulative_layout_shift')->nullable();
-            $table->json('full_response')->nullable();
             $table->timestamps();
 
             // Add unique constraint for site_id and strategy

@@ -27,7 +27,6 @@ function InputWithCopy({ id, label, value, onChange, onCopy, copied, type = 'tex
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = type === 'password';
   const inputType = isPassword && showPassword ? 'text' : type;
-  console.log('test');
 
   return (
     <div className="flex flex-col gap-2">

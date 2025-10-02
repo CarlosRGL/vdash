@@ -86,7 +86,6 @@ class PageSpeedInsightsService
                 'time_to_interactive' => $audits['interactive']['numericValue'] ?? null,
                 'total_blocking_time' => $audits['total-blocking-time']['numericValue'] ?? null,
                 'cumulative_layout_shift' => $audits['cumulative-layout-shift']['numericValue'] ?? null,
-                'full_response' => $data,
             ]
         );
     }
