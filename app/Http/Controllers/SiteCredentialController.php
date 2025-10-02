@@ -47,7 +47,7 @@ class SiteCredentialController extends Controller
 
         return Inertia::render('sites/credentials/Show', [
             'site' => $site,
-            'credentials' => $site->credential ?? new SiteCredential,
+            'credentials' => $site->credential ?? new SiteCredential(),
         ]);
     }
 
@@ -64,7 +64,7 @@ class SiteCredentialController extends Controller
 
         return Inertia::render('sites/credentials/Edit', [
             'site' => $site,
-            'credentials' => $site->credential ?? new SiteCredential,
+            'credentials' => $site->credential ?? new SiteCredential(),
         ]);
     }
 
@@ -97,9 +97,9 @@ class SiteCredentialController extends Controller
             $site->credential()->create($validated);
         }
 
-        return Inertia::render('sites/credentials/Edit', [
+        return to_route('sites.credentials.edit', [
             'site' => $site,
-            'credentials' => $site->credential ?? new SiteCredential,
+            'credentials' => $site->credential ?? new SiteCredential(),
             'flash' => [
                 'toast' => [
                     'type' => 'success',

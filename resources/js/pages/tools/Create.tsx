@@ -100,7 +100,7 @@ export default function Create({ categories }: CreatetoolPageProps) {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
         },
         body: JSON.stringify({
-          url: data.url,
+          url: data.url.replace(/\/$/, ''),
         }),
       });
 
