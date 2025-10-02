@@ -70,20 +70,24 @@ class PageSpeedInsightsService
         $categories = $lighthouseResult['categories'] ?? [];
         $audits = $lighthouseResult['audits'] ?? [];
 
-        return SitePageSpeedInsight::create([
-            'site_id' => $site->id,
-            'strategy' => $strategy,
-            'performance_score' => $categories['performance']['score'] ?? null,
-            'accessibility_score' => $categories['accessibility']['score'] ?? null,
-            'best_practices_score' => $categories['best-practices']['score'] ?? null,
-            'seo_score' => $categories['seo']['score'] ?? null,
-            'first_contentful_paint' => $audits['first-contentful-paint']['numericValue'] ?? null,
-            'speed_index' => $audits['speed-index']['numericValue'] ?? null,
-            'largest_contentful_paint' => $audits['largest-contentful-paint']['numericValue'] ?? null,
-            'time_to_interactive' => $audits['interactive']['numericValue'] ?? null,
-            'total_blocking_time' => $audits['total-blocking-time']['numericValue'] ?? null,
-            'cumulative_layout_shift' => $audits['cumulative-layout-shift']['numericValue'] ?? null,
-            'full_response' => $data,
-        ]);
+        return SitePageSpeedInsight::updateOrCreate(
+            [
+                'site_id' => $site->id,
+                'strategy' => $strategy,
+            ],
+            [
+                'performance_score' => $categories['performance']['score'] ?? null,
+                'accessibility_score' => $categories['accessibility']['score'] ?? null,
+                'best_practices_score' => $categories['best-practices']['score'] ?? null,
+                'seo_score' => $categories['seo']['score'] ?? null,
+                'first_contentful_paint' => $audits['first-contentful-paint']['numericValue'] ?? null,
+                'speed_index' => $audits['speed-index']['numericValue'] ?? null,
+                'largest_contentful_paint' => $audits['largest-contentful-paint']['numericValue'] ?? null,
+                'time_to_interactive' => $audits['interactive']['numericValue'] ?? null,
+                'total_blocking_time' => $audits['total-blocking-time']['numericValue'] ?? null,
+                'cumulative_layout_shift' => $audits['cumulative-layout-shift']['numericValue'] ?? null,
+                'full_response' => $data,
+            ]
+        );
     }
 }

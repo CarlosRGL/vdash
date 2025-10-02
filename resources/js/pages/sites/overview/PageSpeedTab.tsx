@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { cn, getProgressColor } from '@/lib/utils';
 import { type Site, type SitePageSpeedInsight } from '@/types';
 import { router } from '@inertiajs/react';
 import { Activity, Gauge, Monitor, RefreshCw, Smartphone } from 'lucide-react';
@@ -148,8 +149,15 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
                 <span className="text-muted-foreground">Accessibility</span>
                 <Badge variant={getScoreBadgeVariant(accessibilityScore)}>{Math.round(accessibilityScore)}</Badge>
               </div>
-              <Progress value={accessibilityScore} className="h-2" />
+              <div className="relative w-full">
+                <Progress value={accessibilityScore} className="h-2" />
+                <div
+                  className={cn('absolute inset-0 h-2 rounded-full transition-all', getProgressColor(accessibilityScore))}
+                  style={{ width: `${Math.min(accessibilityScore, 100)}%` }}
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Best Practices</span>

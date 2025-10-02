@@ -89,3 +89,10 @@ export const getContractStatus = (startDate: string | null, endDate: string | nu
     return { status: 'unknown', color: 'bg-gray-400' };
   }
 };
+
+export const getProgressColor = (percentage: number) => {
+  if (percentage >= 90) return 'bg-destructive';
+  if (percentage >= 75) return 'bg-orange-500';
+  if (percentage >= 50) return 'bg-yellow-500';
+  return 'bg-green-500';
+};

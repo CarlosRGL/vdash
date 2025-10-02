@@ -24,9 +24,7 @@ class SiteController extends Controller
             'credential',
             'contract',
             'serverInfo',
-            'pageSpeedInsights' => function ($query) {
-                $query->where('strategy', 'mobile')->latest()->limit(1);
-            },
+            'pageSpeedInsights',
         ])
             ->when(! Gate::allows('viewAny', Site::class), function ($query) {
                 return $query->whereHas('users', function ($q) {
@@ -161,9 +159,7 @@ class SiteController extends Controller
             'credential',
             'contract',
             'serverInfo',
-            'pageSpeedInsights' => function ($query) {
-                $query->latest()->limit(2);
-            },
+            'pageSpeedInsights',
         ]);
 
         return Inertia::render('sites/Show', [

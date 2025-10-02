@@ -193,7 +193,7 @@ export default function Create({ categories }: CreatetoolPageProps) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Create Tool" />
-      <div className="mx-auto flex h-full w-full max-w-[1920px] flex-1 flex-col gap-4 p-4">
+      <div className="mx-auto flex h-full w-full max-w-7xl flex-1 flex-col gap-4 p-4">
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center gap-4">
