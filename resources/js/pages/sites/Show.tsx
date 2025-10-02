@@ -1,18 +1,19 @@
+import { SiteCredentialsSheet } from '@/components/sites/site-credentials-sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type Site } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { ExternalLink, Globe } from 'lucide-react';
+import { ExternalLink, Globe, KeyRound } from 'lucide-react';
 import { useState } from 'react';
-import { CredentialsTab, OverviewTab, PageSpeedTab } from './overview';
+import { OverviewTab, PageSpeedTab } from './overview';
 
 interface Props {
   site: Site;
 }
 
 function Show({ site }: Props) {
-  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
+  const [credentialsSheetOpen, setCredentialsSheetOpen] = useState(false);
   const formatDate = (dateString: string, options?: Intl.DateTimeFormatOptions) => {
     return new Date(dateString).toLocaleDateString('fr-FR', {
       year: 'numeric',
@@ -41,13 +42,6 @@ function Show({ site }: Props) {
       href: `/sites/${site.id}`,
     },
   ];
-
-  const togglePasswordVisibility = (field: string) => {
-    setShowPasswords((prev) => ({
-      ...prev,
-      [field]: !prev[field],
-    }));
-  };
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -87,6 +81,10 @@ function Show({ site }: Props) {
               </div>
             </div>
             <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setCredentialsSheetOpen(true)}>
+                <KeyRound className="mr-2 h-4 w-4" />
+                View Credentials
+              </Button>
               <Button variant="outline" asChild>
                 <Link href={`/sites/${site.id}/edit`}>Edit Site & Sync Settings</Link>
               </Button>
@@ -105,8 +103,14 @@ function Show({ site }: Props) {
 
         <OverviewTab site={site} formatDate={formatDate} getStoragePercentage={getStoragePercentage} />
         <PageSpeedTab site={site} />
-        <CredentialsTab site={site} showPasswords={showPasswords} togglePasswordVisibility={togglePasswordVisibility} />
       </div>
+
+      <SiteCredentialsSheet
+        open={credentialsSheetOpen}
+        onOpenChange={setCredentialsSheetOpen}
+        credentials={site.credential || null}
+        siteName={site.name}
+      />
     </AppLayout>
   );
 }
