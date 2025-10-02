@@ -56,7 +56,7 @@ export const formatStorage = (usage: string | null, limit: string | null) => {
   if (!usage && !limit) return 'N/A';
   if (!usage) return `0 / ${limit || 'N/A'}`;
   if (!limit) return usage;
-  return `${usage} / ${limit}`;
+  return `${usage} GB / ${limit} GB`;
 };
 
 export const getStoragePercentage = (usage: string | null, limit: string | null): number => {

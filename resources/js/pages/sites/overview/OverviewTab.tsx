@@ -28,7 +28,7 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
             <Globe className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
-            <div className="text-lg font-bold">
+            <div className="text-muted-foreground text-lg font-bold">
               {site.url ? (
                 <a href={site.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline dark:text-blue-400">
                   {site.url}
@@ -88,30 +88,32 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
                 <span className="text-gray-500">Unknown</span>
               )}
             </div>
-            {site.server_info?.php_memory_limit && (
-              <div className="flex justify-between font-mono">
-                <span className="text-sm font-medium">Memory Limit:</span>
-                <span className="text-sm">{site.server_info?.php_memory_limit}</span>
-              </div>
-            )}
-            {site.server_info?.php_max_execution_time && (
-              <div className="flex justify-between font-mono">
-                <span className="text-sm font-medium">Max Execution Time:</span>
-                <span className="text-sm">{site.server_info?.php_max_execution_time}s</span>
-              </div>
-            )}
-            {site.server_info?.php_post_max_size && (
-              <div className="flex justify-between font-mono">
-                <span className="text-sm font-medium">Post Max Size:</span>
-                <span className="text-sm">{site.server_info?.php_post_max_size}</span>
-              </div>
-            )}
-            {site.server_info?.php_upload_max_filesize && (
-              <div className="flex justify-between font-mono">
-                <span className="text-sm font-medium">Upload Max Filesize:</span>
-                <span className="text-sm">{site.server_info?.php_upload_max_filesize}</span>
-              </div>
-            )}
+            <div className="text-muted-foreground flex flex-col gap-1">
+              {site.server_info?.php_memory_limit && (
+                <div className="flex justify-between font-mono">
+                  <span className="text-sm font-medium">Memory Limit:</span>
+                  <span className="text-sm">{site.server_info?.php_memory_limit}</span>
+                </div>
+              )}
+              {site.server_info?.php_max_execution_time && (
+                <div className="flex justify-between font-mono">
+                  <span className="text-sm font-medium">Max Execution Time:</span>
+                  <span className="text-sm">{site.server_info?.php_max_execution_time}s</span>
+                </div>
+              )}
+              {site.server_info?.php_post_max_size && (
+                <div className="flex justify-between font-mono">
+                  <span className="text-sm font-medium">Post Max Size:</span>
+                  <span className="text-sm">{site.server_info?.php_post_max_size}</span>
+                </div>
+              )}
+              {site.server_info?.php_upload_max_filesize && (
+                <div className="flex justify-between font-mono">
+                  <span className="text-sm font-medium">Upload Max Filesize:</span>
+                  <span className="text-sm">{site.server_info?.php_upload_max_filesize}</span>
+                </div>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -121,7 +123,7 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
             <CardTitle className="text-base font-semibold">Contract Overview</CardTitle>
             <HardDrive className="text-muted-foreground h-4 w-4" />
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-muted-foreground">
             <div className="mb-5 text-lg font-bold">
               {site.contract?.contract_storage_usage && site.contract?.contract_storage_limit ? (
                 <div className="space-y-2">
@@ -147,7 +149,7 @@ export function OverviewTab({ site, formatDate, getStoragePercentage }: Overview
               to {site.contract?.contract_end_date ? formatDate(site.contract.contract_end_date) : 'N/A'}
             </div>
             <div className="">
-              {site.contract?.contract_end_date && <div className="text-sm">{getMonthsLeft(site.contract.contract_end_date)} left</div>}
+              {site.contract?.contract_end_date && <div className="text-sm">{getMonthsLeft(site.contract.contract_end_date)}</div>}
             </div>
           </CardContent>
         </Card>

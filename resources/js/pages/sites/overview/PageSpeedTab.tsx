@@ -2,11 +2,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/components/ui/skeleton';
 import { cn, getPagespeedProgressColor } from '@/lib/utils';
 import { type Site, type SitePageSpeedInsight } from '@/types';
 import { router } from '@inertiajs/react';
 import { Activity, Gauge, Monitor, RefreshCw, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface PageSpeedTabProps {
   site: Site;
@@ -18,6 +19,43 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
   const desktopInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'desktop');
   const [isRunningMobile, setIsRunningMobile] = useState(false);
   const [isRunningDesktop, setIsRunningDesktop] = useState(false);
+  const [lastMobileTestTime, setLastMobileTestTime] = useState<string | undefined>(mobileInsight?.created_at);
+  const [lastDesktopTestTime, setLastDesktopTestTime] = useState<string | undefined>(desktopInsight?.created_at);
+
+  // Poll for updates when a test is running
+  useEffect(() => {
+    if (!isRunningMobile && !isRunningDesktop) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      router.reload({
+        only: ['site'],
+        onSuccess: (page) => {
+          const updatedSite = page.props.site as Site;
+          const updatedInsights = updatedSite.page_speed_insights as SitePageSpeedInsight[] | undefined;
+
+          if (isRunningMobile) {
+            const updatedMobile = updatedInsights?.find((insight) => insight.strategy === 'mobile');
+            if (updatedMobile && updatedMobile.created_at !== lastMobileTestTime) {
+              setIsRunningMobile(false);
+              setLastMobileTestTime(updatedMobile.created_at);
+            }
+          }
+
+          if (isRunningDesktop) {
+            const updatedDesktop = updatedInsights?.find((insight) => insight.strategy === 'desktop');
+            if (updatedDesktop && updatedDesktop.created_at !== lastDesktopTestTime) {
+              setIsRunningDesktop(false);
+              setLastDesktopTestTime(updatedDesktop.created_at);
+            }
+          }
+        },
+      });
+    }, 3000); // Poll every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [isRunningMobile, isRunningDesktop, lastMobileTestTime, lastDesktopTestTime]);
 
   const handleRunTest = (strategy: 'mobile' | 'desktop') => {
     if (strategy === 'mobile') {
@@ -30,7 +68,8 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
       route('sites.pagespeed.run', { site: site.id }),
       { strategy },
       {
-        onFinish: () => {
+        onError: () => {
+          // Stop loading state if there's an error
           if (strategy === 'mobile') {
             setIsRunningMobile(false);
           } else {
@@ -70,6 +109,75 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
 
   const ScoreCard = ({ insight, strategy }: { insight: SitePageSpeedInsight | undefined; strategy: 'mobile' | 'desktop' }) => {
     const isRunning = strategy === 'mobile' ? isRunningMobile : isRunningDesktop;
+
+    // Loading state while test is running
+    if (isRunning) {
+      return (
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                {strategy === 'mobile' ? <Smartphone className="h-5 w-5" /> : <Monitor className="h-5 w-5" />}
+                {strategy === 'mobile' ? 'Mobile' : 'Desktop'}
+              </CardTitle>
+              <Button size="sm" disabled>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Running...
+              </Button>
+            </div>
+            <CardDescription>Running PageSpeed test...</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Performance Score Skeleton */}
+            <div className="bg-muted flex items-center justify-center rounded-lg p-6">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Gauge className="text-muted-foreground h-8 w-8" />
+                  <Skeleton className="h-14 w-24" />
+                </div>
+                <div className="text-muted-foreground mt-2 text-sm font-medium">Performance Score</div>
+              </div>
+            </div>
+
+            {/* Other Scores Skeleton */}
+            <div className="grid grid-cols-3 gap-4">
+              {['Accessibility', 'Best Practices', 'SEO'].map((label) => (
+                <div key={label} className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{label}</span>
+                    <Skeleton className="h-5 w-8" />
+                  </div>
+                  <Skeleton className="h-2 w-full" />
+                </div>
+              ))}
+            </div>
+
+            {/* Core Web Vitals Skeleton */}
+            <div>
+              <div className="mb-3 flex items-center gap-2 text-sm font-semibold">
+                <Activity className="h-4 w-4" />
+                Core Web Vitals
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  'First Contentful Paint',
+                  'Speed Index',
+                  'Largest Contentful Paint',
+                  'Time to Interactive',
+                  'Total Blocking Time',
+                  'Cumulative Layout Shift',
+                ].map((label) => (
+                  <div key={label} className="space-y-1 rounded-lg border p-3">
+                    <div className="text-muted-foreground text-xs">{label}</div>
+                    <Skeleton className="h-7 w-20" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
 
     if (!insight) {
       return (

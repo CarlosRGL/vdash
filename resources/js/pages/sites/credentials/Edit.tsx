@@ -118,7 +118,7 @@ export default function EditSiteCredentials({ site, credentials }: EditSiteCrede
             <CardDescription>Manage access credentials for this site</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form id="credentials" name="credentials" onSubmit={handleSubmit} className="space-y-8">
               {/* FTP Credentials */}
               <div className="space-y-4">
                 <h3 className="text-base font-semibold">FTP Credentials</h3>
