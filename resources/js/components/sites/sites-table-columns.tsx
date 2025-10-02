@@ -3,11 +3,25 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { formatStorage, getContractStatus, getMonthsLeft, getStoragePercentage } from '@/lib/utils';
+import { cn, formatStorage, getContractStatus, getMonthsLeft, getProgressColor, getStoragePercentage } from '@/lib/utils';
 import { type Site, type SitePageSpeedInsight } from '@/types';
 import { Link } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, ChevronDown, ChevronUp, ExternalLink, Eye, Gauge, HardDrive, LockKeyhole, Pencil, RefreshCw, Server } from 'lucide-react';
+import {
+  ArrowUpDown,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Eye,
+  Gauge,
+  HardDrive,
+  LockKeyhole,
+  Monitor,
+  Pencil,
+  RefreshCw,
+  Server,
+  Smartphone,
+} from 'lucide-react';
 import { SiteTypeBadge } from './site-badges';
 interface SitesTableColumnsProps {
   sorting: {
@@ -138,6 +152,53 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
       },
     },
     {
+      id: 'pagespeed',
+      header: () => (
+        <div className="flex items-center">
+          <Gauge className="mr-2 h-4 w-4" />
+          PageSpeed
+        </div>
+      ),
+      cell: ({ row }) => {
+        const pageSpeedInsights = row.original.page_speed_insights as SitePageSpeedInsight[] | undefined;
+        const mobileInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'mobile');
+        const desktopInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'desktop');
+
+        if (!desktopInsight || !desktopInsight.performance_score) {
+          return <div className="text-muted-foreground text-sm">N/A</div>;
+        }
+
+        if (!mobileInsight || !mobileInsight.performance_score) {
+          return <div className="text-muted-foreground text-sm">N/A</div>;
+        }
+
+        const score_mobile = parseFloat(mobileInsight.performance_score) * 100;
+        const score_desktop = parseFloat(desktopInsight.performance_score) * 100;
+        const getScoreColor = (score: number) => {
+          if (score >= 90) return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800';
+          if (score >= 50) return 'text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900 border-orange-200 dark:border-orange-800';
+          return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-800';
+        };
+
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className={`px-3 py-1 ${getScoreColor(score_mobile)}`}>
+              <div className="flex items-center gap-1">
+                <div className={`font-bold`}>{Math.round(score_mobile)}</div>
+                <Smartphone className="size-4" />
+              </div>
+            </Badge>
+            <Badge className={`px-3 py-1 ${getScoreColor(score_desktop)}`}>
+              <div className="flex items-center gap-1">
+                <div className={`font-bold`}>{Math.round(score_desktop)}</div>
+                <Monitor className="size-4" />
+              </div>
+            </Badge>
+          </div>
+        );
+      },
+    },
+    {
       id: 'storage_usage',
       header: () => (
         <div className="flex items-center">
@@ -173,45 +234,17 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
             </div>
             {limit && (
               <div className="flex items-center gap-2">
-                <Progress value={percentage} className="h-2 flex-1" />
+                <div className="relative w-full">
+                  <Progress value={percentage} className="h-2" />
+                  <div
+                    className={cn('absolute inset-0 h-2 rounded-full transition-all', getProgressColor(percentage))}
+                    style={{ width: `${Math.min(percentage, 100)}%` }}
+                  />
+                </div>
                 <span className="text-muted-foreground min-w-[30px] text-xs">{percentage}%</span>
               </div>
             )}
           </div>
-        );
-      },
-    },
-
-    {
-      id: 'pagespeed',
-      header: () => (
-        <div className="flex items-center">
-          <Gauge className="mr-2 h-4 w-4" />
-          PageSpeed
-        </div>
-      ),
-      cell: ({ row }) => {
-        const pageSpeedInsights = row.original.page_speed_insights as SitePageSpeedInsight[] | undefined;
-        const mobileInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'mobile');
-
-        if (!mobileInsight || !mobileInsight.performance_score) {
-          return <div className="text-muted-foreground text-sm">N/A</div>;
-        }
-
-        const score = parseFloat(mobileInsight.performance_score) * 100;
-        const getScoreColor = (score: number) => {
-          if (score >= 90) return 'text-green-600 dark:text-green-400';
-          if (score >= 50) return 'text-orange-600 dark:text-orange-400';
-          return 'text-red-600 dark:text-red-400';
-        };
-
-        return (
-          <Badge variant="outline" className="px-3 py-1">
-            <div className="flex items-center gap-2">
-              <div className={`font-bold ${getScoreColor(score)}`}>{Math.round(score)}</div>
-              <div className="text-muted-foreground text-xs">Mobile</div>
-            </div>
-          </Badge>
         );
       },
     },

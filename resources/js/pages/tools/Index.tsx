@@ -253,7 +253,7 @@ export default function Index({ tools, categories, filters }: ToolsPageProps) {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {tools.data.map((tool) => (
                 <Card key={tool.id} className="flex flex-col">
                   {tool.image && (
@@ -263,7 +263,7 @@ export default function Index({ tools, categories, filters }: ToolsPageProps) {
                   )}
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <CardTitle className="line-clamp-1">{tool.title}</CardTitle>
+                      <CardTitle className="line-clamp-1 text-lg">{tool.title}</CardTitle>
                       <Button variant="ghost" size="sm" onClick={() => toggleFavorite(tool.id)} className="h-8 w-8 p-0">
                         <Heart className={`h-4 w-4 ${tool.is_favorited ? 'fill-current text-red-500' : ''}`} />
                       </Button>

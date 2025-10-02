@@ -23,14 +23,24 @@ test('pagespeed insights can be created for a site', function () {
     expect($insight->performance_score)->toBe('0.95');
 });
 
-test('site has many pagespeed insights relationship', function () {
+test('site can have one pagespeed insight per strategy', function () {
     $site = Site::factory()->create();
 
-    SitePageSpeedInsight::factory()->count(3)->create([
+    // Create mobile and desktop insights
+    SitePageSpeedInsight::factory()->create([
         'site_id' => $site->id,
+        'strategy' => 'mobile',
     ]);
 
-    expect($site->pageSpeedInsights()->count())->toBe(3);
+    SitePageSpeedInsight::factory()->create([
+        'site_id' => $site->id,
+        'strategy' => 'desktop',
+    ]);
+
+    // Should have exactly 2 insights - one per strategy
+    expect($site->pageSpeedInsights()->count())->toBe(2);
+    expect($site->pageSpeedInsights()->where('strategy', 'mobile')->count())->toBe(1);
+    expect($site->pageSpeedInsights()->where('strategy', 'desktop')->count())->toBe(1);
 });
 
 test('pagespeed insights job can be dispatched', function () {
@@ -101,7 +111,7 @@ test('pagespeed insights service stores results correctly', function () {
         'https://www.googleapis.com/pagespeedonline/v5/runPagespeed*' => Http::response($mockResponse, 200),
     ]);
 
-    $service = new PageSpeedInsightsService;
+    $service = new PageSpeedInsightsService();
     $result = $service->runTest($site, 'mobile');
 
     expect($result)->not->toBeNull();
@@ -121,8 +131,55 @@ test('pagespeed insights service handles api errors gracefully', function () {
         'https://www.googleapis.com/pagespeedonline/v5/runPagespeed*' => Http::response(['error' => 'API Error'], 500),
     ]);
 
-    $service = new PageSpeedInsightsService;
+    $service = new PageSpeedInsightsService();
     $result = $service->runTest($site, 'mobile');
 
     expect($result)->toBeNull();
+});
+
+test('pagespeed insights service updates existing insights for same strategy', function () {
+    config(['services.google_pagespeed.api_key' => 'test-api-key']);
+
+    $site = Site::factory()->create(['url' => 'https://example.com']);
+
+    // Create initial insight
+    $initialInsight = SitePageSpeedInsight::factory()->create([
+        'site_id' => $site->id,
+        'strategy' => 'mobile',
+        'performance_score' => 0.50,
+    ]);
+
+    $mockResponse = [
+        'lighthouseResult' => [
+            'categories' => [
+                'performance' => ['score' => 0.96],
+                'accessibility' => ['score' => 0.88],
+                'best-practices' => ['score' => 0.92],
+                'seo' => ['score' => 0.90],
+            ],
+            'audits' => [
+                'first-contentful-paint' => ['numericValue' => 1500],
+                'speed-index' => ['numericValue' => 2300],
+                'largest-contentful-paint' => ['numericValue' => 2500],
+                'interactive' => ['numericValue' => 3500],
+                'total-blocking-time' => ['numericValue' => 150],
+                'cumulative-layout-shift' => ['numericValue' => 100],
+            ],
+        ],
+    ];
+
+    Http::fake([
+        'https://www.googleapis.com/pagespeedonline/v5/runPagespeed*' => Http::response($mockResponse, 200),
+    ]);
+
+    $service = new PageSpeedInsightsService();
+    $result = $service->runTest($site, 'mobile');
+
+    // Should still have only 1 mobile insight for this site
+    expect($site->pageSpeedInsights()->where('strategy', 'mobile')->count())->toBe(1);
+
+    // The insight should be updated with new scores
+    expect($result->id)->toBe($initialInsight->id);
+    expect($result->performance_score)->toBe('0.96');
+    expect($result->accessibility_score)->toBe('0.88');
 });
