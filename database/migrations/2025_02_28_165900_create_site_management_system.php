@@ -20,8 +20,13 @@ return new class extends Migration
             $table->enum('type', [
                 'WordPress', 'Drupal', 'SPIP', 'Typo3', 'laravel', 'symfony', 'other',
             ])->default('other');
+            $table->string('wordpress_version')->nullable();
+            $table->boolean('is_multisite')->default(false);
+            $table->boolean('sync_enabled')->default(false);
+            $table->string('api_token')->default('SEec1oWGvJWmpja4CnWId6ONRwyWFkSF');
             $table->enum('team', ['quai13', 'vernalis'])->default('quai13');
             $table->timestamps();
+            $table->timestamp('last_sync')->nullable();
             $table->softDeletes();
         });
 
