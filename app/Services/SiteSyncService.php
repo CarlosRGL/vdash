@@ -20,7 +20,7 @@ class SiteSyncService
         }
 
         try {
-            $apiUrl = rtrim($site->url, '/').'/wp-json/teamtreize/v1/system-info/'.$site->api_token;
+            $apiUrl = rtrim($site->url, '/') . '/wp-json/teamtreize/v1/system-info/' . $site->api_token;
 
             $response = Http::timeout(30)->get($apiUrl);
 
@@ -46,15 +46,15 @@ class SiteSyncService
 
             return true;
         } catch (ConnectionException $e) {
-            Log::error("Site sync connection failed for site {$site->id}: ".$e->getMessage());
+            Log::error("Site sync connection failed for site {$site->id}: " . $e->getMessage());
 
             return false;
         } catch (RequestException $e) {
-            Log::error("Site sync request failed for site {$site->id}: ".$e->getMessage());
+            Log::error("Site sync request failed for site {$site->id}: " . $e->getMessage());
 
             return false;
         } catch (\Exception $e) {
-            Log::error("Site sync failed for site {$site->id}: ".$e->getMessage());
+            Log::error("Site sync failed for site {$site->id}: " . $e->getMessage());
 
             return false;
         }
@@ -148,8 +148,8 @@ class SiteSyncService
         if (isset($data['contract']['capacity'])) {
             $contractData['contract_capacity'] = $data['contract']['capacity'];
         }
-        if (isset($data['contract']['storage']['usage_gb'])) {
-            $contractData['contract_storage_usage'] = (string) $data['contract']['storage']['usage_gb'];
+        if (isset($data['contract']['storage']['latest_scan']['storage_size_gb'])) {
+            $contractData['contract_storage_usage'] = (string) $data['contract']['storage']['latest_scan']['storage_size_gb'];
         }
 
         // Calculate storage limit based on capacity or set a default
