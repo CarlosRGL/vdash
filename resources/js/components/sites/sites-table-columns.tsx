@@ -182,13 +182,13 @@ export function createSitesTableColumns({ sorting, onSort, onShowCredentials, on
 
         return (
           <div className="flex items-center gap-2">
-            <Badge className={`px-3 py-1 ${getScoreColor(score_mobile)}`}>
+            <Badge className={`px-3 py-1 ${getScoreColor(score_mobile)} hover:bg-inherit`}>
               <div className="flex items-center gap-1">
                 <div className={`font-bold`}>{Math.round(score_mobile)}</div>
                 <Smartphone className="size-4" />
               </div>
             </Badge>
-            <Badge className={`px-3 py-1 ${getScoreColor(score_desktop)}`}>
+            <Badge className={`px-3 py-1 ${getScoreColor(score_desktop)} hover:bg-inherit`}>
               <div className="flex items-center gap-1">
                 <div className={`font-bold`}>{Math.round(score_desktop)}</div>
                 <Monitor className="size-4" />
