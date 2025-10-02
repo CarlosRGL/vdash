@@ -96,3 +96,10 @@ export const getProgressColor = (percentage: number) => {
   if (percentage >= 50) return 'bg-yellow-500';
   return 'bg-green-500';
 };
+
+export const getPagespeedProgressColor = (percentage: number) => {
+  if (percentage >= 90) return 'bg-green-500';
+  if (percentage >= 75) return 'bg-yellow-500';
+  if (percentage >= 50) return 'bg-orange-500';
+  return 'bg-red-500';
+};

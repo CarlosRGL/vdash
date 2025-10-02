@@ -2,8 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { cn, getProgressColor } from '@/lib/utils';
+import { cn, getPagespeedProgressColor } from '@/lib/utils';
 import { type Site, type SitePageSpeedInsight } from '@/types';
 import { router } from '@inertiajs/react';
 import { Activity, Gauge, Monitor, RefreshCw, Smartphone } from 'lucide-react';
@@ -17,7 +16,6 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
   const pageSpeedInsights = site.page_speed_insights as SitePageSpeedInsight[] | undefined;
   const mobileInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'mobile');
   const desktopInsight = pageSpeedInsights?.find((insight) => insight.strategy === 'desktop');
-  const { toast } = useToast();
   const [isRunningMobile, setIsRunningMobile] = useState(false);
   const [isRunningDesktop, setIsRunningDesktop] = useState(false);
 
@@ -32,16 +30,6 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
       route('sites.pagespeed.run', { site: site.id }),
       { strategy },
       {
-        onSuccess: () => {
-          toast.success('Test queued', {
-            description: `${strategy === 'mobile' ? 'Mobile' : 'Desktop'} PageSpeed test has been queued. Refresh the page in a few moments to see results.`,
-          });
-        },
-        onError: () => {
-          toast.error('Error', {
-            description: 'Failed to queue PageSpeed test. Please try again.',
-          });
-        },
         onFinish: () => {
           if (strategy === 'mobile') {
             setIsRunningMobile(false);
@@ -152,7 +140,7 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
               <div className="relative w-full">
                 <Progress value={accessibilityScore} className="h-2" />
                 <div
-                  className={cn('absolute inset-0 h-2 rounded-full transition-all', getProgressColor(accessibilityScore))}
+                  className={cn('absolute inset-0 h-2 rounded-full transition-all', getPagespeedProgressColor(accessibilityScore))}
                   style={{ width: `${Math.min(accessibilityScore, 100)}%` }}
                 />
               </div>
@@ -163,14 +151,27 @@ export function PageSpeedTab({ site }: PageSpeedTabProps) {
                 <span className="text-muted-foreground">Best Practices</span>
                 <Badge variant={getScoreBadgeVariant(bestPracticesScore)}>{Math.round(bestPracticesScore)}</Badge>
               </div>
-              <Progress value={bestPracticesScore} className="h-2" />
+              <div className="relative w-full">
+                <Progress value={bestPracticesScore} className="h-2" />
+                <div
+                  className={cn('absolute inset-0 h-2 rounded-full transition-all', getPagespeedProgressColor(bestPracticesScore))}
+                  style={{ width: `${Math.min(bestPracticesScore, 100)}%` }}
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">SEO</span>
                 <Badge variant={getScoreBadgeVariant(seoScore)}>{Math.round(seoScore)}</Badge>
               </div>
-              <Progress value={seoScore} className="h-2" />
+
+              <div className="relative w-full">
+                <Progress value={seoScore} className="h-2" />
+                <div
+                  className={cn('absolute inset-0 h-2 rounded-full transition-all', getPagespeedProgressColor(seoScore))}
+                  style={{ width: `${Math.min(seoScore, 100)}%` }}
+                />
+              </div>
             </div>
           </div>
 
