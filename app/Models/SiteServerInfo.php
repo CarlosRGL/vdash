@@ -53,15 +53,17 @@ class SiteServerInfo extends Model
      *
      * @return array<string, mixed>
      */
-    public function getPhpConfigAttribute(): array
+    protected function phpConfig(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return [
-            'version' => $this->php_version,
-            'memory_limit' => $this->php_memory_limit,
-            'max_execution_time' => $this->php_max_execution_time,
-            'post_max_size' => $this->php_post_max_size,
-            'upload_max_filesize' => $this->php_upload_max_filesize,
-        ];
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+            return [
+                'version' => $this->php_version,
+                'memory_limit' => $this->php_memory_limit,
+                'max_execution_time' => $this->php_max_execution_time,
+                'post_max_size' => $this->php_post_max_size,
+                'upload_max_filesize' => $this->php_upload_max_filesize,
+            ];
+        });
     }
 
     /**
@@ -69,12 +71,14 @@ class SiteServerInfo extends Model
      *
      * @return array<string, mixed>
      */
-    public function getMysqlConfigAttribute(): array
+    protected function mysqlConfig(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return [
-            'version' => $this->mysql_version,
-            'server_info' => $this->mysql_server_info,
-        ];
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+            return [
+                'version' => $this->mysql_version,
+                'server_info' => $this->mysql_server_info,
+            ];
+        });
     }
 
     /**
@@ -82,12 +86,14 @@ class SiteServerInfo extends Model
      *
      * @return array<string, mixed>
      */
-    public function getServerConfigAttribute(): array
+    protected function serverConfig(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return [
-            'server_ip' => $this->server_ip,
-            'server_hostname' => $this->server_hostname,
-        ];
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+            return [
+                'server_ip' => $this->server_ip,
+                'server_hostname' => $this->server_hostname,
+            ];
+        });
     }
 
     /**
@@ -95,12 +101,14 @@ class SiteServerInfo extends Model
      *
      * @return array<string, mixed>
      */
-    public function getFullServerInfoAttribute(): array
+    protected function fullServerInfo(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        return [
-            'php' => $this->php_config,
-            'mysql' => $this->mysql_config,
-            'server' => $this->server_config,
-        ];
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+            return [
+                'php' => $this->php_config,
+                'mysql' => $this->mysql_config,
+                'server' => $this->server_config,
+            ];
+        });
     }
 }

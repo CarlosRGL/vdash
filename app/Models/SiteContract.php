@@ -25,16 +25,6 @@ class SiteContract extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'contract_start_date' => 'date',
-        'contract_end_date' => 'date',
-    ];
-
-    /**
      * Get the site that owns the contract.
      */
     public function site(): BelongsTo
@@ -71,5 +61,17 @@ class SiteContract extends Model
         }
 
         return now()->diffInDays($this->contract_end_date, false);
+    }
+    /**
+     * The attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'contract_start_date' => 'date',
+            'contract_end_date' => 'date',
+        ];
     }
 }

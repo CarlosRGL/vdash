@@ -80,11 +80,12 @@ class User extends Authenticatable implements HasMedia
     /**
      * Get the user's avatar URL.
      */
-    public function getAvatarAttribute(): ?string
+    protected function avatar(): \Illuminate\Database\Eloquent\Casts\Attribute
     {
-        $url = $this->getFirstMediaUrl('avatar');
-
-        return $url !== '' ? $url : null;
+        return \Illuminate\Database\Eloquent\Casts\Attribute::make(get: function () {
+            $url = $this->getFirstMediaUrl('avatar');
+            return $url !== '' ? $url : null;
+        });
     }
 
     /**

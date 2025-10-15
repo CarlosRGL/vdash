@@ -16,15 +16,15 @@ class SiteContractFactory extends Factory
      */
     public function definition(): array
     {
-        $startDate = $this->faker->dateTimeBetween('-2 years', '+1 year');
-        $endDate = $this->faker->dateTimeBetween($startDate, '+3 years');
+        $startDate = fake()->dateTimeBetween('-2 years', '+1 year');
+        $endDate = fake()->dateTimeBetween($startDate, '+3 years');
 
         return [
             'contract_start_date' => $startDate,
-            'contract_end_date' => $this->faker->boolean(80) ? $endDate : null,
-            'contract_capacity' => $this->faker->randomElement(['Basic', 'Standard', 'Premium', 'Enterprise']),
-            'contract_storage_usage' => $this->faker->numberBetween(1, 50).'GB',
-            'contract_storage_limit' => $this->faker->numberBetween(50, 500).'GB',
+            'contract_end_date' => fake()->boolean(80) ? $endDate : null,
+            'contract_capacity' => fake()->randomElement(['Basic', 'Standard', 'Premium', 'Enterprise']),
+            'contract_storage_usage' => fake()->numberBetween(1, 50).'GB',
+            'contract_storage_limit' => fake()->numberBetween(50, 500).'GB',
         ];
     }
 }

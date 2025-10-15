@@ -34,7 +34,7 @@ class RunPageSpeedInsightJob implements ShouldQueue
 
         $result = $service->runTest($this->site, $this->strategy);
 
-        if ($result) {
+        if ($result instanceof \App\Models\SitePageSpeedInsight) {
             Log::info("PageSpeed Insights test completed successfully for site {$this->site->id}");
         } else {
             Log::warning("PageSpeed Insights test failed for site {$this->site->id}");

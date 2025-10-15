@@ -75,7 +75,7 @@ class SiteSyncService
             $updateData['is_multisite'] = (bool) $data['wordpress']['is_multisite'];
         }
 
-        if (! empty($updateData)) {
+        if ($updateData !== []) {
             $site->update($updateData);
         }
     }
@@ -120,7 +120,7 @@ class SiteSyncService
             $serverData['server_hostname'] = $data['server']['server_hostname'];
         }
 
-        if (! empty($serverData)) {
+        if ($serverData !== []) {
             $site->serverInfo()->updateOrCreate(
                 ['site_id' => $site->id],
                 $serverData
@@ -158,7 +158,7 @@ class SiteSyncService
             $contractData['contract_storage_limit'] = (string) $data['contract']['capacity'];
         }
 
-        if (! empty($contractData)) {
+        if ($contractData !== []) {
             $site->contract()->updateOrCreate(
                 ['site_id' => $site->id],
                 $contractData
