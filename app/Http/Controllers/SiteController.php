@@ -213,7 +213,7 @@ class SiteController extends Controller
             $site->users()->sync($validated['user_ids']);
         }
 
-        return Redirect::route('sites.show', $site)
+        return Redirect::route('sites.edit', $site)
             ->with('toast', [
                 'type' => 'success',
                 'message' => 'Site updated successfully',

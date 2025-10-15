@@ -11,6 +11,7 @@ interface ToastData {
 export function useToast() {
   const page = usePage();
   const flash = page.props.flash as { toast?: ToastData } | undefined;
+  console.log(page);
 
   useEffect(() => {
     if (flash?.toast) {

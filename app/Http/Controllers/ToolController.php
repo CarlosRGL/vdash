@@ -205,7 +205,7 @@ class ToolController extends Controller
     /**
      * Toggle favorite status for a tool.
      */
-    public function toggleFavorite(Tool $tool): RedirectResponse
+    public function toggleFavorite(Tool $tool)
     {
         $user = auth()->user();
 
@@ -217,7 +217,12 @@ class ToolController extends Controller
             $message = 'Tool added to favorites.';
         }
 
-        return back()->with('success', $message);
+        return to_route(
+            'tools.index'
+        )->with(
+            'success',
+            $message
+        );
     }
 
     /**

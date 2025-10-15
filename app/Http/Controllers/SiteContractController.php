@@ -48,7 +48,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Show', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract,
+            'contract' => $site->contract ?? new SiteContract(),
         ]);
     }
 
@@ -65,7 +65,7 @@ class SiteContractController extends Controller
 
         return Inertia::render('sites/contracts/Edit', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract,
+            'contract' => $site->contract ?? new SiteContract(),
         ]);
     }
 
@@ -94,7 +94,7 @@ class SiteContractController extends Controller
 
         return Inertia::Render('sites/contracts/Edit', [
             'site' => $site,
-            'contract' => $site->contract ?? new SiteContract,
+            'contract' => $site->contract ?? new SiteContract(),
             'flash' => [
                 'toast' => [
                     'type' => 'success',

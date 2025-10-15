@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useCopyToClipboard } from '@/hooks/use-copy-to-clipboard';
+import { useToast } from '@/hooks/use-toast';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -138,7 +139,7 @@ export default function Index({ tools, categories, filters }: ToolsPageProps) {
   const [search, setSearch] = useState(filters.search || '');
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(filters.category);
   const [showFavorites, setShowFavorites] = useState(filters.favorites || false);
-
+  useToast();
   const handleSearch = (value: string) => {
     setSearch(value);
     router.get(
