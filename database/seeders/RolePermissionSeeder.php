@@ -18,25 +18,25 @@ class RolePermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create roles
-        $adminRole = Role::create(['name' => 'Admin']);
-        $clientRole = Role::create(['name' => 'Client']);
+        $adminRole = Role::firstOrCreate(['name' => 'Admin'], ['guard_name' => 'web']);
+        $clientRole = Role::firstOrCreate(['name' => 'Client'], ['guard_name' => 'web']);
 
         // Create permissions
         // Site permissions
-        $viewAnySites = Permission::create(['name' => 'view any sites']);
-        $viewSite = Permission::create(['name' => 'view site']);
-        $createSite = Permission::create(['name' => 'create site']);
-        $updateSite = Permission::create(['name' => 'update site']);
-        $deleteSite = Permission::create(['name' => 'delete site']);
-        $restoreSite = Permission::create(['name' => 'restore site']);
-        $forceDeleteSite = Permission::create(['name' => 'force delete site']);
+        $viewAnySites = Permission::firstOrCreate(['name' => 'view any sites'], ['guard_name' => 'web']);
+        $viewSite = Permission::firstOrCreate(['name' => 'view site'], ['guard_name' => 'web']);
+        $createSite = Permission::firstOrCreate(['name' => 'create site'], ['guard_name' => 'web']);
+        $updateSite = Permission::firstOrCreate(['name' => 'update site'], ['guard_name' => 'web']);
+        $deleteSite = Permission::firstOrCreate(['name' => 'delete site'], ['guard_name' => 'web']);
+        $restoreSite = Permission::firstOrCreate(['name' => 'restore site'], ['guard_name' => 'web']);
+        $forceDeleteSite = Permission::firstOrCreate(['name' => 'force delete site'], ['guard_name' => 'web']);
 
         // User permissions
-        $viewAnyUsers = Permission::create(['name' => 'view any users']);
-        $viewUser = Permission::create(['name' => 'view user']);
-        $createUser = Permission::create(['name' => 'create user']);
-        $updateUser = Permission::create(['name' => 'update user']);
-        $deleteUser = Permission::create(['name' => 'delete user']);
+        $viewAnyUsers = Permission::firstOrCreate(['name' => 'view any users'], ['guard_name' => 'web']);
+        $viewUser = Permission::firstOrCreate(['name' => 'view user'], ['guard_name' => 'web']);
+        $createUser = Permission::firstOrCreate(['name' => 'create user'], ['guard_name' => 'web']);
+        $updateUser = Permission::firstOrCreate(['name' => 'update user'], ['guard_name' => 'web']);
+        $deleteUser = Permission::firstOrCreate(['name' => 'delete user'], ['guard_name' => 'web']);
 
         // Assign permissions to roles
         $adminRole->givePermissionTo([
